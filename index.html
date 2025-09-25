@@ -15,7 +15,7 @@
     }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto;overflow-x:hidden}
-    header{position:sticky;top:0;z-index:7;display:flex;align-items:center;gap:8px;padding:14px 16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.9));backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--border)}
+    header{position:sticky;top:0;z-index:7;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.9));backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--border)}
     header h1{font-size:16px;margin:0;font-weight:800;color:#1f2937}
     .app{display:grid;grid-template-columns:280px 1fr;height:calc(100dvh - 60px)}
     aside{border-left:1px solid var(--border);background:var(--surface);padding:12px;overflow:auto}
@@ -59,7 +59,23 @@
     .cover{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:#f5f6fa}
     .coll-grid{display:grid;gap:12px}
     @media (min-width:901px){.coll-grid{grid-template-columns:repeat(5,1fr)}}
-    @media (max-width:900px){.coll-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:900px){
+      .app{grid-template-columns:1fr;height:auto}
+      aside{display:none}
+      main{padding:12px 12px 96px 12px}
+      .row{flex-wrap:wrap}
+      .item{grid-template-columns:28px 1fr auto}
+      header{background:var(--primary-10); border-bottom-color: var(--primary-20); padding:10px 12px}
+      header h1{font-size:14px}
+      .top-actions .iconbtn{width:36px;height:36px}
+      .mobile-tabs{display:flex;gap:6px;width:100%;overflow:auto;padding-top:6px}
+      .mobile-tabs .btn{flex:0 0 auto;padding:8px 10px}
+      .mobile-actions{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--border);padding:10px 12px}
+      .mobile-actions input{flex:1}
+      .mobile-actions .chips{gap:6px}
+      #dailyList{padding-bottom:72px}
+      #collectionDetail .card{max-width:100%;overflow:hidden}
+    }}
     .coll-card{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);cursor:pointer}
     .coll-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .tagchip{display:inline-flex;gap:4px;align-items:center;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#fff}
@@ -117,22 +133,27 @@
   <header>
     <h1>بولت ژورنال مینیمال</h1>
     <span class="pill" id="todayLabel"></span>
-    <div style="margin-inline-start:auto" class="row">
-      <button class="btn" onclick="exportData()">خروجی JSON</button>
-      <label class="btn" for="importFile">ورود JSON</label>
+    <div class="row top-actions" style="margin-inline-start:auto">
+      <button class="iconbtn" title="خروجی JSON" onclick="exportData()" aria-label="Export">
+        <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 3v12m0 0l-4-4m4 4 4-4M4 21h16"/></svg>
+      </button>
+      <button class="iconbtn" title="ورود JSON" onclick="openFileInput()" aria-label="Import">
+        <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 21V9m0 0 4 4m-4-4-4 4M4 3h16"/></svg>
+      </button>
       <input id="importFile" type="file" accept="application/json" style="display:none" />
     </div>
+    <!-- Mobile top tabs inside header -->
+    <nav class="mobile-tabs" aria-label="ناوبری">
+      <button class="btn" onclick="navigate('today')">امروز</button>
+      <button class="btn" onclick="navigate('month')">ماه</button>
+      <button class="btn" onclick="navigate('collections')">مجموعه‌ها</button>
+      <button class="btn" onclick="navigate('habits')">عادت‌ها</button>
+      <button class="btn" onclick="navigate('finance')">مالی</button>
+      <button class="btn" onclick="navigate('search')">جستجو</button>
+    </nav>
   </header>
 
-  <!-- Mobile top tabs -->
-  <nav class="mobile-tabs">
-    <button class="btn" onclick="navigate('today')">امروز</button>
-    <button class="btn" onclick="navigate('month')">ماه</button>
-    <button class="btn" onclick="navigate('collections')">مجموعه‌ها</button>
-    <button class="btn" onclick="navigate('habits')">عادت‌ها</button>
-    <button class="btn" onclick="navigate('finance')">مالی</button>
-    <button class="btn" onclick="navigate('search')">جستجو</button>
-  </nav>
+  
 
   <div class="app">
     <aside class="stack">
@@ -368,6 +389,7 @@ function removeFromCollection(id,txtEnc){ const txt=decodeURIComponent(txtEnc); 
 function addTag(id){ const inp=$('#tagInput'+id); const val=inp && inp.value ? inp.value.trim() : ''; if(!val) return; const d=load(); const c=d.collections[id]; c.tags=[...new Set([...(c.tags||[]), val])]; save(d); inp.value=''; openCollection(id) }
 function removeTag(id,t){ const d=load(); const c=d.collections[id]; c.tags=(c.tags||[]).filter(x=>x!==t); save(d); openCollection(id) }
 function openFile(id){ const el=document.getElementById(id); if(el) el.click(); }
+function openFileInput(){ const el=document.getElementById('importFile'); if(el) el.click(); }
 function uploadCover(id){ const inp=document.getElementById('cov'+id); if(!inp||!inp.files||!inp.files[0]){alert('عکسی انتخاب نشد');return} const reader=new FileReader(); reader.onload=function(e){ const d=load(); d.collections[id].cover=e.target.result; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.src=e.target.result; } }; reader.readAsDataURL(inp.files[0]) }
 function clearCover(id){ const d=load(); d.collections[id].cover=null; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.removeAttribute('src'); img.style.background='#f2f3f7'; } }
 
@@ -425,7 +447,7 @@ Object.assign(window, {
   toggleDone, migrateItem, scheduleItem, removeItem,
   addCollection, renderCollectionsGrid, openCollection,
   addToCollection, removeFromCollection, quickAddToCollection,
-  uploadCover, clearCover, addTag, removeTag, openFile,
+  uploadCover, clearCover, addTag, removeTag, openFile, openFileInput,
   addHabit, toggleHabit, deleteHabit,
   addTxn, delTxn, exportFinanceCSV
 });
