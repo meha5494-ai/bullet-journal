@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Bullet Journal</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7c4dff" />
+  <style>
+    body{margin:0;font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto;background:#f7f8fb;color:#0f172a}
+    header{padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#fff;position:sticky;top:0}
+    main{max-width:1100px;margin:auto;padding:16px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px}
+    .muted{color:#5b6b7e}
+  </style>
+</head>
+<body>
+  <header><b>Mini Bullet Journal</b></header>
+  <main>
+    <div class="card">
+      <h3>🧩 راهنما</h3>
+      <p class="muted">این یک اسکلت PWA آماده است. محتوای کامل اپ (index.html) که با هم ساختیم را جایگزین این فایل کن.</p>
+      <ol>
+        <li>این <code>index.html</code> را با نسخهٔ اپت جایگزین کن.</li>
+        <li><code>manifest.json</code> و <code>sw.js</code> را نگه دار.</li>
+        <li>آیکن‌ها در <code>/icons</code> هستند.</li>
+      </ol>
+    </div>
+  </main>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+    }
+  </script>
+</body>
+</html>
