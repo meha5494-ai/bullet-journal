@@ -86,7 +86,7 @@
   <meta name="theme-color" content="#f7f8fb" />
   <script>
     const tinyPng='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axu7sAAAAAASUVORK5CYII=';
-    const manifest={name:'Bullet Journal — مینیمال',short_name:'BuJo',start_url:'.',display:'standalone',background_color:'#f7f8fb',theme_color:'#7c4dff',lang:'fa',dir:'rtl',icons:[{src:tinyPng,sizes:'192x192',type:'image/png'},{src:tinyPng,sizes:'512x512',type:'image/png'}]};
+    const manifest={name:'Bullet Journal — مینیمال',short_name:'BuJo',start_url:'.',display:'standalone',background_color:'#f7f8fb',theme_color:'#7c4dff',lang:'فا',dir:'rtl',icons:[{src:tinyPng,sizes:'192x192',type:'image/png'},{src:tinyPng,sizes:'512x512',type:'image/png'}]};
     const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
     document.addEventListener('DOMContentLoaded',()=>{document.getElementById('manifestInline').href=URL.createObjectURL(blob)});
   </script>
@@ -253,6 +253,7 @@ function signifierIcon(t){ return t==='task'?'◻︎': t==='event'?'○':'•' }
 function parseQuick(text){ const type=text.startsWith('◻︎')?'task': text.startsWith('○')?'event':'note'; const important=/(^|\s)!($|\s)/.test(text); const research=/(^|\s)\?($|\s)/.test(text); const tags=Array.from(text.matchAll(/#([\p{L}\d_\-]+)/gu)).map(m=>m[1]); const content=text.replace(/^([◻︎○•]\s*)?/,'').replace(/[!?]/g,'').trim(); return {type,content,tags,important,research} }
 function addItem(day,item){ const d=load(); d.days[day]=d.days[day]||[]; d.days[day].unshift({id:uid(),...item,done:false,migrated:false,scheduled:false,createdAt:Date.now()}); save(d); renderDaily() }
 function quickAdd(){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const qi=document.querySelector('#quickInput'); if(!qi) return; const txt=qi.value.trim(); if(!txt) return; addItem(day,parseQuick(txt)); qi.value='' }
+window.quickAdd = quickAdd; // ensure global for inline onclick
 function itemRow(day,it){ const row=document.createElement('div'); row.className='item'+(it.done?' done':''); row.innerHTML=
   '<div class="muted">'+signifierIcon(it.type)+'</div>'+
   '<div><div>'+it.content+' '+(it.important?'<span class="pill">!</span>':'')+' '+(it.research?'<span class="pill">?</span>':'')+' '+it.tags.map(t=>'<span class="pill">#'+t+'</span>').join('')+'</div></div>'+
@@ -311,7 +312,7 @@ function openCollection(id){ window.navigate('collections'); const d=load(); con
   detail.appendChild(card); attachRipples()
 }
 function quickAddToCollection(id,type){ const inp=document.querySelector('#ci'+id); if(!inp) return; if(!inp.value.trim()) inp.value = (type==='task'?'◻︎ ':'') + inp.value; inp.focus() }
-function addToCollection(id){ const inp=document.querySelector('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tagInput=document.querySelector('#tagInput'+id); const tags=((tagInput && tagInput.value)||'').split(',').map(s=>s.trim()).filter(Boolean); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type=isTask?'task':'note', tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; if(tagInput) tagInput.value=''; openCollection(id) }
+function addToCollection(id){ const inp=document.querySelector('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tagInput=document.querySelector('#tagInput'+id); const tags=((tagInput && tagInput.value)||'').split(',').map(s=>s.trim()).filter(Boolean); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type: (isTask?'task':'note'), tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; if(tagInput) tagInput.value=''; openCollection(id) }
 function removeFromCollection(id,txtEnc){ const txt=decodeURIComponent(txtEnc); const d=load(); const c=d.collections[id]; c.items=c.items.filter(it=> (typeof it==='string')? it!==txt : it.text!==txt ); save(d); openCollection(id) }
 function addTag(id){ const inp=document.querySelector('#tagInput'+id); const val=inp && inp.value ? inp.value.trim() : ''; if(!val) return; const d=load(); const c=d.collections[id]; c.tags=[...new Set([...(c.tags||[]), val])]; save(d); inp.value=''; openCollection(id) }
 function removeTag(id,t){ const d=load(); const c=d.collections[id]; c.tags=(c.tags||[]).filter(x=>x!==t); save(d); openCollection(id) }
@@ -381,7 +382,7 @@ Object.assign(window, {
   addTxn, delTxn, exportFinanceCSV
 });
 
-// ===== Core render (بدون optional chaining) =====
+// ===== Core render =====
 function render(){
   var dp = document.querySelector('#datePicker');
   var currentDay = (dp && dp.value) || todayISO();
@@ -413,31 +414,44 @@ function render(){
 window.render = render;
 
 // ===== Init =====
-document.getElementById('datePicker').value=todayISO();
-document.getElementById('monthPicker').value=new Date().toISOString().slice(0,7);
-document.getElementById('todayLabel').textContent=jFull(todayISO());
-document.getElementById('hMonth').value=new Date().toISOString().slice(0,7);
-document.getElementById('fDate').value=todayISO();
-document.getElementById('fMonth').value=new Date().toISOString().slice(0,7);
-document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value);
-document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value);
-document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value);
+function init(){
+  document.getElementById('datePicker').value=todayISO();
+  document.getElementById('monthPicker').value=new Date().toISOString().slice(0,7);
+  document.getElementById('todayLabel').textContent=jFull(todayISO());
+  document.getElementById('hMonth').value=new Date().toISOString().slice(0,7);
+  document.getElementById('fDate').value=todayISO();
+  document.getElementById('fMonth').value=new Date().toISOString().slice(0,7);
+  document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value);
+  document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value);
+  document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value);
 
-document.getElementById('datePicker').addEventListener('change', function(){ renderDaily(); render(); });
-document.getElementById('monthPicker').addEventListener('change', function(){ renderMonth(); document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value); });
-document.getElementById('hMonth').addEventListener('change', function(){ renderHabits(); document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value); });
-document.getElementById('fMonth').addEventListener('change', function(){ renderFinance(); document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value); });
-var _cs=document.getElementById('collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
+  document.getElementById('datePicker').addEventListener('change', function(){ renderDaily(); render(); });
+  document.getElementById('monthPicker').addEventListener('change', function(){ renderMonth(); document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value); });
+  document.getElementById('hMonth').addEventListener('change', function(){ renderHabits(); document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value); });
+  document.getElementById('fMonth').addEventListener('change', function(){ renderFinance(); document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value); });
+  var _cs=document.getElementById('collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
+  var qi=document.getElementById('quickInput'); if(qi) qi.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
 
-render(); renderHabits(); renderCollectionsGrid(); attachRipples();
+  render(); renderHabits(); renderCollectionsGrid(); attachRipples();
+}
 
-// ===== Self tests (optional via ?selftest) =====
-(function(){ if(!location.search.includes('selftest')) return;
-  console.log('✅ self tests start');
-  console.assert(typeof window.navigate==='function','window.navigate exists');
-  console.assert(typeof svg==='function' && svg('check').includes('<svg'),'svg() exists');
-  const backup=load(); const month=new Date().toISOString().slice(0,7); const d=load(); d.habits=[{id:'h1',name:'test',color:'#00aa88',logs:{}}]; save(d); const day=month+'-01'; toggleHabit('h1',day); const after=load(); console.assert(after.habits[0].logs[day]===true,'habit toggled on');
-  localStorage.setItem(storeKey, JSON.stringify(backup));
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', init);
+}else{ init(); }
+
+// ===== Self tests (opt-in with ?selftest) =====
+(function(){ if(!location.search.includes('selftest')) return; console.log('✅ self tests start');
+  const backup=localStorage.getItem(storeKey);
+  try{
+    console.assert(typeof window.quickAdd==='function','window.quickAdd exists');
+    console.assert(typeof window.navigate==='function','window.navigate exists');
+    // add/remove smoke test
+    const d=todayISO(); const before=load(); addItem(d,{type:'note',content:'selftest',tags:[],important:false,research:false}); const after=load();
+    console.assert((after.days[d]||[]).length >= ((before.days[d]||[]).length+1),'addItem worked');
+  } finally {
+    if(backup!=null) localStorage.setItem(storeKey, backup); else localStorage.removeItem(storeKey);
+    renderDaily();
+  }
   console.log('✅ self tests end');
 })();
 </script>
