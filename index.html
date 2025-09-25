@@ -36,14 +36,15 @@
     .iconbtn:active{transform:translateY(1px)}
     .iconbtn svg{width:22px;height:22px}
 
-    /* Ripple (shared) */
+    /* Ripple */
     .ripple{position:absolute;inset:auto;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.15);animation:ripple .6s ease-out}
     @keyframes ripple{from{width:0;height:0;opacity:.35}to{width:180px;height:180px;opacity:0}}
 
-    /* Inputs – bigger for mobile readability */
+    /* Inputs */
     input,select,textarea{background:#fff;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;width:100%;outline:none;font-size:16px;min-height:44px}
     input:focus,select:focus,textarea:focus{border-color:var(--primary-30);box-shadow:0 0 0 3px var(--primary-10)}
     input[type="number"]{font-variant-numeric:tabular-nums}
+
     .list{display:flex;flex-direction:column;gap:12px}
     .item{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;padding:12px;border-radius:12px;border:1px dashed var(--border);background:#fff}
     .item.done{opacity:.6;text-decoration:line-through}
@@ -55,44 +56,9 @@
     .muted{color:var(--sub)}
     hr{border:none;border-top:1px solid var(--border);margin:8px 0}
 
-    /* Collections cover & grid */
+    /* Collections grid */
     .cover{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:#f5f6fa}
-    .coll-grid{display:grid;gap:12px}
-    @media (min-width:901px){.coll-grid{grid-template-columns:repeat(5,1fr)}}
-    @media (max-width:900px){
-      .app{grid-template-columns:1fr;height:auto}
-      /* hide sidebar & its footer completely on mobile */
-      aside{display:none !important}
-      aside .footer{display:none !important}
-      main{padding:12px 12px 96px 12px}
-      .row{flex-wrap:wrap}
-      .item{grid-template-columns:28px 1fr auto}
-      header{background:var(--primary-10); border-bottom-color: var(--primary-20); padding:10px 12px}
-      header h1{font-size:14px}
-      .top-actions .iconbtn{width:36px;height:36px}
-      .mobile-tabs{display:flex;gap:6px;width:100%;overflow:auto;padding-top:6px}
-      .mobile-tabs .btn{flex:0 0 auto;padding:8px 10px}
-      .mobile-actions{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--border);padding:10px 12px}
-      .mobile-actions input{flex:1}
-      .mobile-actions .chips{gap:6px}
-      #dailyList{padding-bottom:72px}
-      #collectionDetail .card{max-width:100%;overflow:hidden}
-    }
-      aside{display:none}
-      main{padding:12px 12px 96px 12px}
-      .row{flex-wrap:wrap}
-      .item{grid-template-columns:28px 1fr auto}
-      header{background:var(--primary-10); border-bottom-color: var(--primary-20); padding:10px 12px}
-      header h1{font-size:14px}
-      .top-actions .iconbtn{width:36px;height:36px}
-      .mobile-tabs{display:flex;gap:6px;width:100%;overflow:auto;padding-top:6px}
-      .mobile-tabs .btn{flex:0 0 auto;padding:8px 10px}
-      .mobile-actions{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--border);padding:10px 12px}
-      .mobile-actions input{flex:1}
-      .mobile-actions .chips{gap:6px}
-      #dailyList{padding-bottom:72px}
-      #collectionDetail .card{max-width:100%;overflow:hidden}
-    }}
+    .coll-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)} /* دو ستون در هر اندازه */
     .coll-card{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);cursor:pointer}
     .coll-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .tagchip{display:inline-flex;gap:4px;align-items:center;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#fff}
@@ -116,27 +82,28 @@
     .cover-thumb{width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1px solid var(--border);background:#f5f6fa}
     .file-hidden{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 
-    /* Mobile navigation + composer */
+    /* Mobile navigation + composer (hidden on desktop) */
     .mobile-tabs{display:none}
     .mobile-actions{display:none}
 
     /* ===== Mobile tweaks ===== */
     @media (max-width:900px){
       .app{grid-template-columns:1fr;height:auto}
-      aside{display:none}
+      aside{display:none !important}
       main{padding:12px 12px 96px 12px}
       .row{flex-wrap:wrap}
       .item{grid-template-columns:28px 1fr auto}
-      .mobile-tabs{display:flex;position:sticky;top:56px;z-index:6;gap:6px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--border)}
-      .mobile-tabs .btn{flex:1}
+      header{background:var(--primary-10); border-bottom-color: var(--primary-20); padding:10px 12px}
+      header h1{font-size:14px}
+      .top-actions .iconbtn{width:36px;height:36px}
+      .mobile-tabs{display:flex;gap:6px;width:100%;overflow:auto;padding-top:6px}
+      .mobile-tabs .btn{flex:0 0 auto;padding:8px 10px}
       .mobile-actions{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--border);padding:10px 12px}
       .mobile-actions input{flex:1}
       .mobile-actions .chips{gap:6px}
       #dailyList{padding-bottom:72px}
-      /* Fix horizontal scroll in collections detail */
       #collectionDetail .card{max-width:100%;overflow:hidden}
     }
-  .coll-grid{grid-template-columns:repeat(2,1fr)!important}
   </style>
   <link rel="manifest" id="manifestInline" />
   <meta name="theme-color" content="#f7f8fb" />
@@ -144,7 +111,7 @@
     const tinyPng='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axu7sAAAAAASUVORK5CYII=';
     const manifest={name:'Bullet Journal — مینیمال',short_name:'BuJo',start_url:'.',display:'standalone',background_color:'#f7f8fb',theme_color:'#7c4dff',lang:'fa',dir:'rtl',icons:[{src:tinyPng,sizes:'192x192',type:'image/png'},{src:tinyPng,sizes:'512x512',type:'image/png'}]};
     const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    document.addEventListener('DOMContentLoaded',()=>{document.getElementById('manifestInline').href=URL.createObjectURL(blob)});
+    document.addEventListener('DOMContentLoaded',()=>{const m=document.getElementById('manifestInline'); if(m) m.href=URL.createObjectURL(blob)});
   </script>
 </head>
 <body>
@@ -170,8 +137,6 @@
       <button class="btn" onclick="navigate('search')">جستجو</button>
     </nav>
   </header>
-
-  
 
   <div class="app">
     <aside class="stack">
@@ -318,10 +283,10 @@ function load(){ let d; try{d=JSON.parse(localStorage.getItem(storeKey))||{days:
 function save(d){ localStorage.setItem(storeKey,JSON.stringify(d)) }
 function uid(){ return Math.random().toString(36).slice(2,9) }
 
-// ===== Material-like ripple =====
+// ===== Ripple =====
 function attachRipples(){ $$('.btn,.iconbtn').forEach(b=>{ if(b.dataset.rippleBound) return; b.dataset.rippleBound='1'; b.addEventListener('click', (e)=>{ const r=document.createElement('span'); r.className='ripple'; const rect=b.getBoundingClientRect(); r.style.left=(e.clientX-rect.left)+'px'; r.style.top=(e.clientY-rect.top)+'px'; b.appendChild(r); setTimeout(()=>r.remove(),600); }) }) }
 
-// ===== Inline SVG icons =====
+// ===== Icons =====
 function svg(name){
   const base='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="';
   const end='"/></svg>';
@@ -411,7 +376,6 @@ function openFileInput(){ const el=document.getElementById('importFile'); if(el)
 function uploadCover(id){ const inp=document.getElementById('cov'+id); if(!inp||!inp.files||!inp.files[0]){alert('عکسی انتخاب نشد');return} const reader=new FileReader(); reader.onload=function(e){ const d=load(); d.collections[id].cover=e.target.result; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.src=e.target.result; } }; reader.readAsDataURL(inp.files[0]) }
 function clearCover(id){ const d=load(); d.collections[id].cover=null; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.removeAttribute('src'); img.style.background='#f2f3f7'; } }
 function deleteCollection(id){ if(!confirm('آیا مطمئنی می‌خواهی این مجموعه حذف شود؟')) return; const d=load(); delete d.collections[id]; save(d); const detail=document.getElementById('collectionDetail'); if(detail) detail.innerHTML=''; renderCollectionsSidebar(); renderCollectionsGrid(); }
- }
 
 // ===== Habits =====
 function addHabit(){ const name=$('#hName').value.trim(); const color=$('#hColor').value; if(!name) {alert('نام عادت را وارد کنید'); return} const d=load(); d.habits.unshift({id:uid(),name,color,logs:{}}); save(d); $('#hName').value=''; renderHabits() }
@@ -445,12 +409,13 @@ function exportFinanceCSV(){ const d=load(); const fm=$('#fMonth'); const month=
 
 // ===== Export/Import =====
 function exportData(){ const d=load(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='bujo.json'; a.click() }
-$('#importFile').addEventListener('change',function(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=function(ev){ try{ save(JSON.parse(ev.target.result)); render(); renderHabits(); renderCollectionsGrid(); }catch(e){ alert('فایل نامعتبر است') } }; r.readAsText(f) })
+const importEl=document.getElementById('importFile');
+if(importEl){ importEl.addEventListener('change',function(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=function(ev){ try{ save(JSON.parse(ev.target.result)); render(); renderHabits(); renderCollectionsGrid(); }catch(e){ alert('فایل نامعتبر است') } }; r.readAsText(f) }) }
 
 // ===== Navigation =====
 function navigate(view){
   $$('.chips button').forEach(function(b){ b.classList.remove('active') });
-  if(view==='today') document.getElementById('nav-today').classList.add('active');
+  const nt=document.getElementById('nav-today'); if(view==='today' && nt) nt.classList.add('active');
   ['today','month','collections','habits','finance','search'].forEach(function(v){
     var sec=document.getElementById('view-'+v);
     if(sec) sec.style.display=(v===view?'flex':'none');
@@ -469,9 +434,10 @@ Object.assign(window, {
   addToCollection, removeFromCollection, quickAddToCollection,
   uploadCover, clearCover, addTag, removeTag, openFile, openFileInput,
   addHabit, toggleHabit, deleteHabit,
-  addTxn, delTxn, exportFinanceCSV
+  addTxn, delTxn, exportFinanceCSV,
+  deleteCollection
 });
-window.deleteCollection = deleteCollection;
+window.render = render;
 
 // ===== Core render =====
 function render(){
@@ -502,27 +468,26 @@ function render(){
     if (fj) fj.textContent = jMonth(fm.value);
   }
 }
-window.render = render;
 
 // ===== Init =====
 function init(){
-  document.getElementById('datePicker').value=todayISO();
-  document.getElementById('monthPicker').value=new Date().toISOString().slice(0,7);
-  document.getElementById('todayLabel').textContent=jFull(todayISO());
-  document.getElementById('hMonth').value=new Date().toISOString().slice(0,7);
-  document.getElementById('fDate').value=todayISO();
-  document.getElementById('fMonth').value=new Date().toISOString().slice(0,7);
-  document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value);
-  document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value);
-  document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value);
+  if(document.getElementById('datePicker')) document.getElementById('datePicker').value=todayISO();
+  if(document.getElementById('monthPicker')) document.getElementById('monthPicker').value=new Date().toISOString().slice(0,7);
+  if(document.getElementById('todayLabel')) document.getElementById('todayLabel').textContent=jFull(todayISO());
+  if(document.getElementById('hMonth')) document.getElementById('hMonth').value=new Date().toISOString().slice(0,7);
+  if(document.getElementById('fDate')) document.getElementById('fDate').value=todayISO();
+  if(document.getElementById('fMonth')) document.getElementById('fMonth').value=new Date().toISOString().slice(0,7);
+  if(document.getElementById('monthJLabel')) document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker')?document.getElementById('monthPicker').value:new Date().toISOString().slice(0,7));
+  if(document.getElementById('hMonthJLabel')) document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth')?document.getElementById('hMonth').value:new Date().toISOString().slice(0,7));
+  if(document.getElementById('fMonthJLabel')) document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth')?document.getElementById('fMonth').value:new Date().toISOString().slice(0,7));
 
-  document.getElementById('datePicker').addEventListener('change', function(){ renderDaily(); render(); });
-  document.getElementById('monthPicker').addEventListener('change', function(){ renderMonth(); document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value); });
-  document.getElementById('hMonth').addEventListener('change', function(){ renderHabits(); document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value); });
-  document.getElementById('fMonth').addEventListener('change', function(){ renderFinance(); document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value); });
-  var _cs=document.getElementById('collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
-  var qim=document.getElementById('quickInputMobile'); if(qim) qim.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
-  var qi=document.getElementById('quickInput'); if(qi) qi.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
+  const dpp=document.getElementById('datePicker'); if(dpp) dpp.addEventListener('change', function(){ renderDaily(); render(); });
+  const mpp=document.getElementById('monthPicker'); if(mpp) mpp.addEventListener('change', function(){ renderMonth(); const mj=document.getElementById('monthJLabel'); if(mj) mj.textContent=jMonth(mpp.value); });
+  const hmm=document.getElementById('hMonth'); if(hmm) hmm.addEventListener('change', function(){ renderHabits(); const hj=document.getElementById('hMonthJLabel'); if(hj) hj.textContent=jMonth(hmm.value); });
+  const fmm=document.getElementById('fMonth'); if(fmm) fmm.addEventListener('change', function(){ renderFinance(); const fj=document.getElementById('fMonthJLabel'); if(fj) fj.textContent=jMonth(fmm.value); });
+  const _cs=document.getElementById('collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
+  const qim=document.getElementById('quickInputMobile'); if(qim) qim.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
+  const qi=document.getElementById('quickInput'); if(qi) qi.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
 
   render(); renderHabits(); renderCollectionsGrid(); attachRipples();
 }
