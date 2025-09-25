@@ -1,4 +1,4 @@
-const CACHE = 'bujo-cache-v1';
+const CACHE = 'bujo-cache-v2'; // قبلاً v1 بود، یک عدد بزرگ‌تر بگذار
 const ASSETS = ['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(()=>self.skipWaiting()));
