@@ -61,6 +61,23 @@
     @media (min-width:901px){.coll-grid{grid-template-columns:repeat(5,1fr)}}
     @media (max-width:900px){
       .app{grid-template-columns:1fr;height:auto}
+      /* hide sidebar & its footer completely on mobile */
+      aside{display:none !important}
+      aside .footer{display:none !important}
+      main{padding:12px 12px 96px 12px}
+      .row{flex-wrap:wrap}
+      .item{grid-template-columns:28px 1fr auto}
+      header{background:var(--primary-10); border-bottom-color: var(--primary-20); padding:10px 12px}
+      header h1{font-size:14px}
+      .top-actions .iconbtn{width:36px;height:36px}
+      .mobile-tabs{display:flex;gap:6px;width:100%;overflow:auto;padding-top:6px}
+      .mobile-tabs .btn{flex:0 0 auto;padding:8px 10px}
+      .mobile-actions{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--border);padding:10px 12px}
+      .mobile-actions input{flex:1}
+      .mobile-actions .chips{gap:6px}
+      #dailyList{padding-bottom:72px}
+      #collectionDetail .card{max-width:100%;overflow:hidden}
+    }
       aside{display:none}
       main{padding:12px 12px 96px 12px}
       .row{flex-wrap:wrap}
@@ -542,6 +559,18 @@ async function setupSW(){
   }catch(e){ return false }
 }
 setupSW();
+</script>
+
+<script>
+  // Force-hide sidebar on mobile as a safety (in case some browsers ignore media query)
+  function toggleSidebarForMobile(){
+    var as=document.querySelector('aside');
+    if(!as) return;
+    if(window.matchMedia('(max-width: 900px)').matches){ as.style.display='none'; }
+    else { as.style.display=''; }
+  }
+  toggleSidebarForMobile();
+  window.addEventListener('resize', toggleSidebarForMobile);
 </script>
 
 </body>
