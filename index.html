@@ -14,8 +14,8 @@
       --radius:16px; --shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08)
     }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto}
-    header{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;padding:14px 16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.9));backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--border)}
+    html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto;overflow-x:hidden}
+    header{position:sticky;top:0;z-index:7;display:flex;align-items:center;gap:8px;padding:14px 16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.9));backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--border)}
     header h1{font-size:16px;margin:0;font-weight:800;color:#1f2937}
     .app{display:grid;grid-template-columns:280px 1fr;height:calc(100dvh - 60px)}
     aside{border-left:1px solid var(--border);background:var(--surface);padding:12px;overflow:auto}
@@ -31,28 +31,29 @@
     .btn:active{transform:translateY(1px)}
 
     /* Icon buttons */
-    .iconbtn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;color:#475569;cursor:pointer}
+    .iconbtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#475569;cursor:pointer}
     .iconbtn:hover{filter:brightness(1.03)}
     .iconbtn:active{transform:translateY(1px)}
-    .iconbtn svg{width:20px;height:20px}
+    .iconbtn svg{width:22px;height:22px}
 
     /* Ripple (shared) */
     .ripple{position:absolute;inset:auto;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.15);animation:ripple .6s ease-out}
     @keyframes ripple{from{width:0;height:0;opacity:.35}to{width:180px;height:180px;opacity:0}}
 
-    input,select,textarea{background:#fff;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:10px;width:100%;outline:none}
+    /* Inputs – bigger for mobile readability */
+    input,select,textarea{background:#fff;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;width:100%;outline:none;font-size:16px;min-height:44px}
     input:focus,select:focus,textarea:focus{border-color:var(--primary-30);box-shadow:0 0 0 3px var(--primary-10)}
-    .list{display:flex;flex-direction:column;gap:10px}
-    .item{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;padding:10px;border-radius:12px;border:1px dashed var(--border);background:#fff}
+    input[type="number"]{font-variant-numeric:tabular-nums}
+    .list{display:flex;flex-direction:column;gap:12px}
+    .item{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;padding:12px;border-radius:12px;border:1px dashed var(--border);background:#fff}
     .item.done{opacity:.6;text-decoration:line-through}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;color:var(--sub)}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;color:var(--sub)}
     .chips{display:flex;gap:6px;flex-wrap:wrap}
-    .chips button{border-radius:999px;padding:6px 10px;border:1px solid var(--border);background:#fff;color:#475569;cursor:pointer}
+    .chips button{border-radius:999px;padding:8px 12px;border:1px solid var(--border);background:#fff;color:#475569;cursor:pointer;font-size:14px}
     .chips button.active{color:#3a2a85;background:var(--primary-10);border-color:var(--primary-20)}
     .section-title{font-weight:800;margin:8px 0 4px 0;color:#3a2a85}
     .muted{color:var(--sub)}
     hr{border:none;border-top:1px solid var(--border);margin:8px 0}
-    @media (max-width:900px){.app{grid-template-columns:1fr}aside{order:2;height:auto}}
 
     /* Collections cover & grid */
     .cover{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:#f5f6fa}
@@ -61,32 +62,53 @@
     @media (max-width:900px){.coll-grid{grid-template-columns:repeat(2,1fr)}}
     .coll-card{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);cursor:pointer}
     .coll-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .tagchip{display:inline-flex;gap:4px;align-items:center;padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#fff}
+    .tagchip{display:inline-flex;gap:4px;align-items:center;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#fff}
 
-    /* ===== Habits table (classic) ===== */
+    /* Habits table */
     .hab-grid{overflow:auto}
-    table.hab{border-collapse:collapse;width:100%;min-width:820px}
-    .hab th,.hab td{border:1px solid var(--border);background:#fff;padding:6px;text-align:center}
+    table.hab{border-collapse:collapse;width:100%;min-width:680px}
+    .hab th,.hab td{border:1px solid var(--border);background:#fff;padding:10px;text-align:center}
     .hab thead th{position:sticky;top:0;background:#f3f4f6;z-index:1}
-    .cell{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);margin:auto;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+    .cell{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);margin:auto;cursor:pointer;transition:background .15s ease,border-color .15s ease}
     .cell.on{background:var(--h, var(--primary-20));border-color:var(--h, var(--primary-30))}
 
-    /* ===== Finance colored pills ===== */
+    /* Finance colored pills */
     .pill.expense{background:#fee2e2;border-color:#fecaca;color:#991b1b}
     .pill.income{background:#dcfce7;border-color:#bbf7d0;color:#14532d}
     .pill.invest{background:#fef9c3;border-color:#fde68a;color:#854d0e}
     .pill.net.pos{background:#e0f2fe;border-color:#bae6fd;color:#075985}
     .pill.net.neg{background:#ffe4e6;border-color:#fecdd3;color:#9f1239}
 
-    /* ===== Compact cover picker ===== */
+    /* Compact cover picker */
     .cover-thumb{width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1px solid var(--border);background:#f5f6fa}
     .file-hidden{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+    /* Mobile navigation + composer */
+    .mobile-tabs{display:none}
+    .mobile-actions{display:none}
+
+    /* ===== Mobile tweaks ===== */
+    @media (max-width:900px){
+      .app{grid-template-columns:1fr;height:auto}
+      aside{display:none}
+      main{padding:12px 12px 96px 12px}
+      .row{flex-wrap:wrap}
+      .item{grid-template-columns:28px 1fr auto}
+      .mobile-tabs{display:flex;position:sticky;top:56px;z-index:6;gap:6px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--border)}
+      .mobile-tabs .btn{flex:1}
+      .mobile-actions{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--border);padding:10px 12px}
+      .mobile-actions input{flex:1}
+      .mobile-actions .chips{gap:6px}
+      #dailyList{padding-bottom:72px}
+      /* Fix horizontal scroll in collections detail */
+      #collectionDetail .card{max-width:100%;overflow:hidden}
+    }
   </style>
   <link rel="manifest" id="manifestInline" />
   <meta name="theme-color" content="#f7f8fb" />
   <script>
     const tinyPng='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axu7sAAAAAASUVORK5CYII=';
-    const manifest={name:'Bullet Journal — مینیمال',short_name:'BuJo',start_url:'.',display:'standalone',background_color:'#f7f8fb',theme_color:'#7c4dff',lang:'فا',dir:'rtl',icons:[{src:tinyPng,sizes:'192x192',type:'image/png'},{src:tinyPng,sizes:'512x512',type:'image/png'}]};
+    const manifest={name:'Bullet Journal — مینیمال',short_name:'BuJo',start_url:'.',display:'standalone',background_color:'#f7f8fb',theme_color:'#7c4dff',lang:'fa',dir:'rtl',icons:[{src:tinyPng,sizes:'192x192',type:'image/png'},{src:tinyPng,sizes:'512x512',type:'image/png'}]};
     const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
     document.addEventListener('DOMContentLoaded',()=>{document.getElementById('manifestInline').href=URL.createObjectURL(blob)});
   </script>
@@ -101,6 +123,17 @@
       <input id="importFile" type="file" accept="application/json" style="display:none" />
     </div>
   </header>
+
+  <!-- Mobile top tabs -->
+  <nav class="mobile-tabs">
+    <button class="btn" onclick="navigate('today')">امروز</button>
+    <button class="btn" onclick="navigate('month')">ماه</button>
+    <button class="btn" onclick="navigate('collections')">مجموعه‌ها</button>
+    <button class="btn" onclick="navigate('habits')">عادت‌ها</button>
+    <button class="btn" onclick="navigate('finance')">مالی</button>
+    <button class="btn" onclick="navigate('search')">جستجو</button>
+  </nav>
+
   <div class="app">
     <aside class="stack">
       <div class="card stack">
@@ -181,12 +214,12 @@
         <div class="card stack">
           <div class="row">
             <input id="hName" placeholder="نام عادت (مثلاً: ورزش، مطالعه)" />
-            <input type="color" id="hColor" value="#7c4dff" style="width:56px;padding:0;height:40px" />
+            <input type="color" id="hColor" value="#7c4dff" style="width:56px;padding:0;height:44px" />
             <button class="btn primary" onclick="addHabit()">+ افزودن عادت</button>
             <input type="month" id="hMonth" /> <span id="hMonthJLabel" class="pill"></span>
           </div>
           <div id="hSummary" class="row"></div>
-          <div id="hTable" class="hab-grid"></div>
+          <div id="hTable" class="hab-grid" style="max-width:100%"></div>
         </div>
       </section>
 
@@ -197,7 +230,7 @@
             <input type="date" id="fDate" />
             <select id="fKind"><option value="expense">هزینه</option><option value="income">درآمد</option><option value="invest">سرمایه‌گذاری</option></select>
             <input id="fCategory" placeholder="دسته (مثلاً: خوراک، حقوق، سهام)" />
-            <input id="fAmount" type="number" step="0.01" placeholder="مبلغ" />
+            <input id="fAmount" type="number" step="0.01" inputmode="decimal" placeholder="مبلغ" />
             <input id="fNote" placeholder="یادداشت (اختیاری)" />
             <button class="btn primary" onclick="addTxn()">+ افزودن تراکنش</button>
           </div>
@@ -216,6 +249,18 @@
         <div id="searchList" class="list"></div>
       </section>
     </main>
+  </div>
+
+  <!-- Mobile bottom composer -->
+  <div class="mobile-actions">
+    <input id="quickInputMobile" placeholder="◻︎ تسک/یادداشت… #برچسب" />
+    <button class="btn primary" onclick="quickAdd()">افزودن</button>
+    <div class="chips">
+      <button onclick="insertSignifier('◻︎ ')" aria-label="Task">◻︎</button>
+      <button onclick="insertSignifier('○ ')" aria-label="Event">○</button>
+      <button onclick="insertSignifier(' !')" aria-label="Important">!</button>
+      <button onclick="insertSignifier(' #')" aria-label="Tag">#</button>
+    </div>
   </div>
 
 <script>
@@ -246,14 +291,15 @@ function svg(name){
 }
 
 // ===== Signifiers helper =====
-function insertSignifier(text){ const i=$('#quickInput'); if(!i) return; const pos=i.selectionStart||i.value.length; i.value=i.value.slice(0,pos)+text+i.value.slice(pos); i.focus(); i.setSelectionRange(pos+text.length,pos+text.length); }
+function getQuickInput(){ const m=$('#quickInputMobile'); if(m && getComputedStyle(m).display!=='none') return m; return $('#quickInput'); }
+function insertSignifier(text){ const i=getQuickInput(); if(!i) return; const pos=i.selectionStart||i.value.length; i.value=i.value.slice(0,pos)+text+i.value.slice(pos); i.focus(); i.setSelectionRange(pos+text.length,pos+text.length); }
 
 // ===== Daily =====
 function signifierIcon(t){ return t==='task'?'◻︎': t==='event'?'○':'•' }
 function parseQuick(text){ const type=text.startsWith('◻︎')?'task': text.startsWith('○')?'event':'note'; const important=/(^|\s)!($|\s)/.test(text); const research=/(^|\s)\?($|\s)/.test(text); const tags=Array.from(text.matchAll(/#([\p{L}\d_\-]+)/gu)).map(m=>m[1]); const content=text.replace(/^([◻︎○•]\s*)?/,'').replace(/[!?]/g,'').trim(); return {type,content,tags,important,research} }
 function addItem(day,item){ const d=load(); d.days[day]=d.days[day]||[]; d.days[day].unshift({id:uid(),...item,done:false,migrated:false,scheduled:false,createdAt:Date.now()}); save(d); renderDaily() }
-function quickAdd(){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const qi=document.querySelector('#quickInput'); if(!qi) return; const txt=qi.value.trim(); if(!txt) return; addItem(day,parseQuick(txt)); qi.value='' }
-window.quickAdd = quickAdd; // ensure global for inline onclick
+function quickAdd(){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const im=$('#quickInputMobile'); const idt=$('#quickInput'); const src=(im && im.value.trim())? im : idt; if(!src) return; const txt=src.value.trim(); if(!txt) return; addItem(day,parseQuick(txt)); src.value='' }
+window.quickAdd = quickAdd;
 function itemRow(day,it){ const row=document.createElement('div'); row.className='item'+(it.done?' done':''); row.innerHTML=
   '<div class="muted">'+signifierIcon(it.type)+'</div>'+
   '<div><div>'+it.content+' '+(it.important?'<span class="pill">!</span>':'')+' '+(it.research?'<span class="pill">?</span>':'')+' '+it.tags.map(t=>'<span class="pill">#'+t+'</span>').join('')+'</div></div>'+
@@ -265,21 +311,21 @@ function itemRow(day,it){ const row=document.createElement('div'); row.className
   '</div>';
   return row;
 }
-function renderDaily(){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); const list=document.querySelector('#dailyList'); if(!list) return; list.innerHTML=''; (d.days[day]||[]).forEach(it=>list.appendChild(itemRow(day,it))); attachRipples() }
+function renderDaily(){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); const list=$('#dailyList'); if(!list) return; list.innerHTML=''; (d.days[day]||[]).forEach(it=>list.appendChild(itemRow(day,it))); attachRipples() }
 function toggleDone(day,id){ const d=load(); const it=(d.days[day]||[]).find(x=>x.id===id); if(!it) return; it.done=!it.done; save(d); renderDaily() }
 function migrateItem(day,id){ const target=prompt('مهاجرت به چه تاریخی؟ (YYYY-MM-DD)',todayISO()); if(!target) return; const d=load(); const idx=(d.days[day]||[]).findIndex(x=>x.id===id); if(idx<0) return; const it=d.days[day][idx]; it.migrated=true; save(d); addItem(target,it) }
 function scheduleItem(day,id){ const target=prompt('برای کِی زمان‌بندی شود؟ (YYYY-MM-DD)',todayISO()); if(!target) return; const d=load(); const it=(d.days[day]||[]).find(x=>x.id===id); if(!it) return; it.scheduled=true; save(d) }
 function removeItem(day,id){ const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>x.id!==id); save(d); renderDaily() }
-function bulk(action){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); (d.days[day]||[]).forEach(it=>{ if(action==='complete') it.done=true; if(action==='migrate') it.migrated=true; if(action==='schedule') it.scheduled=true }); save(d); renderDaily() }
-function clearDone(){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>!x.done); save(d); renderDaily() }
+function bulk(action){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); (d.days[day]||[]).forEach(it=>{ if(action==='complete') it.done=true; if(action==='migrate') it.migrated=true; if(action==='schedule') it.scheduled=true }); save(d); renderDaily() }
+function clearDone(){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>!x.done); save(d); renderDaily() }
 
 // ===== Month =====
-function renderMonth(){ const d=load(); const mp=document.querySelector('#monthPicker'); const m=(mp && mp.value)||new Date().toISOString().slice(0,7); const list=document.querySelector('#monthList'); if(!list) return; list.innerHTML=''; Object.keys(d.days).filter(x=>x.startsWith(m)).sort().reverse().forEach(day=>{ const card=document.createElement('div'); card.className='card stack'; const cnt=(d.days[day]||[]).length; const done=(d.days[day]||[]).filter(x=>x.done).length; card.innerHTML='<div class="row" style="justify-content:space-between"><b>'+jShort(day)+'</b><span class="muted">'+done+'/'+cnt+' انجام‌شده</span></div>'; (d.days[day]||[]).slice(0,6).forEach(it=>card.appendChild(itemRow(day,it))); list.appendChild(card) }); attachRipples() }
+function renderMonth(){ const d=load(); const mp=$('#monthPicker'); const m=(mp && mp.value)||new Date().toISOString().slice(0,7); const list=$('#monthList'); if(!list) return; list.innerHTML=''; Object.keys(d.days).filter(x=>x.startsWith(m)).sort().reverse().forEach(day=>{ const card=document.createElement('div'); card.className='card stack'; const cnt=(d.days[day]||[]).length; const done=(d.days[day]||[]).filter(x=>x.done).length; card.innerHTML='<div class="row" style="justify-content:space-between"><b>'+jShort(day)+'</b><span class="muted">'+done+'/'+cnt+' انجام‌شده</span></div>'; (d.days[day]||[]).slice(0,6).forEach(it=>card.appendChild(itemRow(day,it))); list.appendChild(card) }); attachRipples() }
 
 // ===== Collections =====
-function addCollection(){ const name=document.querySelector('#newCollectionName').value.trim(); if(!name){alert('نام مجموعه را وارد کنید');return} const d=load(); const id=uid(); d.collections[id]={id,name,items:[],cover:null,tags:[]}; save(d); document.querySelector('#newCollectionName').value=''; renderCollectionsSidebar(); renderCollectionsGrid(); openCollection(id) }
-function renderCollectionsSidebar(){ const d=load(); const list=document.querySelector('#collectionsList'); if(!list) return; list.innerHTML=''; const arr=Object.values(d.collections); if(arr.length===0){ list.innerHTML='<span class="muted">هنوز مجموعه‌ای نساختی</span>'; return } arr.forEach(c=>{ const div=document.createElement('div'); div.className='row'; div.innerHTML='<button class="btn" onclick="openCollection(\''+c.id+'\')">'+c.name+'</button>'; list.appendChild(div) }); attachRipples() }
-function renderCollectionsGrid(){ const d=load(); const grid=document.querySelector('#collectionsGrid'); if(!grid) return; const si=document.querySelector('#collSearch'); const q=(si && si.value ? si.value : '').trim(); grid.innerHTML=''; let arr=Object.values(d.collections); if(q) arr=arr.filter(c=>c.name.includes(q)||(c.tags||[]).some(t=>t.includes(q)));
+function addCollection(){ const name=$('#newCollectionName').value.trim(); if(!name){alert('نام مجموعه را وارد کنید');return} const d=load(); const id=uid(); d.collections[id]={id,name,items:[],cover:null,tags:[]}; save(d); $('#newCollectionName').value=''; renderCollectionsSidebar(); renderCollectionsGrid(); openCollection(id) }
+function renderCollectionsSidebar(){ const d=load(); const list=$('#collectionsList'); if(!list) return; list.innerHTML=''; const arr=Object.values(d.collections); if(arr.length===0){ list.innerHTML='<span class="muted">هنوز مجموعه‌ای نساختی</span>'; return } arr.forEach(c=>{ const div=document.createElement('div'); div.className='row'; div.innerHTML='<button class="btn" onclick="openCollection(\''+c.id+'\')">'+c.name+'</button>'; list.appendChild(div) }); attachRipples() }
+function renderCollectionsGrid(){ const d=load(); const grid=$('#collectionsGrid'); if(!grid) return; const si=$('#collSearch'); const q=(si && si.value ? si.value : '').trim(); grid.innerHTML=''; let arr=Object.values(d.collections); if(q) arr=arr.filter(c=>c.name.includes(q)||(c.tags||[]).some(t=>t.includes(q)));
   arr.forEach(c=>{ const card=document.createElement('div'); card.className='coll-card'; card.onclick=function(){openCollection(c.id)}; card.innerHTML=
       '<img class="cover" src="'+(c.cover||'')+'" alt="" onerror="this.style.background=\'#f2f3f7\';this.removeAttribute(\'src\')"/>'+
       '<div class="coll-name">'+c.name+'</div>'+
@@ -287,14 +333,19 @@ function renderCollectionsGrid(){ const d=load(); const grid=document.querySelec
     grid.appendChild(card)
   })
 }
-function openCollection(id){ window.navigate('collections'); const d=load(); const c=d.collections[id]; if(!c) return; const detail=document.querySelector('#collectionDetail'); if(!detail) return; detail.innerHTML='';
+function openCollection(id){ window.navigate('collections'); const d=load(); const c=d.collections[id]; if(!c) return; const detail=$('#collectionDetail'); if(!detail) return; detail.innerHTML='';
   const card=document.createElement('div'); card.className='card stack';
   const tagsHtml=(c.tags||[]).map(t=>'<span class="tagchip">#'+t+' <button class="btn" style="padding:2px 6px" onclick="removeTag(\''+id+'\',\''+t+'\')">×</button></span>').join(' ');
   const coverHtml='<div class="row" style="flex-wrap:wrap">'+
       '<img class="cover-thumb" src="'+(c.cover||'')+'" alt="cover" onerror="this.style.background=\'#f2f3f7\';this.removeAttribute(\'src\')"/>'+
       '<div class="stack" style="flex:1;min-width:220px">'+
         '<div class="section-title">'+c.name+'</div>'+
-        '<div class="row"><input id="cov'+id+'" type="file" accept="image/*" class="file-hidden"/><label class="btn" for="cov'+id+'">انتخاب کاور</label><button class="btn" onclick="uploadCover(\''+id+'\')">بارگذاری</button><button class="btn" onclick="clearCover(\''+id+'\')">حذف کاور</button></div>'+
+        '<div class="row">'+
+          '<input id="cov'+id+'" type="file" accept="image/*" class="file-hidden"/>'+
+          '<button class="btn" onclick="openFile(\'cov'+id+'\')">انتخاب کاور</button>'+
+          '<button class="btn" onclick="uploadCover(\''+id+'\')">بارگذاری</button>'+
+          '<button class="btn" onclick="clearCover(\''+id+'\')">حذف کاور</button>'+
+        '</div>'+
         '<div class="row">'+
           '<input id="tagInput'+id+'" placeholder="افزودن برچسب (Enter)" onkeydown="if(event.key===\'Enter\'){addTag(\''+id+'\')}" >'+
           '<div id="tagWrap'+id+'" class="row" style="flex-wrap:wrap;gap:6px">'+(tagsHtml||'<span class=muted>بدون برچسب</span>')+'</div>'+
@@ -311,17 +362,18 @@ function openCollection(id){ window.navigate('collections'); const d=load(); con
   (c.items||[]).forEach(it=>{ const row=document.createElement('div'); row.className='item'; const text=(typeof it==='string')?it:it.text; const type=(typeof it==='string')?'note':(it.type||'note'); const tagstr=(typeof it==='string')?'':(it.tags||[]).map(t=>'<span class="pill">#'+t+'</span>').join(' '); row.innerHTML='<div class="muted">'+(type==='task'?'◻︎': type==='project'?'◆':'•')+'</div><div>'+text+' '+tagstr+'</div><div><button class="btn" onclick="removeFromCollection(\''+id+'\',\''+encodeURIComponent(text)+'\')">🗑</button></div>'; card.appendChild(row) });
   detail.appendChild(card); attachRipples()
 }
-function quickAddToCollection(id,type){ const inp=document.querySelector('#ci'+id); if(!inp) return; if(!inp.value.trim()) inp.value = (type==='task'?'◻︎ ':'') + inp.value; inp.focus() }
-function addToCollection(id){ const inp=document.querySelector('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tagInput=document.querySelector('#tagInput'+id); const tags=((tagInput && tagInput.value)||'').split(',').map(s=>s.trim()).filter(Boolean); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type: (isTask?'task':'note'), tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; if(tagInput) tagInput.value=''; openCollection(id) }
+function quickAddToCollection(id,type){ const inp=$('#ci'+id); if(!inp) return; if(!inp.value.trim()) inp.value = (type==='task'?'◻︎ ':'') + inp.value; inp.focus() }
+function addToCollection(id){ const inp=$('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tagInput=$('#tagInput'+id); const tags=((tagInput && tagInput.value)||'').split(',').map(s=>s.trim()).filter(Boolean); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type: (isTask?'task':'note'), tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; if(tagInput) tagInput.value=''; openCollection(id) }
 function removeFromCollection(id,txtEnc){ const txt=decodeURIComponent(txtEnc); const d=load(); const c=d.collections[id]; c.items=c.items.filter(it=> (typeof it==='string')? it!==txt : it.text!==txt ); save(d); openCollection(id) }
-function addTag(id){ const inp=document.querySelector('#tagInput'+id); const val=inp && inp.value ? inp.value.trim() : ''; if(!val) return; const d=load(); const c=d.collections[id]; c.tags=[...new Set([...(c.tags||[]), val])]; save(d); inp.value=''; openCollection(id) }
+function addTag(id){ const inp=$('#tagInput'+id); const val=inp && inp.value ? inp.value.trim() : ''; if(!val) return; const d=load(); const c=d.collections[id]; c.tags=[...new Set([...(c.tags||[]), val])]; save(d); inp.value=''; openCollection(id) }
 function removeTag(id,t){ const d=load(); const c=d.collections[id]; c.tags=(c.tags||[]).filter(x=>x!==t); save(d); openCollection(id) }
+function openFile(id){ const el=document.getElementById(id); if(el) el.click(); }
 function uploadCover(id){ const inp=document.getElementById('cov'+id); if(!inp||!inp.files||!inp.files[0]){alert('عکسی انتخاب نشد');return} const reader=new FileReader(); reader.onload=function(e){ const d=load(); d.collections[id].cover=e.target.result; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.src=e.target.result; } }; reader.readAsDataURL(inp.files[0]) }
 function clearCover(id){ const d=load(); d.collections[id].cover=null; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.removeAttribute('src'); img.style.background='#f2f3f7'; } }
 
 // ===== Habits =====
-function addHabit(){ const name=document.querySelector('#hName').value.trim(); const color=document.querySelector('#hColor').value; if(!name) {alert('نام عادت را وارد کنید'); return} const d=load(); d.habits.unshift({id:uid(),name,color,logs:{}}); save(d); document.querySelector('#hName').value=''; renderHabits() }
-function renderHabits(){ const d=load(); const hm=document.querySelector('#hMonth'); const month=(hm && hm.value)||new Date().toISOString().slice(0,7); if(hm) hm.value=month; const parts=month.split('-'); const yy=parseInt(parts[0],10), mm=parseInt(parts[1],10); const daysInMonth=new Date(yy, mm, 0).getDate(); const wrap=document.querySelector('#hTable'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.className='hab';
+function addHabit(){ const name=$('#hName').value.trim(); const color=$('#hColor').value; if(!name) {alert('نام عادت را وارد کنید'); return} const d=load(); d.habits.unshift({id:uid(),name,color,logs:{}}); save(d); $('#hName').value=''; renderHabits() }
+function renderHabits(){ const d=load(); const hm=$('#hMonth'); const month=(hm && hm.value)||new Date().toISOString().slice(0,7); if(hm) hm.value=month; const parts=month.split('-'); const yy=parseInt(parts[0],10), mm=parseInt(parts[1],10); const daysInMonth=new Date(yy, mm, 0).getDate(); const wrap=$('#hTable'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.className='hab';
   let thead='<thead><tr><th>عادت</th>'; for(let i=1;i<=daysInMonth;i++){ thead+='<th>'+i.toLocaleString('fa-IR')+'</th>' } thead+='<th>درصد</th><th>حذف</th></tr></thead>';
   table.innerHTML=thead; const tbody=document.createElement('tbody');
   d.habits.forEach(h=>{ const tr=document.createElement('tr'); tr.style.setProperty('--h', h.color); let done=0; const first=document.createElement('td'); first.innerHTML='<span class="pill" style="border-color:'+h.color+'">'+h.name+'</span>'; tr.appendChild(first);
@@ -331,31 +383,27 @@ function renderHabits(){ const d=load(); const hm=document.querySelector('#hMont
     tbody.appendChild(tr) });
   table.appendChild(tbody); wrap.appendChild(table);
   const totalCells=d.habits.reduce((s,h)=>s+Object.keys(h.logs).filter(k=>k.startsWith(month) && h.logs[k]).length,0);
-  const hs=document.querySelector('#hSummary'); if(hs) hs.innerHTML='<span class="pill">عادت‌ها: '+d.habits.length+'</span><span class="pill">موارد انجام‌شده این ماه: '+totalCells+'</span>';
-  attachRipples()
-}
+  const hs=$('#hSummary'); if(hs) hs.innerHTML='<span class="pill">عادت‌ها: '+d.habits.length+'</span><span class="pill">موارد انجام‌شده این ماه: '+totalCells+'</span>';
+  attachRipples() }
 function toggleHabit(hid,day){ const d=load(); const h=d.habits.find(x=>x.id===hid); if(!h) return; h.logs[day]=!h.logs[day]; save(d); renderHabits() }
 function deleteHabit(hid){ const d=load(); d.habits=d.habits.filter(x=>x.id!==hid); save(d); renderHabits() }
 
 // ===== Finance =====
-function addTxn(){ const fd=document.querySelector('#fDate'); const date=(fd && fd.value)||todayISO(); const kind=document.querySelector('#fKind').value; const category=(document.querySelector('#fCategory').value.trim())||(kind==='income'?'درآمد':'متفرقه'); const amount=parseFloat(document.querySelector('#fAmount').value); const note=document.querySelector('#fNote').value.trim(); if(!(amount>0)){alert('مبلغ را درست وارد کن');return} const d=load(); d.finance.unshift({id:uid(),date,kind,category,amount,note,createdAt:Date.now()}); save(d); document.querySelector('#fAmount').value=''; document.querySelector('#fNote').value=''; renderFinance() }
+function addTxn(){ const fd=$('#fDate'); const date=(fd && fd.value)||todayISO(); const kind=$('#fKind').value; const category=($('#fCategory').value.trim())||(kind==='income'?'درآمد':'متفرقه'); const amount=parseFloat($('#fAmount').value); const note=$('#fNote').value.trim(); if(!(amount>0)){alert('مبلغ را درست وارد کن');return} const d=load(); d.finance.unshift({id:uid(),date,kind,category,amount,note,createdAt:Date.now()}); save(d); $('#fAmount').value=''; $('#fNote').value=''; renderFinance() }
 function labelKind(k){ return k==='expense'?'هزینه':k==='income'?'درآمد':'سرمایه‌گذاری' }
-function renderFinance(){ const d=load(); const fm=document.querySelector('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); if(fm) fm.value=month; const fd=document.querySelector('#fDate'); if(fd && !fd.value) fd.value=todayISO(); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); let exp=0,inc=0,inv=0; rows.forEach(t=>{ if(t.kind==='expense') exp+=t.amount; else if(t.kind==='income') inc+=t.amount; else inv+=t.amount }); const net=inc-exp-inv;
-  const fs=document.querySelector('#fSummary'); if(fs) fs.innerHTML =
+function renderFinance(){ const d=load(); const fm=$('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); if(fm) fm.value=month; const fd=$('#fDate'); if(fd && !fd.value) fd.value=todayISO(); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); let exp=0,inc=0,inv=0; rows.forEach(t=>{ if(t.kind==='expense') exp+=t.amount; else if(t.kind==='income') inc+=t.amount; else inv+=t.amount }); const net=inc-exp-inv;
+  const fs=$('#fSummary'); if(fs) fs.innerHTML =
     '<span class="pill expense">هزینه: '+exp.toLocaleString('fa-IR')+'</span>'+
     '<span class="pill income">درآمد: '+inc.toLocaleString('fa-IR')+'</span>'+
     '<span class="pill invest">سرمایه‌گذاری: '+inv.toLocaleString('fa-IR')+'</span>'+
     '<span class="pill net '+(net>=0?'pos':'neg')+'">خالص: '+net.toLocaleString('fa-IR')+'</span>';
-  const wrap=document.querySelector('#fTableWrap'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.innerHTML='<thead><tr><th>تاریخ</th><th>نوع</th><th>دسته</th><th>مبلغ</th><th>یادداشت</th><th>عملیات</th></tr></thead><tbody></tbody>'; const tb=table.querySelector('tbody'); rows.forEach(t=>{ const tr=document.createElement('tr'); tr.innerHTML='<td>'+jShort(t.date)+'</td><td>'+labelKind(t.kind)+'</td><td>'+t.category+'</td><td>'+t.amount.toLocaleString('fa-IR')+'</td><td>'+(t.note||'')+'</td><td><button class="btn" onclick="delTxn(\''+t.id+'\')">🗑</button></td>'; tb.appendChild(tr) }); wrap.appendChild(table); attachRipples() }
+  const wrap=$('#fTableWrap'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.innerHTML='<thead><tr><th>تاریخ</th><th>نوع</th><th>دسته</th><th>مبلغ</th><th>یادداشت</th><th>عملیات</th></tr></thead><tbody></tbody>'; const tb=table.querySelector('tbody'); rows.forEach(t=>{ const tr=document.createElement('tr'); tr.innerHTML='<td>'+jShort(t.date)+'</td><td>'+labelKind(t.kind)+'</td><td>'+t.category+'</td><td>'+t.amount.toLocaleString('fa-IR')+'</td><td>'+(t.note||'')+'</td><td><button class="btn" onclick="delTxn(\''+t.id+'\')">🗑</button></td>'; tb.appendChild(tr) }); wrap.appendChild(table); attachRipples() }
 function delTxn(id){ const d=load(); d.finance=d.finance.filter(t=>t.id!==id); save(d); renderFinance() }
-function exportFinanceCSV(){ const d=load(); const fm=document.querySelector('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); const lines=['date,kind,category,amount,note']; rows.forEach(t=>{ lines.push([t.date,t.kind,'"'+t.category.replace(/"/g,'""')+'"',t.amount,'"'+(t.note||'').replace(/"/g,'""')+'"'].join(',')) }); const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='finance-'+month+'.csv'; a.click() }
-
-// ===== Search =====
-function searchAll(q){ const d=load(); const res=[]; const reTag=q.startsWith('#')?q.slice(1):null; Object.entries(d.days).forEach(function([day,items]){ (items||[]).forEach(function(it){ const text=(it.content+' '+it.tags.join(' ')); const match=reTag?it.tags.includes(reTag):text.includes(q); if(match) res.push({day,it}) }) }); return res.sort(function(a,b){return b.it.createdAt-a.it.createdAt}) }
+function exportFinanceCSV(){ const d=load(); const fm=$('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); const lines=['date,kind,category,amount,note']; rows.forEach(t=>{ lines.push([t.date,t.kind,'"'+t.category.replace(/"/g,'""')+'"',t.amount,'"'+(t.note||'').replace(/"/g,'""')+'"'].join(',')) }); const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='finance-'+month+'.csv'; a.click() }
 
 // ===== Export/Import =====
 function exportData(){ const d=load(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='bujo.json'; a.click() }
-document.getElementById('importFile').addEventListener('change',function(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=function(ev){ try{ save(JSON.parse(ev.target.result)); render(); renderHabits(); renderCollectionsGrid(); }catch(e){ alert('فایل نامعتبر است') } }; r.readAsText(f) })
+$('#importFile').addEventListener('change',function(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=function(ev){ try{ save(JSON.parse(ev.target.result)); render(); renderHabits(); renderCollectionsGrid(); }catch(e){ alert('فایل نامعتبر است') } }; r.readAsText(f) })
 
 // ===== Navigation =====
 function navigate(view){
@@ -377,7 +425,7 @@ Object.assign(window, {
   toggleDone, migrateItem, scheduleItem, removeItem,
   addCollection, renderCollectionsGrid, openCollection,
   addToCollection, removeFromCollection, quickAddToCollection,
-  uploadCover, clearCover, addTag, removeTag,
+  uploadCover, clearCover, addTag, removeTag, openFile,
   addHabit, toggleHabit, deleteHabit,
   addTxn, delTxn, exportFinanceCSV
 });
@@ -430,6 +478,7 @@ function init(){
   document.getElementById('hMonth').addEventListener('change', function(){ renderHabits(); document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value); });
   document.getElementById('fMonth').addEventListener('change', function(){ renderFinance(); document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value); });
   var _cs=document.getElementById('collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
+  var qim=document.getElementById('quickInputMobile'); if(qim) qim.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
   var qi=document.getElementById('quickInput'); if(qi) qi.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
 
   render(); renderHabits(); renderCollectionsGrid(); attachRipples();
@@ -445,7 +494,6 @@ if(document.readyState==='loading'){
   try{
     console.assert(typeof window.quickAdd==='function','window.quickAdd exists');
     console.assert(typeof window.navigate==='function','window.navigate exists');
-    // add/remove smoke test
     const d=todayISO(); const before=load(); addItem(d,{type:'note',content:'selftest',tags:[],important:false,research:false}); const after=load();
     console.assert((after.days[d]||[]).length >= ((before.days[d]||[]).length+1),'addItem worked');
   } finally {
