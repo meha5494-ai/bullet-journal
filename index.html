@@ -57,7 +57,6 @@
     /* Collections cover & grid */
     .cover{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:#f5f6fa}
     .coll-grid{display:grid;gap:12px}
-    /* 5 columns on desktop, 2 on mobile */
     @media (min-width:901px){.coll-grid{grid-template-columns:repeat(5,1fr)}}
     @media (max-width:900px){.coll-grid{grid-template-columns:repeat(2,1fr)}}
     .coll-card{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);cursor:pointer}
@@ -88,7 +87,8 @@
   <script>
     const tinyPng='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axu7sAAAAAASUVORK5CYII=';
     const manifest={name:'Bullet Journal — مینیمال',short_name:'BuJo',start_url:'.',display:'standalone',background_color:'#f7f8fb',theme_color:'#7c4dff',lang:'fa',dir:'rtl',icons:[{src:tinyPng,sizes:'192x192',type:'image/png'},{src:tinyPng,sizes:'512x512',type:'image/png'}]};
-    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});document.addEventListener('DOMContentLoaded',()=>{document.getElementById('manifestInline').href=URL.createObjectURL(blob)});
+    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+    document.addEventListener('DOMContentLoaded',()=>{document.getElementById('manifestInline').href=URL.createObjectURL(blob)});
   </script>
 </head>
 <body>
@@ -220,7 +220,6 @@
 
 <script>
 // ===== State =====
-// Jalali display helpers (storage stays ISO)
 const fmtJFull  = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
 const fmtJShort = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {year:'numeric', month:'long', day:'numeric'});
 const fmtJMonth = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {year:'numeric', month:'long'});
@@ -231,135 +230,147 @@ function jMonth(isoMonth){ try{ return fmtJMonth.format(new Date(isoMonth+'-01')
 const storeKey='mini_bujo_v4';
 const $=s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
 const todayISO=()=>new Date().toISOString().slice(0,10);
-function load(){ let d; try{d=JSON.parse(localStorage.getItem(storeKey))||{days:{},collections:{},finance:[],habits:[]}}catch{d={days:{},collections:{},finance:[],habits:[]}}; d.collections??={}; d.finance??=[]; d.habits??=[]; return d }
+function load(){ let d; try{d=JSON.parse(localStorage.getItem(storeKey))||{days:{},collections:{},finance:[],habits:[]}}catch{d={days:{},collections:{},finance:[],habits:[]}}; d.collections=(d.collections||{}); d.finance=(d.finance||[]); d.habits=(d.habits||[]); return d }
 function save(d){ localStorage.setItem(storeKey,JSON.stringify(d)) }
 function uid(){ return Math.random().toString(36).slice(2,9) }
 
 // ===== Material-like ripple =====
 function attachRipples(){ $$('.btn,.iconbtn').forEach(b=>{ if(b.dataset.rippleBound) return; b.dataset.rippleBound='1'; b.addEventListener('click', (e)=>{ const r=document.createElement('span'); r.className='ripple'; const rect=b.getBoundingClientRect(); r.style.left=(e.clientX-rect.left)+'px'; r.style.top=(e.clientY-rect.top)+'px'; b.appendChild(r); setTimeout(()=>r.remove(),600); }) }) }
 
-// ===== Inline SVG icons (material-like) =====
+// ===== Inline SVG icons =====
 function svg(name){
   const base='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="';
   const end='"/></svg>';
-  const paths={
-    check:'M5 13l4 4L19 7',
-    migrate:'M10 17l5-5-5-5M5 12h10',
-    schedule:'M12 8v5l3 3 M7 4h10 M7 8h10',
-    del:'M3 6h18 M8 6v12m8-12v12M5 6l1-2h12l1 2'
-  };
+  const paths={ check:'M5 13l4 4L19 7', migrate:'M10 17l5-5-5-5M5 12h10', schedule:'M12 8v5l3 3 M7 4h10 M7 8h10', del:'M3 6h18 M8 6v12m8-12v12M5 6l1-2h12l1 2' };
   return base + (paths[name]||'') + end;
 }
 
 // ===== Signifiers helper =====
-function insertSignifier(text){ const i=$('#quickInput'); const pos=i.selectionStart||i.value.length; i.value=i.value.slice(0,pos)+text+i.value.slice(pos); i.focus(); i.setSelectionRange(pos+text.length,pos+text.length); }
+function insertSignifier(text){ const i=$('#quickInput'); if(!i) return; const pos=i.selectionStart||i.value.length; i.value=i.value.slice(0,pos)+text+i.value.slice(pos); i.focus(); i.setSelectionRange(pos+text.length,pos+text.length); }
 
 // ===== Daily =====
 function signifierIcon(t){ return t==='task'?'◻︎': t==='event'?'○':'•' }
 function parseQuick(text){ const type=text.startsWith('◻︎')?'task': text.startsWith('○')?'event':'note'; const important=/(^|\s)!($|\s)/.test(text); const research=/(^|\s)\?($|\s)/.test(text); const tags=Array.from(text.matchAll(/#([\p{L}\d_\-]+)/gu)).map(m=>m[1]); const content=text.replace(/^([◻︎○•]\s*)?/,'').replace(/[!?]/g,'').trim(); return {type,content,tags,important,research} }
-function addItem(day,item){ const d=load(); d.days[day]??=[]; d.days[day].unshift({id:uid(),...item,done:false,migrated:false,scheduled:false,createdAt:Date.now()}); save(d); renderDaily() }
-function quickAdd(){ const day=$('#datePicker').value||todayISO(); const txt=$('#quickInput').value.trim(); if(!txt) return; addItem(day,parseQuick(txt)); $('#quickInput').value='' }
-function itemRow(day,it){ const row=document.createElement('div'); row.className='item'+(it.done?' done':''); row.innerHTML=`
-    <div class="muted">${signifierIcon(it.type)}</div>
-    <div><div>${it.content} ${it.important?'<span class="pill">!</span>':''} ${it.research?'<span class="pill">?</span>':''} ${it.tags.map(t=>`<span class=\"pill\">#${t}</span>`).join('')}</div></div>
-    <div class="row">
-      <button class="iconbtn" title="انجام" onclick="toggleDone('${day}','${it.id}')">${svg('check')}</button>
-      <button class="iconbtn" title="مهاجرت" onclick="migrateItem('${day}','${it.id}')">${svg('migrate')}</button>
-      <button class="iconbtn" title="برنامه‌ریزی" onclick="scheduleItem('${day}','${it.id}')">${svg('schedule')}</button>
-      <button class="iconbtn" title="حذف" onclick="removeItem('${day}','${it.id}')">${svg('del')}</button>
-    </div>`; return row }
-function renderDaily(){ const day=$('#datePicker').value||todayISO(); const d=load(); const list=$('#dailyList'); list.innerHTML=''; (d.days[day]||[]).forEach(it=>list.appendChild(itemRow(day,it))); attachRipples() }
+function addItem(day,item){ const d=load(); d.days[day]=d.days[day]||[]; d.days[day].unshift({id:uid(),...item,done:false,migrated:false,scheduled:false,createdAt:Date.now()}); save(d); renderDaily() }
+function quickAdd(){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const qi=document.querySelector('#quickInput'); if(!qi) return; const txt=qi.value.trim(); if(!txt) return; addItem(day,parseQuick(txt)); qi.value='' }
+function itemRow(day,it){ const row=document.createElement('div'); row.className='item'+(it.done?' done':''); row.innerHTML=
+  '<div class="muted">'+signifierIcon(it.type)+'</div>'+
+  '<div><div>'+it.content+' '+(it.important?'<span class="pill">!</span>':'')+' '+(it.research?'<span class="pill">?</span>':'')+' '+it.tags.map(t=>'<span class="pill">#'+t+'</span>').join('')+'</div></div>'+
+  '<div class="row">'+
+    '<button class="iconbtn" title="انجام" onclick="toggleDone(\''+day+'\',\''+it.id+'\')">'+svg('check')+'</button>'+
+    '<button class="iconbtn" title="مهاجرت" onclick="migrateItem(\''+day+'\',\''+it.id+'\')">'+svg('migrate')+'</button>'+
+    '<button class="iconbtn" title="برنامه‌ریزی" onclick="scheduleItem(\''+day+'\',\''+it.id+'\')">'+svg('schedule')+'</button>'+
+    '<button class="iconbtn" title="حذف" onclick="removeItem(\''+day+'\',\''+it.id+'\')">'+svg('del')+'</button>'+
+  '</div>';
+  return row;
+}
+function renderDaily(){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); const list=document.querySelector('#dailyList'); if(!list) return; list.innerHTML=''; (d.days[day]||[]).forEach(it=>list.appendChild(itemRow(day,it))); attachRipples() }
 function toggleDone(day,id){ const d=load(); const it=(d.days[day]||[]).find(x=>x.id===id); if(!it) return; it.done=!it.done; save(d); renderDaily() }
 function migrateItem(day,id){ const target=prompt('مهاجرت به چه تاریخی؟ (YYYY-MM-DD)',todayISO()); if(!target) return; const d=load(); const idx=(d.days[day]||[]).findIndex(x=>x.id===id); if(idx<0) return; const it=d.days[day][idx]; it.migrated=true; save(d); addItem(target,it) }
 function scheduleItem(day,id){ const target=prompt('برای کِی زمان‌بندی شود؟ (YYYY-MM-DD)',todayISO()); if(!target) return; const d=load(); const it=(d.days[day]||[]).find(x=>x.id===id); if(!it) return; it.scheduled=true; save(d) }
 function removeItem(day,id){ const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>x.id!==id); save(d); renderDaily() }
-function bulk(action){ const day=$('#datePicker').value||todayISO(); const d=load(); (d.days[day]||[]).forEach(it=>{ if(action==='complete') it.done=true; if(action==='migrate') it.migrated=true; if(action==='schedule') it.scheduled=true }); save(d); renderDaily() }
-function clearDone(){ const day=$('#datePicker').value||todayISO(); const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>!x.done); save(d); renderDaily() }
+function bulk(action){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); (d.days[day]||[]).forEach(it=>{ if(action==='complete') it.done=true; if(action==='migrate') it.migrated=true; if(action==='schedule') it.scheduled=true }); save(d); renderDaily() }
+function clearDone(){ const dp=document.querySelector('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>!x.done); save(d); renderDaily() }
 
 // ===== Month =====
-function renderMonth(){ const d=load(); const m=$('#monthPicker').value||new Date().toISOString().slice(0,7); const list=$('#monthList'); list.innerHTML=''; Object.keys(d.days).filter(x=>x.startsWith(m)).sort().reverse().forEach(day=>{ const card=document.createElement('div'); card.className='card stack'; const cnt=(d.days[day]||[]).length; const done=(d.days[day]||[]).filter(x=>x.done).length; card.innerHTML=`<div class="row" style="justify-content:space-between"><b>${jShort(day)}</b><span class="muted">${done}/${cnt} انجام‌شده</span></div>`; (d.days[day]||[]).slice(0,6).forEach(it=>card.appendChild(itemRow(day,it))); list.appendChild(card) }); attachRipples() }
+function renderMonth(){ const d=load(); const mp=document.querySelector('#monthPicker'); const m=(mp && mp.value)||new Date().toISOString().slice(0,7); const list=document.querySelector('#monthList'); if(!list) return; list.innerHTML=''; Object.keys(d.days).filter(x=>x.startsWith(m)).sort().reverse().forEach(day=>{ const card=document.createElement('div'); card.className='card stack'; const cnt=(d.days[day]||[]).length; const done=(d.days[day]||[]).filter(x=>x.done).length; card.innerHTML='<div class="row" style="justify-content:space-between"><b>'+jShort(day)+'</b><span class="muted">'+done+'/'+cnt+' انجام‌شده</span></div>'; (d.days[day]||[]).slice(0,6).forEach(it=>card.appendChild(itemRow(day,it))); list.appendChild(card) }); attachRipples() }
 
-// ===== Collections (grid + detail, tags, types) =====
-function addCollection(){ const name=$('#newCollectionName').value.trim(); if(!name){alert('نام مجموعه را وارد کنید');return} const d=load(); const id=uid(); d.collections[id]={id,name,items:[],cover:null,tags:[]}; save(d); $('#newCollectionName').value=''; renderCollectionsSidebar(); renderCollectionsGrid(); openCollection(id) }
-function renderCollectionsSidebar(){ const d=load(); const list=$('#collectionsList'); list.innerHTML=''; const arr=Object.values(d.collections); if(arr.length===0){ list.innerHTML='<span class="muted">هنوز مجموعه‌ای نساختی</span>'; return } arr.forEach(c=>{ const div=document.createElement('div'); div.className='row'; div.innerHTML=`<button class="btn" onclick="openCollection('${c.id}')">${c.name}</button>`; list.appendChild(div) }); attachRipples() }
-function renderCollectionsGrid(){ const d=load(); const grid=$('#collectionsGrid'); const q=($('#collSearch').value||'').trim(); grid.innerHTML=''; let arr=Object.values(d.collections); if(q) arr=arr.filter(c=>c.name.includes(q)||(c.tags||[]).some(t=>t.includes(q)));
-  arr.forEach(c=>{ const card=document.createElement('div'); card.className='coll-card'; card.onclick=()=>openCollection(c.id); card.innerHTML=`
-      <img class="cover" src="${c.cover||''}" alt="" onerror="this.style.background='#f2f3f7';this.removeAttribute('src')"/>
-      <div class="coll-name">${c.name}</div>
-      <div class="chips">${(c.tags||[]).slice(0,3).map(t=>`<span class='tagchip'>#${t}</span>`).join('')}</div>`;
+// ===== Collections =====
+function addCollection(){ const name=document.querySelector('#newCollectionName').value.trim(); if(!name){alert('نام مجموعه را وارد کنید');return} const d=load(); const id=uid(); d.collections[id]={id,name,items:[],cover:null,tags:[]}; save(d); document.querySelector('#newCollectionName').value=''; renderCollectionsSidebar(); renderCollectionsGrid(); openCollection(id) }
+function renderCollectionsSidebar(){ const d=load(); const list=document.querySelector('#collectionsList'); if(!list) return; list.innerHTML=''; const arr=Object.values(d.collections); if(arr.length===0){ list.innerHTML='<span class="muted">هنوز مجموعه‌ای نساختی</span>'; return } arr.forEach(c=>{ const div=document.createElement('div'); div.className='row'; div.innerHTML='<button class="btn" onclick="openCollection(\''+c.id+'\')">'+c.name+'</button>'; list.appendChild(div) }); attachRipples() }
+function renderCollectionsGrid(){ const d=load(); const grid=document.querySelector('#collectionsGrid'); if(!grid) return; const si=document.querySelector('#collSearch'); const q=(si && si.value ? si.value : '').trim(); grid.innerHTML=''; let arr=Object.values(d.collections); if(q) arr=arr.filter(c=>c.name.includes(q)||(c.tags||[]).some(t=>t.includes(q)));
+  arr.forEach(c=>{ const card=document.createElement('div'); card.className='coll-card'; card.onclick=function(){openCollection(c.id)}; card.innerHTML=
+      '<img class="cover" src="'+(c.cover||'')+'" alt="" onerror="this.style.background=\'#f2f3f7\';this.removeAttribute(\'src\')"/>'+
+      '<div class="coll-name">'+c.name+'</div>'+
+      '<div class="chips">'+(c.tags||[]).slice(0,3).map(t=>'<span class="tagchip">#'+t+'</span>').join('')+'</div>';
     grid.appendChild(card)
   })
 }
-function openCollection(id){ window.navigate('collections'); const d=load(); const c=d.collections[id]; if(!c) return; const detail=$('#collectionDetail'); detail.innerHTML='';
+function openCollection(id){ window.navigate('collections'); const d=load(); const c=d.collections[id]; if(!c) return; const detail=document.querySelector('#collectionDetail'); if(!detail) return; detail.innerHTML='';
   const card=document.createElement('div'); card.className='card stack';
-  const tagsHtml=(c.tags||[]).map(t=>`<span class="tagchip">#${t} <button class='btn' style='padding:2px 6px' onclick="removeTag('${id}','${t}')">×</button></span>`).join(' ');
-  const coverHtml=`<div class="row" style="flex-wrap:wrap">
-      <img class="cover-thumb" src="${c.cover||''}" alt="cover" onerror="this.style.background='#f2f3f7';this.removeAttribute('src')"/>
-      <div class="stack" style="flex:1;min-width:220px">
-        <div class="section-title">${c.name}</div>
-        <div class="row"><input id="cov${id}" type="file" accept="image/*" class="file-hidden"/><label class="btn" for="cov${id}">انتخاب کاور</label><button class="btn" onclick="uploadCover('${id}')">بارگذاری</button><button class="btn" onclick="clearCover('${id}')">حذف کاور</button></div>
-        <div class="row">
-          <input id="tagInput${id}" placeholder="افزودن برچسب (Enter)" onkeydown="if(event.key==='Enter'){addTag('${id}')}" >
-          <div id="tagWrap${id}" class="row" style="flex-wrap:wrap;gap:6px">${tagsHtml||'<span class=muted>بدون برچسب</span>'}</div>
-        </div>
-      </div>
-    </div>`;
-  const controls=`<div class="chips">
-      <button class="btn" onclick="quickAddToCollection('${id}','project')">پروژه</button>
-      <button class="btn" onclick="quickAddToCollection('${id}','task')">تسک</button>
-      <button class="btn" onclick="quickAddToCollection('${id}','note')">یادداشت</button>
-    </div>
-    <div class="row"><input id="ci${id}" placeholder="آیتم جدید…"><button class="btn primary" onclick="addToCollection('${id}')">+ افزودن</button></div>`;
+  const tagsHtml=(c.tags||[]).map(t=>'<span class="tagchip">#'+t+' <button class="btn" style="padding:2px 6px" onclick="removeTag(\''+id+'\',\''+t+'\')">×</button></span>').join(' ');
+  const coverHtml='<div class="row" style="flex-wrap:wrap">'+
+      '<img class="cover-thumb" src="'+(c.cover||'')+'" alt="cover" onerror="this.style.background=\'#f2f3f7\';this.removeAttribute(\'src\')"/>'+
+      '<div class="stack" style="flex:1;min-width:220px">'+
+        '<div class="section-title">'+c.name+'</div>'+
+        '<div class="row"><input id="cov'+id+'" type="file" accept="image/*" class="file-hidden"/><label class="btn" for="cov'+id+'">انتخاب کاور</label><button class="btn" onclick="uploadCover(\''+id+'\')">بارگذاری</button><button class="btn" onclick="clearCover(\''+id+'\')">حذف کاور</button></div>'+
+        '<div class="row">'+
+          '<input id="tagInput'+id+'" placeholder="افزودن برچسب (Enter)" onkeydown="if(event.key===\'Enter\'){addTag(\''+id+'\')}" >'+
+          '<div id="tagWrap'+id+'" class="row" style="flex-wrap:wrap;gap:6px">'+(tagsHtml||'<span class=muted>بدون برچسب</span>')+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  const controls='<div class="chips">'+
+      '<button class="btn" onclick="quickAddToCollection(\''+id+'\',\'project\')">پروژه</button>'+
+      '<button class="btn" onclick="quickAddToCollection(\''+id+'\',\'task\')">تسک</button>'+
+      '<button class="btn" onclick="quickAddToCollection(\''+id+'\',\'note\')">یادداشت</button>'+
+    '</div>'+
+    '<div class="row"><input id="ci'+id+'" placeholder="آیتم جدید…"><button class="btn primary" onclick="addToCollection(\''+id+'\')">+ افزودن</button></div>';
   card.innerHTML=coverHtml+controls;
-  (c.items||[]).forEach(it=>{ const row=document.createElement('div'); row.className='item'; const text=(typeof it==='string')?it:it.text; const type=(typeof it==='string')?'note':(it.type||'note'); const tagstr=(typeof it==='string')?'':(it.tags||[]).map(t=>`<span class='pill'>#${t}</span>`).join(' '); row.innerHTML=`<div class="muted">${type==='task'?'◻︎': type==='project'?'◆':'•'}</div><div>${text} ${tagstr}</div><div><button class="btn" onclick="removeFromCollection('${id}','${encodeURIComponent(text)}')">🗑</button></div>`; card.appendChild(row) });
+  (c.items||[]).forEach(it=>{ const row=document.createElement('div'); row.className='item'; const text=(typeof it==='string')?it:it.text; const type=(typeof it==='string')?'note':(it.type||'note'); const tagstr=(typeof it==='string')?'':(it.tags||[]).map(t=>'<span class="pill">#'+t+'</span>').join(' '); row.innerHTML='<div class="muted">'+(type==='task'?'◻︎': type==='project'?'◆':'•')+'</div><div>'+text+' '+tagstr+'</div><div><button class="btn" onclick="removeFromCollection(\''+id+'\',\''+encodeURIComponent(text)+'\')">🗑</button></div>'; card.appendChild(row) });
   detail.appendChild(card); attachRipples()
 }
-function quickAddToCollection(id,type){ const inp=$('#ci'+id); if(!inp) return; if(!inp.value.trim()) inp.value = (type==='task'?'◻︎ ':'') + inp.value; inp.focus() }
-function addToCollection(id){ const inp=$('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tags=(($('#tagInput'+id).value||'').split(',').map(s=>s.trim()).filter(Boolean)); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type=isTask?'task':'note', tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; $('#tagInput'+id).value=''; openCollection(id) }
+function quickAddToCollection(id,type){ const inp=document.querySelector('#ci'+id); if(!inp) return; if(!inp.value.trim()) inp.value = (type==='task'?'◻︎ ':'') + inp.value; inp.focus() }
+function addToCollection(id){ const inp=document.querySelector('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tagInput=document.querySelector('#tagInput'+id); const tags=((tagInput && tagInput.value)||'').split(',').map(s=>s.trim()).filter(Boolean); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type=isTask?'task':'note', tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; if(tagInput) tagInput.value=''; openCollection(id) }
 function removeFromCollection(id,txtEnc){ const txt=decodeURIComponent(txtEnc); const d=load(); const c=d.collections[id]; c.items=c.items.filter(it=> (typeof it==='string')? it!==txt : it.text!==txt ); save(d); openCollection(id) }
-function addTag(id){ const inp=$('#tagInput'+id); const val=inp.value.trim(); if(!val) return; const d=load(); const c=d.collections[id]; c.tags=[...new Set([...(c.tags||[]), val])]; save(d); inp.value=''; openCollection(id) }
+function addTag(id){ const inp=document.querySelector('#tagInput'+id); const val=inp && inp.value ? inp.value.trim() : ''; if(!val) return; const d=load(); const c=d.collections[id]; c.tags=[...new Set([...(c.tags||[]), val])]; save(d); inp.value=''; openCollection(id) }
 function removeTag(id,t){ const d=load(); const c=d.collections[id]; c.tags=(c.tags||[]).filter(x=>x!==t); save(d); openCollection(id) }
-function uploadCover(id){ const inp=document.getElementById('cov'+id); if(!inp||!inp.files||!inp.files[0]){alert('عکسی انتخاب نشد');return} const reader=new FileReader(); reader.onload=e=>{ const d=load(); d.collections[id].cover=e.target.result; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.src=e.target.result; } }; reader.readAsDataURL(inp.files[0]) }
+function uploadCover(id){ const inp=document.getElementById('cov'+id); if(!inp||!inp.files||!inp.files[0]){alert('عکسی انتخاب نشد');return} const reader=new FileReader(); reader.onload=function(e){ const d=load(); d.collections[id].cover=e.target.result; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.src=e.target.result; } }; reader.readAsDataURL(inp.files[0]) }
 function clearCover(id){ const d=load(); d.collections[id].cover=null; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.removeAttribute('src'); img.style.background='#f2f3f7'; } }
 
 // ===== Habits =====
-function addHabit(){ const name=$('#hName').value.trim(); const color=$('#hColor').value; if(!name) {alert('نام عادت را وارد کنید'); return} const d=load(); d.habits.unshift({id:uid(),name,color,logs:{}}); save(d); $('#hName').value=''; renderHabits() }
-function renderHabits(){ const d=load(); const month=$('#hMonth').value||new Date().toISOString().slice(0,7); $('#hMonth').value=month; const [yy,mm]=month.split('-').map(Number); const daysInMonth=new Date(yy, mm, 0).getDate(); const wrap=$('#hTable'); wrap.innerHTML=''; const table=document.createElement('table'); table.className='hab';
-  let thead='<thead><tr><th>عادت</th>'; for(let i=1;i<=daysInMonth;i++){ thead+=`<th>${i.toLocaleString('fa-IR')}</th>` } thead+='<th>درصد</th><th>حذف</th></tr></thead>';
+function addHabit(){ const name=document.querySelector('#hName').value.trim(); const color=document.querySelector('#hColor').value; if(!name) {alert('نام عادت را وارد کنید'); return} const d=load(); d.habits.unshift({id:uid(),name,color,logs:{}}); save(d); document.querySelector('#hName').value=''; renderHabits() }
+function renderHabits(){ const d=load(); const hm=document.querySelector('#hMonth'); const month=(hm && hm.value)||new Date().toISOString().slice(0,7); if(hm) hm.value=month; const parts=month.split('-'); const yy=parseInt(parts[0],10), mm=parseInt(parts[1],10); const daysInMonth=new Date(yy, mm, 0).getDate(); const wrap=document.querySelector('#hTable'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.className='hab';
+  let thead='<thead><tr><th>عادت</th>'; for(let i=1;i<=daysInMonth;i++){ thead+='<th>'+i.toLocaleString('fa-IR')+'</th>' } thead+='<th>درصد</th><th>حذف</th></tr></thead>';
   table.innerHTML=thead; const tbody=document.createElement('tbody');
-  d.habits.forEach(h=>{ const tr=document.createElement('tr'); tr.style.setProperty('--h', h.color); let done=0; const first=document.createElement('td'); first.innerHTML=`<span class="pill" style="border-color:${h.color}">${h.name}</span>`; tr.appendChild(first);
-    for(let i=1;i<=daysInMonth;i++){ const day=`${month}-${String(i).padStart(2,'0')}`; const on=!!h.logs[day]; if(on) done++; const td=document.createElement('td'); td.innerHTML=`<div class="cell ${on?'on':''}" title="${day}"></div>`; td.onclick=()=>toggleHabit(h.id,day); tr.appendChild(td) }
-    const rateTd=document.createElement('td'); const rate=Math.round((done/daysInMonth)*100)||0; rateTd.innerHTML=`<span class="pill">${rate}%</span>`; tr.appendChild(rateTd);
-    const delTd=document.createElement('td'); delTd.innerHTML=`<button class="btn" onclick="deleteHabit('${h.id}')">🗑</button>`; tr.appendChild(delTd);
+  d.habits.forEach(h=>{ const tr=document.createElement('tr'); tr.style.setProperty('--h', h.color); let done=0; const first=document.createElement('td'); first.innerHTML='<span class="pill" style="border-color:'+h.color+'">'+h.name+'</span>'; tr.appendChild(first);
+    for(let i=1;i<=daysInMonth;i++){ const day=month+'-'+String(i).padStart(2,'0'); const on=!!h.logs[day]; if(on) done++; const td=document.createElement('td'); td.innerHTML='<div class="cell '+(on?'on':'')+'" title="'+day+'"></div>'; td.onclick=function(){toggleHabit(h.id,day)}; tr.appendChild(td) }
+    const rateTd=document.createElement('td'); const rate=Math.round((done/daysInMonth)*100)||0; rateTd.innerHTML='<span class="pill">'+rate+'%</span>'; tr.appendChild(rateTd);
+    const delTd=document.createElement('td'); delTd.innerHTML='<button class="btn" onclick="deleteHabit(\''+h.id+'\')">🗑</button>'; tr.appendChild(delTd);
     tbody.appendChild(tr) });
   table.appendChild(tbody); wrap.appendChild(table);
-  const totalCells=d.habits.reduce((s,h)=>s+Object.keys(h.logs).filter(k=>k.startsWith(month) && h.logs[k]).length,0); $('#hSummary').innerHTML=`<span class="pill">عادت‌ها: ${d.habits.length}</span><span class="pill">موارد انجام‌شده این ماه: ${totalCells}</span>`; attachRipples() }
+  const totalCells=d.habits.reduce((s,h)=>s+Object.keys(h.logs).filter(k=>k.startsWith(month) && h.logs[k]).length,0);
+  const hs=document.querySelector('#hSummary'); if(hs) hs.innerHTML='<span class="pill">عادت‌ها: '+d.habits.length+'</span><span class="pill">موارد انجام‌شده این ماه: '+totalCells+'</span>';
+  attachRipples()
+}
 function toggleHabit(hid,day){ const d=load(); const h=d.habits.find(x=>x.id===hid); if(!h) return; h.logs[day]=!h.logs[day]; save(d); renderHabits() }
 function deleteHabit(hid){ const d=load(); d.habits=d.habits.filter(x=>x.id!==hid); save(d); renderHabits() }
 
 // ===== Finance =====
-function addTxn(){ const date=$('#fDate').value||todayISO(); const kind=$('#fKind').value; const category=$('#fCategory').value.trim()||(kind==='income'?'درآمد':'متفرقه'); const amount=parseFloat($('#fAmount').value); const note=$('#fNote').value.trim(); if(!(amount>0)){alert('مبلغ را درست وارد کن');return} const d=load(); d.finance.unshift({id:uid(),date,kind,category,amount,note,createdAt:Date.now()}); save(d); $('#fAmount').value=''; $('#fNote').value=''; renderFinance() }
+function addTxn(){ const fd=document.querySelector('#fDate'); const date=(fd && fd.value)||todayISO(); const kind=document.querySelector('#fKind').value; const category=(document.querySelector('#fCategory').value.trim())||(kind==='income'?'درآمد':'متفرقه'); const amount=parseFloat(document.querySelector('#fAmount').value); const note=document.querySelector('#fNote').value.trim(); if(!(amount>0)){alert('مبلغ را درست وارد کن');return} const d=load(); d.finance.unshift({id:uid(),date,kind,category,amount,note,createdAt:Date.now()}); save(d); document.querySelector('#fAmount').value=''; document.querySelector('#fNote').value=''; renderFinance() }
 function labelKind(k){ return k==='expense'?'هزینه':k==='income'?'درآمد':'سرمایه‌گذاری' }
-function renderFinance(){ const d=load(); const month=$('#fMonth').value||new Date().toISOString().slice(0,7); $('#fMonth').value=month; if(!$('#fDate').value) $('#fDate').value=todayISO(); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); let exp=0,inc=0,inv=0; rows.forEach(t=>{ if(t.kind==='expense') exp+=t.amount; else if(t.kind==='income') inc+=t.amount; else inv+=t.amount }); const net=inc-exp-inv; $('#fSummary').innerHTML = `
-    <span class="pill expense">هزینه: ${exp.toLocaleString('fa-IR')}</span>
-    <span class="pill income">درآمد: ${inc.toLocaleString('fa-IR')}</span>
-    <span class="pill invest">سرمایه‌گذاری: ${inv.toLocaleString('fa-IR')}</span>
-    <span class="pill net ${net>=0?'pos':'neg'}">خالص: ${net.toLocaleString('fa-IR')}</span>
-  `; const wrap=$('#fTableWrap'); wrap.innerHTML=''; const table=document.createElement('table'); table.innerHTML=`<thead><tr><th>تاریخ</th><th>نوع</th><th>دسته</th><th>مبلغ</th><th>یادداشت</th><th>عملیات</th></tr></thead><tbody></tbody>`; const tb=table.querySelector('tbody'); rows.forEach(t=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${jShort(t.date)}</td><td>${labelKind(t.kind)}</td><td>${t.category}</td><td>${t.amount.toLocaleString('fa-IR')}</td><td>${t.note||''}</td><td><button class="btn" onclick="delTxn('${t.id}')">🗑</button></td>`; tb.appendChild(tr) }); wrap.appendChild(table); attachRipples() }
+function renderFinance(){ const d=load(); const fm=document.querySelector('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); if(fm) fm.value=month; const fd=document.querySelector('#fDate'); if(fd && !fd.value) fd.value=todayISO(); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); let exp=0,inc=0,inv=0; rows.forEach(t=>{ if(t.kind==='expense') exp+=t.amount; else if(t.kind==='income') inc+=t.amount; else inv+=t.amount }); const net=inc-exp-inv;
+  const fs=document.querySelector('#fSummary'); if(fs) fs.innerHTML =
+    '<span class="pill expense">هزینه: '+exp.toLocaleString('fa-IR')+'</span>'+
+    '<span class="pill income">درآمد: '+inc.toLocaleString('fa-IR')+'</span>'+
+    '<span class="pill invest">سرمایه‌گذاری: '+inv.toLocaleString('fa-IR')+'</span>'+
+    '<span class="pill net '+(net>=0?'pos':'neg')+'">خالص: '+net.toLocaleString('fa-IR')+'</span>';
+  const wrap=document.querySelector('#fTableWrap'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.innerHTML='<thead><tr><th>تاریخ</th><th>نوع</th><th>دسته</th><th>مبلغ</th><th>یادداشت</th><th>عملیات</th></tr></thead><tbody></tbody>'; const tb=table.querySelector('tbody'); rows.forEach(t=>{ const tr=document.createElement('tr'); tr.innerHTML='<td>'+jShort(t.date)+'</td><td>'+labelKind(t.kind)+'</td><td>'+t.category+'</td><td>'+t.amount.toLocaleString('fa-IR')+'</td><td>'+(t.note||'')+'</td><td><button class="btn" onclick="delTxn(\''+t.id+'\')">🗑</button></td>'; tb.appendChild(tr) }); wrap.appendChild(table); attachRipples() }
 function delTxn(id){ const d=load(); d.finance=d.finance.filter(t=>t.id!==id); save(d); renderFinance() }
-function exportFinanceCSV(){ const d=load(); const month=$('#fMonth').value||new Date().toISOString().slice(0,7); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); const lines=['date,kind,category,amount,note']; rows.forEach(t=>{ lines.push([t.date,t.kind,`"${t.category.replaceAll('"','""')}"`,t.amount,`"${(t.note||'').replaceAll('"','""')}"`].join(',')) }); const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`finance-${month}.csv`; a.click() }
+function exportFinanceCSV(){ const d=load(); const fm=document.querySelector('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); const lines=['date,kind,category,amount,note']; rows.forEach(t=>{ lines.push([t.date,t.kind,'"'+t.category.replace(/"/g,'""')+'"',t.amount,'"'+(t.note||'').replace(/"/g,'""')+'"'].join(',')) }); const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='finance-'+month+'.csv'; a.click() }
 
 // ===== Search =====
-function searchAll(q){ const d=load(); const res=[]; const reTag=q.startsWith('#')?q.slice(1):null; Object.entries(d.days).forEach(([day,items])=>{ (items||[]).forEach(it=>{ const text=`${it.content} ${it.tags.join(' ')}`; const match=reTag?it.tags.includes(reTag):text.includes(q); if(match) res.push({day,it}) }) }); return res.sort((a,b)=>b.it.createdAt-a.it.createdAt) }
+function searchAll(q){ const d=load(); const res=[]; const reTag=q.startsWith('#')?q.slice(1):null; Object.entries(d.days).forEach(function([day,items]){ (items||[]).forEach(function(it){ const text=(it.content+' '+it.tags.join(' ')); const match=reTag?it.tags.includes(reTag):text.includes(q); if(match) res.push({day,it}) }) }); return res.sort(function(a,b){return b.it.createdAt-a.it.createdAt}) }
 
 // ===== Export/Import =====
 function exportData(){ const d=load(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='bujo.json'; a.click() }
-$('#importFile').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{ try{ save(JSON.parse(ev.target.result)); render(); renderHabits(); renderCollectionsGrid(); }catch{ alert('فایل نامعتبر است') } }; r.readAsText(f) })
+document.getElementById('importFile').addEventListener('change',function(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=function(ev){ try{ save(JSON.parse(ev.target.result)); render(); renderHabits(); renderCollectionsGrid(); }catch(e){ alert('فایل نامعتبر است') } }; r.readAsText(f) })
 
 // ===== Navigation =====
-function navigate(view){ $$('.chips button').forEach(b=>b.classList.remove('active')); if(view==='today') $('#nav-today').classList.add('active'); ['today','month','collections','habits','finance','search'].forEach(v=>$('#view-'+v).style.display=(v===view?'flex':'none')); if(view==='finance') renderFinance(); if(view==='habits') renderHabits(); if(view==='collections'){ renderCollectionsGrid(); $('#collectionDetail').innerHTML=''; } attachRipples() }
+function navigate(view){
+  $$('.chips button').forEach(function(b){ b.classList.remove('active') });
+  if(view==='today') document.getElementById('nav-today').classList.add('active');
+  ['today','month','collections','habits','finance','search'].forEach(function(v){
+    var sec=document.getElementById('view-'+v);
+    if(sec) sec.style.display=(v===view?'flex':'none');
+  });
+  if(view==='finance') renderFinance();
+  if(view==='habits') renderHabits();
+  if(view==='collections'){ renderCollectionsGrid(); var cd=document.getElementById('collectionDetail'); if(cd) cd.innerHTML=''; }
+  attachRipples();
+}
 
-// ===== Expose globals for inline handlers =====
+// ===== Expose globals =====
 Object.assign(window, {
   navigate, exportData, insertSignifier, quickAdd, bulk, clearDone,
   toggleDone, migrateItem, scheduleItem, removeItem,
@@ -370,21 +381,62 @@ Object.assign(window, {
   addTxn, delTxn, exportFinanceCSV
 });
 
-// ===== Core render after all functions are ready =====
-function render(){ const currentDay=$('#datePicker')?.value||todayISO(); $('#todayLabel').textContent=jFull(currentDay); renderDaily(); renderMonth(); renderCollectionsSidebar(); const m=$('#monthPicker')?.value; if(m) $('#monthJLabel').textContent=jMonth(m); const hm=$('#hMonth')?.value; if(hm) $('#hMonthJLabel').textContent=jMonth(hm); const fm=$('#fMonth')?.value; if(fm) $('#fMonthJLabel').textContent=jMonth(fm); }
-window.render = render; // expose for tests
+// ===== Core render (بدون optional chaining) =====
+function render(){
+  var dp = document.querySelector('#datePicker');
+  var currentDay = (dp && dp.value) || todayISO();
+  var tl = document.querySelector('#todayLabel');
+  if (tl) tl.textContent = jFull(currentDay);
+
+  renderDaily();
+  renderMonth();
+  renderCollectionsSidebar();
+
+  var mp = document.querySelector('#monthPicker');
+  if (mp) {
+    var mj = document.querySelector('#monthJLabel');
+    if (mj) mj.textContent = jMonth(mp.value);
+  }
+
+  var hm = document.querySelector('#hMonth');
+  if (hm) {
+    var hj = document.querySelector('#hMonthJLabel');
+    if (hj) hj.textContent = jMonth(hm.value);
+  }
+
+  var fm = document.querySelector('#fMonth');
+  if (fm) {
+    var fj = document.querySelector('#fMonthJLabel');
+    if (fj) fj.textContent = jMonth(fm.value);
+  }
+}
+window.render = render;
 
 // ===== Init =====
-$('#datePicker').value=todayISO(); $('#monthPicker').value=new Date().toISOString().slice(0,7); $('#todayLabel').textContent=jFull(todayISO()); $('#hMonth').value=new Date().toISOString().slice(0,7); $('#fDate').value=todayISO(); $('#fMonth').value=new Date().toISOString().slice(0,7); $('#monthJLabel').textContent=jMonth($('#monthPicker').value); $('#hMonthJLabel').textContent=jMonth($('#hMonth').value); $('#fMonthJLabel').textContent=jMonth($('#fMonth').value);
-$('#datePicker').addEventListener('change', ()=>{ renderDaily(); render(); }); $('#monthPicker').addEventListener('change', ()=>{ renderMonth(); $('#monthJLabel').textContent=jMonth($('#monthPicker').value); }); $('#hMonth').addEventListener('change', ()=>{ renderHabits(); $('#hMonthJLabel').textContent=jMonth($('#hMonth').value); }); $('#fMonth').addEventListener('change', ()=>{ renderFinance(); $('#fMonthJLabel').textContent=jMonth($('#fMonth').value); }); const _cs=$('#collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
+document.getElementById('datePicker').value=todayISO();
+document.getElementById('monthPicker').value=new Date().toISOString().slice(0,7);
+document.getElementById('todayLabel').textContent=jFull(todayISO());
+document.getElementById('hMonth').value=new Date().toISOString().slice(0,7);
+document.getElementById('fDate').value=todayISO();
+document.getElementById('fMonth').value=new Date().toISOString().slice(0,7);
+document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value);
+document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value);
+document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value);
+
+document.getElementById('datePicker').addEventListener('change', function(){ renderDaily(); render(); });
+document.getElementById('monthPicker').addEventListener('change', function(){ renderMonth(); document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker').value); });
+document.getElementById('hMonth').addEventListener('change', function(){ renderHabits(); document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth').value); });
+document.getElementById('fMonth').addEventListener('change', function(){ renderFinance(); document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth').value); });
+var _cs=document.getElementById('collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
+
 render(); renderHabits(); renderCollectionsGrid(); attachRipples();
 
-// ===== Self tests (only with ?selftest) =====
-(function(){ if(!location.search.includes('selftest')) return; console.log('✅ self tests start');
+// ===== Self tests (optional via ?selftest) =====
+(function(){ if(!location.search.includes('selftest')) return;
+  console.log('✅ self tests start');
   console.assert(typeof window.navigate==='function','window.navigate exists');
   console.assert(typeof svg==='function' && svg('check').includes('<svg'),'svg() exists');
-  // Habit flip test (non-destructive)
-  const backup=load(); const month=new Date().toISOString().slice(0,7); const d=load(); d.habits=[{id:'h1',name:'test',color:'#00aa88',logs:{}}]; save(d); const day=`${month}-01`; toggleHabit('h1',day); const after=load(); console.assert(after.habits[0].logs[day]===true,'habit toggled on'); // cleanup
+  const backup=load(); const month=new Date().toISOString().slice(0,7); const d=load(); d.habits=[{id:'h1',name:'test',color:'#00aa88',logs:{}}]; save(d); const day=month+'-01'; toggleHabit('h1',day); const after=load(); console.assert(after.habits[0].logs[day]===true,'habit toggled on');
   localStorage.setItem(storeKey, JSON.stringify(backup));
   console.log('✅ self tests end');
 })();
@@ -392,7 +444,19 @@ render(); renderHabits(); renderCollectionsGrid(); attachRipples();
 
 <script>
 /* ===== SW guard (no blob) ===== */
-async function setupSW(){ try{ if(!('serviceWorker' in navigator)) return false; const proto=location.protocol; const allowed=(proto==='https:'|| (proto==='http:'&&location.hostname==='localhost')) && window.isSecureContext; if(!allowed) return false; const swUrl=new URL('sw.js',location.href).toString(); const res=await fetch(swUrl,{method:'GET',cache:'no-store'}); if(!res.ok) return false; await navigator.serviceWorker.register(swUrl,{scope:'./'}); return true; }catch(e){ return false } }
+async function setupSW(){
+  try{
+    if(!('serviceWorker' in navigator)) return false;
+    const proto=location.protocol;
+    const allowed=(proto==='https:'|| (proto==='http:'&&location.hostname==='localhost')) && window.isSecureContext;
+    if(!allowed) return false;
+    const swUrl=new URL('sw.js',location.href).toString();
+    const res=await fetch(swUrl,{method:'GET',cache:'no-store'});
+    if(!res.ok) return false;
+    await navigator.serviceWorker.register(swUrl,{scope:'./'});
+    return true;
+  }catch(e){ return false }
+}
 setupSW();
 </script>
 
