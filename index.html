@@ -136,6 +136,7 @@
       /* Fix horizontal scroll in collections detail */
       #collectionDetail .card{max-width:100%;overflow:hidden}
     }
+  .coll-grid{grid-template-columns:repeat(2,1fr)!important}
   </style>
   <link rel="manifest" id="manifestInline" />
   <meta name="theme-color" content="#f7f8fb" />
@@ -373,33 +374,33 @@ function renderCollectionsGrid(){ const d=load(); const grid=$('#collectionsGrid
 }
 function openCollection(id){ window.navigate('collections'); const d=load(); const c=d.collections[id]; if(!c) return; const detail=$('#collectionDetail'); if(!detail) return; detail.innerHTML='';
   const card=document.createElement('div'); card.className='card stack';
-  const tagsHtml=(c.tags||[]).map(t=>'<span class="tagchip">#'+t+' <button class="btn" style="padding:2px 6px" onclick="removeTag(\''+id+'\',\''+t+'\')">×</button></span>').join(' ');
-  const coverHtml='<div class="row" style="flex-wrap:wrap">'+
-      '<img class="cover-thumb" src="'+(c.cover||'')+'" alt="cover" onerror="this.style.background=\'#f2f3f7\';this.removeAttribute(\'src\')"/>'+
-      '<div class="stack" style="flex:1;min-width:220px">'+
-        '<div class="section-title">'+c.name+'</div>'+
-        '<div class="row">'+
-          '<input id="cov'+id+'" type="file" accept="image/*" class="file-hidden"/>'+
-          '<button class="btn" onclick="openFile(\'cov'+id+'\')">انتخاب کاور</button>'+
-          '<button class="btn" onclick="uploadCover(\''+id+'\')">بارگذاری</button>'+
-          '<button class="btn" onclick="clearCover(\''+id+'\')">حذف کاور</button>'+
-        '</div>'+
-        '<div class="row">'+
-          '<input id="tagInput'+id+'" placeholder="افزودن برچسب (Enter)" onkeydown="if(event.key===\'Enter\'){addTag(\''+id+'\')}" >'+
-          '<div id="tagWrap'+id+'" class="row" style="flex-wrap:wrap;gap:6px">'+(tagsHtml||'<span class=muted>بدون برچسب</span>')+'</div>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
-  const controls='<div class="chips">'+
-      '<button class="btn" onclick="quickAddToCollection(\''+id+'\',\'project\')">پروژه</button>'+
-      '<button class="btn" onclick="quickAddToCollection(\''+id+'\',\'task\')">تسک</button>'+
-      '<button class="btn" onclick="quickAddToCollection(\''+id+'\',\'note\')">یادداشت</button>'+
-    '</div>'+
-    '<div class="row"><input id="ci'+id+'" placeholder="آیتم جدید…"><button class="btn primary" onclick="addToCollection(\''+id+'\')">+ افزودن</button></div>';
+  const tagsHtml=(c.tags||[]).map(t=>`<span class="tagchip">#${t} <button class='btn' style='padding:2px 6px' onclick="removeTag('${id}','${t}')">×</button></span>`).join(' ');
+  const coverHtml=`<div class="row" style="flex-wrap:wrap">
+      <img class="cover-thumb" src="${c.cover||''}" alt="cover" onerror="this.style.background='#f2f3f7';this.removeAttribute('src')"/>
+      <div class="stack" style="flex:1;min-width:220px">
+        <div class="section-title">${c.name}</div>
+        <div class="row"><input id="cov${id}" type="file" accept="image/*" class="file-hidden"/>
+          <button class="btn" onclick="openFile('cov${id}')">انتخاب کاور</button>
+          <button class="btn" onclick="uploadCover('${id}')">بارگذاری</button>
+          <button class="btn" onclick="clearCover('${id}')">حذف کاور</button></div>
+        <div class="row">
+          <input id="tagInput${id}" placeholder="افزودن برچسب (Enter)" onkeydown="if(event.key==='Enter'){addTag('${id}')}" >
+          <div id="tagWrap${id}" class="row" style="flex-wrap:wrap;gap:6px">${tagsHtml||'<span class=muted>بدون برچسب</span>'}</div>
+        </div>
+      </div>
+    </div>`;
+  const controls=`<div class="chips">
+      <button class="btn" onclick="quickAddToCollection('${id}','project')">پروژه</button>
+      <button class="btn" onclick="quickAddToCollection('${id}','task')">تسک</button>
+      <button class="btn" onclick="quickAddToCollection('${id}','note')">یادداشت</button>
+      <button class="btn" style="background:#fee2e2;color:#991b1b" onclick="deleteCollection('${id}')">🗑 حذف مجموعه</button>
+    </div>
+    <div class="row"><input id="ci${id}" placeholder="آیتم جدید…"><button class="btn primary" onclick="addToCollection('${id}')">+ افزودن</button></div>`;
   card.innerHTML=coverHtml+controls;
-  (c.items||[]).forEach(it=>{ const row=document.createElement('div'); row.className='item'; const text=(typeof it==='string')?it:it.text; const type=(typeof it==='string')?'note':(it.type||'note'); const tagstr=(typeof it==='string')?'':(it.tags||[]).map(t=>'<span class="pill">#'+t+'</span>').join(' '); row.innerHTML='<div class="muted">'+(type==='task'?'◻︎': type==='project'?'◆':'•')+'</div><div>'+text+' '+tagstr+'</div><div><button class="btn" onclick="removeFromCollection(\''+id+'\',\''+encodeURIComponent(text)+'\')">🗑</button></div>'; card.appendChild(row) });
+  (c.items||[]).forEach(it=>{ const row=document.createElement('div'); row.className='item'; const text=(typeof it==='string')?it:it.text; const type=(typeof it==='string')?'note':(it.type||'note'); const tagstr=(typeof it==='string')?'':(it.tags||[]).map(t=>`<span class='pill'>#${t}</span>`).join(' '); row.innerHTML=`<div class="muted">${type==='task'?'◻︎': type==='project'?'◆':'•'}</div><div>${text} ${tagstr}</div><div><button class="btn" onclick="removeFromCollection('${id}','${encodeURIComponent(text)}')">🗑</button></div>`; card.appendChild(row) });
   detail.appendChild(card); attachRipples()
 }
+
 function quickAddToCollection(id,type){ const inp=$('#ci'+id); if(!inp) return; if(!inp.value.trim()) inp.value = (type==='task'?'◻︎ ':'') + inp.value; inp.focus() }
 function addToCollection(id){ const inp=$('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tagInput=$('#tagInput'+id); const tags=((tagInput && tagInput.value)||'').split(',').map(s=>s.trim()).filter(Boolean); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type: (isTask?'task':'note'), tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; if(tagInput) tagInput.value=''; openCollection(id) }
 function removeFromCollection(id,txtEnc){ const txt=decodeURIComponent(txtEnc); const d=load(); const c=d.collections[id]; c.items=c.items.filter(it=> (typeof it==='string')? it!==txt : it.text!==txt ); save(d); openCollection(id) }
@@ -409,6 +410,8 @@ function openFile(id){ const el=document.getElementById(id); if(el) el.click(); 
 function openFileInput(){ const el=document.getElementById('importFile'); if(el) el.click(); }
 function uploadCover(id){ const inp=document.getElementById('cov'+id); if(!inp||!inp.files||!inp.files[0]){alert('عکسی انتخاب نشد');return} const reader=new FileReader(); reader.onload=function(e){ const d=load(); d.collections[id].cover=e.target.result; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.src=e.target.result; } }; reader.readAsDataURL(inp.files[0]) }
 function clearCover(id){ const d=load(); d.collections[id].cover=null; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.removeAttribute('src'); img.style.background='#f2f3f7'; } }
+function deleteCollection(id){ if(!confirm('آیا مطمئنی می‌خواهی این مجموعه حذف شود؟')) return; const d=load(); delete d.collections[id]; save(d); const detail=document.getElementById('collectionDetail'); if(detail) detail.innerHTML=''; renderCollectionsSidebar(); renderCollectionsGrid(); }
+ }
 
 // ===== Habits =====
 function addHabit(){ const name=$('#hName').value.trim(); const color=$('#hColor').value; if(!name) {alert('نام عادت را وارد کنید'); return} const d=load(); d.habits.unshift({id:uid(),name,color,logs:{}}); save(d); $('#hName').value=''; renderHabits() }
@@ -468,6 +471,7 @@ Object.assign(window, {
   addHabit, toggleHabit, deleteHabit,
   addTxn, delTxn, exportFinanceCSV
 });
+window.deleteCollection = deleteCollection;
 
 // ===== Core render =====
 function render(){
