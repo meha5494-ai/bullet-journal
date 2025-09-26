@@ -3,118 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بولت ژورنال</title>
+    <meta name="theme-color" content="#7c3aed">
+    <title>بولت ژورنال من</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#E0B0FF">
     <link rel="apple-touch-icon" href="icon-192.png">
     <style>
-        :root {
-            --primary: #E0B0FF;
-            --primary-dark: #BA68C8;
-            --surface: #FFFFFF;
-            --surface-light: #F5F5F5;
-            --text-primary: #333333;
-            --text-secondary: #666666;
-            --divider: #E0E0E0;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --error: #F44336;
-            --ripple-color: rgba(186, 104, 200, 0.3);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #6d28d9;
+            --primary-light: #a78bfa;
+            --secondary: #ec4899;
+            --background: #fafafa;
+            --surface: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --divider: #e5e7eb;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         body {
-            background-color: var(--surface-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Vazirmatn', sans-serif;
+            background: var(--background);
             color: var(--text-primary);
             direction: rtl;
-            font-family: 'Vazirmatn', sans-serif;
-        }
-
-        .app-container {
-            display: flex;
             min-height: 100vh;
+            display: flex;
         }
 
-        /* Sidebar Styles */
+        /* Sidebar */
         .sidebar {
             width: 280px;
-            background-color: var(--surface);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            z-index: 1000;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
             transition: transform 0.3s ease;
-        }
-
-        .sidebar.hidden {
-            transform: translateX(-100%);
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            right: 0;
         }
 
         .sidebar-header {
-            padding: 24px 16px;
-            border-bottom: 1px solid var(--divider);
-        }
-
-        .sidebar-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-dark);
-        }
-
-        .nav-menu {
-            list-style: none;
-            padding: 8px 0;
-        }
-
-        .nav-item {
-            padding: 12px 16px;
-            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: background-color 0.2s;
-            border-radius: 0 8px 8px 0;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header svg {
+            width: 40px;
+            height: 40px;
+            fill: var(--primary);
+        }
+
+        .sidebar-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .nav-item:hover {
-            background-color: var(--surface-light);
-        }
-
-        .nav-item.active {
-            background-color: var(--primary);
+            background: var(--primary-light);
             color: white;
         }
 
-        .nav-item i {
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-item svg {
             width: 24px;
             height: 24px;
-            display: inline-block;
-            background-size: contain;
-            background-repeat: no-repeat;
+            fill: currentColor;
         }
 
         /* Main Content */
         .main-content {
             flex: 1;
+            margin-right: 280px;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* Top Bar */
-        .top-bar {
+        /* Header */
+        .header {
+            background: var(--surface);
+            padding: 20px 30px;
+            box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px;
-            background-color: var(--surface);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 900;
         }
 
         .menu-toggle {
@@ -125,49 +127,109 @@
             padding: 8px;
         }
 
-        .menu-toggle i {
-            width: 24px;
-            height: 24px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z'/%3E%3C/svg%3E");
+        .date-display {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-secondary);
         }
 
-        .page-title {
-            font-size: 1.25rem;
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px 30px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--divider);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
             font-weight: 600;
         }
 
-        /* Tab Bar for Mobile */
-        .tab-bar {
-            display: none;
-            position: fixed;
-            bottom: 60px;
-            left: 0;
-            right: 0;
-            background-color: var(--surface);
-            border-top: 1px solid var(--divider);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            z-index: 800;
-        }
-
-        .tab-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 12px;
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .tab-item.active {
-            color: var(--primary-dark);
+        .btn-primary {
+            background: var(--primary);
+            color: white;
         }
 
-        .tab-item i {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--primary-light);
+            color: white;
         }
 
         /* Quick Input */
@@ -176,231 +238,114 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: var(--surface);
-            border-top: 1px solid var(--divider);
-            padding: 12px 16px;
+            background: var(--surface);
+            padding: 16px 30px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             display: flex;
-            gap: 8px;
-            z-index: 800;
+            gap: 12px;
+            align-items: center;
+            z-index: 50;
         }
 
         .quick-input input {
             flex: 1;
             padding: 12px 16px;
             border: 1px solid var(--divider);
-            border-radius: 24px;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .quick-input button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Page Content */
-        .page-content {
-            padding: 16px;
-            flex: 1;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Today Page */
-        .today-date {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 16px;
-            color: var(--primary-dark);
-        }
-
-        .entry-list {
-            list-style: none;
-        }
-
-        .entry-item {
-            background-color: var(--surface);
-            padding: 16px;
-            margin-bottom: 12px;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: flex-start;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .quick-input input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Habits Table */
+        .habits-grid {
+            display: grid;
             gap: 12px;
         }
 
-        .entry-checkbox {
-            margin-top: 4px;
-        }
-
-        .entry-text {
-            flex: 1;
-        }
-
-        /* Collections Page */
-        .collections-grid {
+        .habit-row {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .collection-card {
-            background-color: var(--surface);
+            grid-template-columns: 200px 1fr;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            background: var(--background);
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
         }
 
-        .collection-cover {
-            width: 100%;
-            height: 160px;
-            background-color: var(--primary);
+        .habit-name {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .collection-info {
-            padding: 12px;
-        }
-
-        .collection-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .collection-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-bottom: 8px;
-        }
-
-        .tag {
-            background-color: var(--surface-light);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .collection-actions {
-            display: flex;
-            justify-content: flex-end;
             gap: 8px;
         }
 
-        .action-btn {
-            background: none;
-            border: none;
+        .habit-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
             cursor: pointer;
-            padding: 4px;
-            color: var(--text-secondary);
         }
 
-        /* Habits Page */
-        .habits-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--surface);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        .habit-days {
+            display: grid;
+            grid-template-columns: repeat(30, 1fr);
+            gap: 4px;
         }
 
-        .habits-table th,
-        .habits-table td {
-            padding: 12px;
-            text-align: center;
+        .habit-day {
+            width: 28px;
+            height: 28px;
             border: 1px solid var(--divider);
-        }
-
-        .habits-table th {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .habit-cell {
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .habit-cell:hover {
-            background-color: var(--surface-light);
+        .habit-day:hover {
+            transform: scale(1.1);
         }
 
-        .habit-cell.completed {
-            background-color: var(--success);
-            color: white;
-        }
-
-        /* Finance Page */
+        /* Finance Summary */
         .finance-summary {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
 
-        .summary-card {
-            background-color: var(--surface);
-            padding: 16px;
-            border-radius: 8px;
+        .finance-card {
+            background: var(--background);
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        .summary-title {
-            font-size: 0.875rem;
+        .finance-card h3 {
+            font-size: 14px;
             color: var(--text-secondary);
             margin-bottom: 8px;
         }
 
-        .summary-amount {
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
-
-        .expense { color: var(--error); }
-        .income { color: var(--success); }
-        .invest { color: var(--warning); }
-
-        .finance-list {
-            list-style: none;
-        }
-
-        .finance-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--divider);
-        }
-
-        .finance-type {
+        .finance-card .amount {
+            font-size: 24px;
             font-weight: 600;
         }
+
+        .income { color: #10b981; }
+        .expense { color: #ef4444; }
+        .invest { color: #3b82f6; }
 
         /* Ripple Effect */
         .ripple {
             position: absolute;
             border-radius: 50%;
-            background-color: var(--ripple-color);
+            background: rgba(255, 255, 255, 0.6);
             transform: scale(0);
-            animation: ripple-animation 0.6s linear;
-            pointer-events: none;
+            animation: ripple-animation 0.6s ease-out;
         }
 
         @keyframes ripple-animation {
@@ -410,526 +355,1227 @@
             }
         }
 
-        /* Responsive Design */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
             .sidebar {
-                position: fixed;
-                height: 100vh;
-                top: 0;
-                left: 0;
+                transform: translateX(100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-right: 0;
             }
 
             .menu-toggle {
                 display: block;
             }
 
-            .tab-bar {
-                display: flex;
+            .content {
+                padding: 20px 16px;
             }
 
-            .collections-grid {
+            .quick-input {
+                padding: 12px 16px;
+            }
+
+            .habit-row {
                 grid-template-columns: 1fr;
+            }
+
+            .habit-days {
+                grid-template-columns: repeat(15, 1fr);
             }
         }
 
-        /* Persian Font */
-        @font-face {
-            font-family: 'Vazirmatn';
-            src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-Regular.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
+        /* Color Picker */
+        .color-picker {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            z-index: 1000;
+        }
+
+        .color-picker.show {
+            display: grid;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        /* Search Results */
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .search-result-item {
+            padding: 16px;
+            background: var(--background);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        /* Collections Grid */
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .collection-card {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .collection-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .collection-card h3 {
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .collection-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--divider);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">بولت ژورنال</div>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+            <h1>بولت ژورنال</h1>
+        </div>
+        <nav>
+            <div class="nav-item active" data-page="today">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                </svg>
+                <span>امروز</span>
             </div>
-            <ul class="nav-menu">
-                <li class="nav-item active" data-page="today">
-                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E&quot;)"></i>
-                    امروز
-                </li>
-                <li class="nav-item" data-page="month">
-                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z'/%3E%3C/svg%3E&quot;)"></i>
-                    ماه
-                </li>
-                <li class="nav-item" data-page="collections">
-                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z'/%3E%3C/svg%3E&quot;)"></i>
-                    مجموعه‌ها
-                </li>
-                <li class="nav-item" data-page="habits">
-                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E&quot;)"></i>
-                    عادت‌ها
-                </li>
-                <li class="nav-item" data-page="finance">
-                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E&quot;)"></i>
-                    مالی
-                </li>
-                <li class="nav-item" data-page="search">
-                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E&quot;)"></i>
-                    جستجو
-                </li>
-            </ul>
+            <div class="nav-item" data-page="month">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                </svg>
+                <span>ماه</span>
+            </div>
+            <div class="nav-item" data-page="collections">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2l-5.5 9h11z M12 5.84L13.93 9h-3.87z M17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zM3 21.5h8v-8H3v8z"/>
+                </svg>
+                <span>مجموعه‌ها</span>
+            </div>
+            <div class="nav-item" data-page="habits">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                </svg>
+                <span>عادت‌ها</span>
+            </div>
+            <div class="nav-item" data-page="finance">
+                <svg viewBox="0 0 24 24">
+                    <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                </svg>
+                <span>مالی</span>
+            </div>
+            <div class="nav-item" data-page="search">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <span>جستجو</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <button class="menu-toggle" id="menuToggle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+            </button>
+            <div class="date-display" id="dateDisplay"></div>
+            <button class="btn btn-primary" onclick="globalHandlers.exportData()">
+                خروجی داده‌ها
+            </button>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-tab="tasks">وظایف</div>
+            <div class="tab" data-tab="notes">یادداشت‌ها</div>
+            <div class="tab" data-tab="events">رویدادها</div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="top-bar">
-                <button class="menu-toggle" id="menuToggle">
-                    <i></i>
-                </button>
-                <div class="page-title" id="pageTitle">امروز</div>
-                <div></div> <!-- Spacer -->
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Today Page -->
+            <div class="page active" id="today">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">وظایف امروز</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.addTask()">
+                            افزودن وظیفه
+                        </button>
+                    </div>
+                    <div id="todayTasks"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">یادداشت‌های امروز</h2>
+                        <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
+                            افزودن یادداشت
+                        </button>
+                    </div>
+                    <div id="todayNotes"></div>
+                </div>
             </div>
 
-            <div class="page-content">
-                <!-- Today Page -->
-                <div id="todayPage" class="page">
-                    <div class="today-date" id="todayDate"></div>
-                    <ul class="entry-list" id="todayEntries">
-                        <!-- Entries will be added here -->
-                    </ul>
-                </div>
-
-                <!-- Month Page -->
-                <div id="monthPage" class="page hidden">
-                    <h2>ورودی‌های ماه</h2>
-                    <ul class="entry-list" id="monthEntries">
-                        <!-- Month entries will be added here -->
-                    </ul>
-                </div>
-
-                <!-- Collections Page -->
-                <div id="collectionsPage" class="page hidden">
-                    <div class="collections-grid" id="collectionsGrid">
-                        <!-- Collection cards will be added here -->
+            <!-- Month Page -->
+            <div class="page" id="month">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" id="monthTitle"></h2>
+                        <div>
+                            <button class="btn btn-secondary" onclick="globalHandlers.previousMonth()">ماه قبل</button>
+                            <button class="btn btn-secondary" onclick="globalHandlers.nextMonth()">ماه بعد</button>
+                        </div>
                     </div>
+                    <div id="monthCalendar"></div>
                 </div>
+            </div>
 
-                <!-- Habits Page -->
-                <div id="habitsPage" class="page hidden">
-                    <h2>عادت‌ها</h2>
-                    <table class="habits-table" id="habitsTable">
-                        <thead>
-                            <tr id="habitsHeader"></tr>
-                        </thead>
-                        <tbody id="habitsBody"></tbody>
-                    </table>
+            <!-- Collections Page -->
+            <div class="page" id="collections">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">مجموعه‌ها</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.addCollection()">
+                            مجموعه جدید
+                        </button>
+                    </div>
+                    <div class="collections-grid" id="collectionsGrid"></div>
                 </div>
+            </div>
 
-                <!-- Finance Page -->
-                <div id="financePage" class="page hidden">
+            <!-- Habits Page -->
+            <div class="page" id="habits">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">ردیابی عادت‌ها</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.addHabit()">
+                            عادت جدید
+                        </button>
+                    </div>
+                    <div class="habits-grid" id="habitsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Finance Page -->
+            <div class="page" id="finance">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">خلاصه مالی</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.exportFinanceCSV()">
+                            خروجی CSV
+                        </button>
+                    </div>
                     <div class="finance-summary">
-                        <div class="summary-card">
-                            <div class="summary-title">هزینه‌ها</div>
-                            <div class="summary-amount expense" id="totalExpense">۰ تومان</div>
+                        <div class="finance-card">
+                            <h3>درآمد</h3>
+                            <div class="amount income" id="totalIncome">۰ ریال</div>
                         </div>
-                        <div class="summary-card">
-                            <div class="summary-title">درآمدها</div>
-                            <div class="summary-amount income" id="totalIncome">۰ تومان</div>
+                        <div class="finance-card">
+                            <h3>هزینه</h3>
+                            <div class="amount expense" id="totalExpense">۰ ریال</div>
                         </div>
-                        <div class="summary-card">
-                            <div class="summary-title">سرمایه‌گذاری</div>
-                            <div class="summary-amount invest" id="totalInvest">۰ تومان</div>
+                        <div class="finance-card">
+                            <h3>سرمایه‌گذاری</h3>
+                            <div class="amount invest" id="totalInvest">۰ ریال</div>
+                        </div>
+                        <div class="finance-card">
+                            <h3>خالص</h3>
+                            <div class="amount" id="netBalance">۰ ریال</div>
                         </div>
                     </div>
-                    <ul class="finance-list" id="financeList">
-                        <!-- Finance entries will be added here -->
-                    </ul>
                 </div>
-
-                <!-- Search Page -->
-                <div id="searchPage" class="page hidden">
-                    <input type="text" id="searchInput" placeholder="جستجو..." class="w-full p-3 mb-4 rounded-lg border">
-                    <div id="searchResults">
-                        <!-- Search results will be added here -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">تراکنش‌ها</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.addTransaction()">
+                            افزودن تراکنش
+                        </button>
                     </div>
+                    <div id="transactionsList"></div>
                 </div>
             </div>
 
-            <!-- Quick Input -->
-            <div class="quick-input">
-                <input type="text" id="quickInput" placeholder="یادداشت سریع...">
-                <button id="addQuickEntry">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </button>
+            <!-- Search Page -->
+            <div class="page" id="search">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">جستجو</h2>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="searchInput" placeholder="جستجو در تمام داده‌ها..." onkeyup="globalHandlers.search()">
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
             </div>
+        </div>
+
+        <!-- Quick Input -->
+        <div class="quick-input">
+            <input type="text" id="quickInput" placeholder="ورودی سریع...">
+            <button class="btn btn-primary" onclick="globalHandlers.quickAdd()">افزودن</button>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">عنوان</h2>
+                <button class="modal-close" onclick="globalHandlers.closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
         </div>
     </div>
 
-    <!-- Tab Bar for Mobile -->
-    <div class="tab-bar">
-        <div class="tab-item active" data-page="today">
-            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E&quot;)"></i>
-            امروز
-        </div>
-        <div class="tab-item" data-page="collections">
-            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z'/%3E%3C/svg%3E&quot;)"></i>
-            مجموعه‌ها
-        </div>
-        <div class="tab-item" data-page="habits">
-            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E&quot;)"></i>
-            عادت‌ها
-        </div>
-        <div class="tab-item" data-page="finance">
-            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E&quot;)"></i>
-            مالی
-        </div>
-    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <script>
-        // Global handlers and data
-        let currentPage = 'today';
-        let entries = JSON.parse(localStorage.getItem('entries')) || [];
-        let collections = JSON.parse(localStorage.getItem('collections')) || [
-            { id: 1, title: 'پروژه‌های کاری', tags: ['کار', 'اولویت'], coverColor: '#9C27B0' },
-            { id: 2, title: 'اهداف شخصی', tags: ['شخصی', 'سلامت'], coverColor: '#673AB7' },
-            { id: 3, title: 'یادگیری', tags: ['تحصیل', 'مهارت'], coverColor: '#3F51B5' }
-        ];
-        let habits = JSON.parse(localStorage.getItem('habits')) || [
-            { id: 1, name: 'ورزش', color: '#4CAF50' },
-            { id: 2, name: 'خواندن', color: '#2196F3' },
-            { id: 3, name: 'مدیتیشن', color: '#FF9800' }
-        ];
-        let habitRecords = JSON.parse(localStorage.getItem('habitRecords')) || {};
-        let finances = JSON.parse(localStorage.getItem('finances')) || [];
+        // Global Handlers
+        const globalHandlers = {
+            // Data Management
+            data: {
+                tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
+                notes: JSON.parse(localStorage.getItem('notes') || '[]'),
+                habits: JSON.parse(localStorage.getItem('habits') || '[]'),
+                collections: JSON.parse(localStorage.getItem('collections') || '[]'),
+                transactions: JSON.parse(localStorage.getItem('transactions') || '[]'),
+                events: JSON.parse(localStorage.getItem('events') || '[]')
+            },
 
-        // Persian date formatting
-        const persianDate = (date = new Date()) => {
-            return new Intl.DateTimeFormat('fa-IR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                weekday: 'long'
-            }).format(date);
-        };
-
-        const persianMonth = (date = new Date()) => {
-            return new Intl.DateTimeFormat('fa-IR', {
-                year: 'numeric',
-                month: 'long'
-            }).format(date);
-        };
-
-        const persianNumber = (num) => {
-            return num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-        };
-
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set today's date
-            document.getElementById('todayDate').textContent = persianDate();
-            
-            // Load data
-            renderTodayPage();
-            renderCollections();
-            renderHabits();
-            renderFinance();
-            
-            // Event listeners
-            setupEventListeners();
-            setupRippleEffect();
-            
-            // Register service worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(console.error);
-            }
-        });
-
-        function setupEventListeners() {
-            // Navigation
-            document.querySelectorAll('.nav-item, .tab-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const page = item.dataset.page;
-                    switchPage(page);
+            saveData() {
+                Object.keys(this.data).forEach(key => {
+                    localStorage.setItem(key, JSON.stringify(this.data[key]));
                 });
-            });
+            },
 
-            // Menu toggle
-            document.getElementById('menuToggle').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('hidden');
-            });
+            // Date Functions
+            getShamsiDate(date = new Date()) {
+                const options = { 
+                    calendar: 'persian', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    weekday: 'long'
+                };
+                return new Intl.DateTimeFormat('fa-IR', options).format(date);
+            },
 
-            // Quick input
-            document.getElementById('addQuickEntry').addEventListener('click', addQuickEntry);
-            document.getElementById('quickInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addQuickEntry();
-            });
+            getShamsiMonth(date = new Date()) {
+                const options = { 
+                    calendar: 'persian', 
+                    year: 'numeric', 
+                    month: 'long'
+                };
+                return new Intl.DateTimeFormat('fa-IR', options).format(date);
+            },
 
-            // Search
-            document.getElementById('searchInput').addEventListener('input', performSearch);
-        }
+            // UI Functions
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            },
 
-        function switchPage(page) {
-            // Update active states
-            document.querySelectorAll('.nav-item, .tab-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.page === page);
-            });
-            
-            // Show correct page
-            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-            document.getElementById(`${page}Page`).classList.remove('hidden');
-            document.getElementById('pageTitle').textContent = getPageTitle(page);
-            
-            currentPage = page;
-            document.getElementById('sidebar').classList.add('hidden');
-        }
+            addRipple(element, event) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                
+                const rect = element.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                element.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            },
 
-        function getPageTitle(page) {
-            const titles = {
-                today: 'امروز',
-                month: 'ماه',
-                collections: 'مجموعه‌ها',
-                habits: 'عادت‌ها',
-                finance: 'مالی',
-                search: 'جستجو'
-            };
-            return titles[page] || page;
-        }
+            // Modal Functions
+            openModal(title, content) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalBody').innerHTML = content;
+                document.getElementById('modal').classList.add('show');
+            },
 
-        function addQuickEntry() {
-            const input = document.getElementById('quickInput');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            const entry = {
-                id: Date.now(),
-                text: text,
-                date: new Date().toISOString(),
-                completed: false,
-                page: currentPage
-            };
-            
-            entries.push(entry);
-            saveData();
-            input.value = '';
-            
-            if (currentPage === 'today') {
-                renderTodayPage();
-            } else if (currentPage === 'month') {
-                renderMonthPage();
-            }
-        }
+            closeModal() {
+                document.getElementById('modal').classList.remove('show');
+            },
 
-        function renderTodayPage() {
-            const today = new Date().toISOString().split('T')[0];
-            const todayEntries = entries.filter(e => 
-                e.date.startsWith(today) && e.page === 'today'
-            );
-            
-            const container = document.getElementById('todayEntries');
-            container.innerHTML = '';
-            
-            todayEntries.forEach(entry => {
-                const li = document.createElement('li');
-                li.className = 'entry-item';
-                li.innerHTML = `
-                    <input type="checkbox" class="entry-checkbox" ${entry.completed ? 'checked' : ''} data-id="${entry.id}">
-                    <div class="entry-text">${entry.text}</div>
-                `;
-                container.appendChild(li);
-            });
-            
-            // Add checkbox event listeners
-            document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
-                checkbox.addEventListener('change', toggleEntryCompletion);
-            });
-        }
+            // Navigation
+            switchPage(pageId) {
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+                
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+                
+                // Close sidebar on mobile
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+                
+                // Update page content
+                this.updatePageContent(pageId);
+            },
 
-        function toggleEntryCompletion(e) {
-            const id = parseInt(e.target.dataset.id);
-            const entry = entries.find(e => e.id === id);
-            if (entry) {
-                entry.completed = e.target.checked;
-                saveData();
-            }
-        }
+            updatePageContent(pageId) {
+                switch(pageId) {
+                    case 'today':
+                        this.renderToday();
+                        break;
+                    case 'month':
+                        this.renderMonth();
+                        break;
+                    case 'collections':
+                        this.renderCollections();
+                        break;
+                    case 'habits':
+                        this.renderHabits();
+                        break;
+                    case 'finance':
+                        this.renderFinance();
+                        break;
+                    case 'search':
+                        document.getElementById('searchInput').focus();
+                        break;
+                }
+            },
 
-        function renderCollections() {
-            const container = document.getElementById('collectionsGrid');
-            container.innerHTML = '';
-            
-            collections.forEach(collection => {
-                const card = document.createElement('div');
-                card.className = 'collection-card';
-                card.innerHTML = `
-                    <div class="collection-cover" style="background-color: ${collection.coverColor}">
-                        ${collection.title}
-                    </div>
-                    <div class="collection-info">
-                        <div class="collection-title">${collection.title}</div>
-                        <div class="collection-tags">
-                            ${collection.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                        </div>
-                        <div class="collection-actions">
-                            <button class="action-btn" data-id="${collection.id}" onclick="deleteCollection(${collection.id})">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="currentColor"/>
-                                </svg>
+            // Today Page
+            renderToday() {
+                const today = new Date().toISOString().split('T')[0];
+                const todayTasks = this.data.tasks.filter(task => task.date === today);
+                const todayNotes = this.data.notes.filter(note => note.date === today);
+                
+                const tasksHtml = todayTasks.length ? todayTasks.map(task => `
+                    <div class="search-result-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>${task.text}</span>
+                            <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
+                                ${task.completed ? '✓' : '○'}
                             </button>
                         </div>
                     </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function deleteCollection(id) {
-            collections = collections.filter(c => c.id !== id);
-            saveData();
-            renderCollections();
-        }
-
-        function renderHabits() {
-            const daysInMonth = 30; // Simplified for demo
-            const header = document.getElementById('habitsHeader');
-            const body = document.getElementById('habitsBody');
-            
-            // Clear existing content
-            header.innerHTML = '<th>عادت</th>';
-            body.innerHTML = '';
-            
-            // Add day headers
-            for (let i = 1; i <= daysInMonth; i++) {
-                header.innerHTML += `<th>${persianNumber(i)}</th>`;
-            }
-            
-            // Add habit rows
-            habits.forEach(habit => {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td style="background-color: ${habit.color}; color: white; font-weight: bold;">${habit.name}</td>`;
+                `).join('') : '<p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>';
                 
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dateKey = `2023-10-${day.toString().padStart(2, '0')}`; // Simplified date
-                    const completed = habitRecords[dateKey] && habitRecords[dateKey].includes(habit.id);
-                    row.innerHTML += `
-                        <td class="habit-cell ${completed ? 'completed' : ''}" 
-                            data-habit-id="${habit.id}" 
-                            data-date="${dateKey}"
-                            style="${completed ? `background-color: ${habit.color}; color: white;` : ''}">
-                        </td>
+                const notesHtml = todayNotes.length ? todayNotes.map(note => `
+                    <div class="search-result-item">
+                        <div>${note.text}</div>
+                        <small style="color: var(--text-secondary);">${new Date(note.createdAt).toLocaleTimeString('fa-IR')}</small>
+                    </div>
+                `).join('') : '<p style="text-align: center; color: var(--text-secondary);">یادداشتی برای امروز وجود ندارد</p>';
+                
+                document.getElementById('todayTasks').innerHTML = tasksHtml;
+                document.getElementById('todayNotes').innerHTML = notesHtml;
+            },
+
+            addTask() {
+                const content = `
+                    <div class="form-group">
+                        <label>متن وظیفه</label>
+                        <input type="text" id="taskText" placeholder="وظیفه را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="taskDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.saveTask()">ذخیره</button>
+                `;
+                this.openModal('افزودن وظیفه', content);
+            },
+
+            saveTask() {
+                const text = document.getElementById('taskText').value;
+                const date = document.getElementById('taskDate').value;
+                
+                if (!text) {
+                    this.showToast('متن وظیفه را وارد کنید');
+                    return;
+                }
+                
+                const task = {
+                    id: Date.now().toString(),
+                    text,
+                    date,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.tasks.push(task);
+                this.saveData();
+                this.closeModal();
+                this.renderToday();
+                this.showToast('وظیفه با موفقیت افزوده شد');
+            },
+
+            toggleTask(taskId) {
+                const task = this.data.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveData();
+                    this.renderToday();
+                }
+            },
+
+            addNote() {
+                const content = `
+                    <div class="form-group">
+                        <label>متن یادداشت</label>
+                        <textarea id="noteText" rows="4" placeholder="یادداشت را وارد کنید..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.saveNote()">ذخیره</button>
+                `;
+                this.openModal('افزودن یادداشت', content);
+            },
+
+            saveNote() {
+                const text = document.getElementById('noteText').value;
+                
+                if (!text) {
+                    this.showToast('متن یادداشت را وارد کنید');
+                    return;
+                }
+                
+                const note = {
+                    id: Date.now().toString(),
+                    text,
+                    date: new Date().toISOString().split('T')[0],
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.notes.push(note);
+                this.saveData();
+                this.closeModal();
+                this.renderToday();
+                this.showToast('یادداشت با موفقیت افزوده شد');
+            },
+
+            // Month Page
+            currentMonth: new Date(),
+
+            renderMonth() {
+                const title = document.getElementById('monthTitle');
+                title.textContent = this.getShamsiMonth(this.currentMonth);
+                
+                // Simple calendar implementation
+                const calendar = document.getElementById('monthCalendar');
+                const daysInMonth = 30; // Simplified for Persian calendar
+                let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">';
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const date = new Date(this.currentMonth);
+                    date.setDate(i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    const hasEvents = this.data.events.some(e => e.date === dateStr) ||
+                                    this.data.tasks.some(t => t.date === dateStr);
+                    
+                    html += `
+                        <div class="habit-day ${hasEvents ? 'active' : ''}" style="position: relative;">
+                            ${i}
+                            ${hasEvents ? '<div style="position: absolute; bottom: 2px; left: 2px; width: 4px; height: 4px; background: var(--primary); border-radius: 50%;"></div>' : ''}
+                        </div>
                     `;
                 }
-                body.appendChild(row);
-            });
-            
-            // Add click listeners to habit cells
-            document.querySelectorAll('.habit-cell').forEach(cell => {
-                cell.addEventListener('click', toggleHabit);
-            });
-        }
+                
+                html += '</div>';
+                calendar.innerHTML = html;
+            },
 
-        function toggleHabit(e) {
-            const habitId = parseInt(e.target.dataset.habitId);
-            const date = e.target.dataset.date;
-            
-            if (!habitRecords[date]) {
-                habitRecords[date] = [];
-            }
-            
-            const index = habitRecords[date].indexOf(habitId);
-            if (index > -1) {
-                habitRecords[date].splice(index, 1);
-            } else {
-                habitRecords[date].push(habitId);
-            }
-            
-            saveData();
-            e.target.classList.toggle('completed');
-            if (e.target.classList.contains('completed')) {
-                const habit = habits.find(h => h.id === habitId);
-                e.target.style.backgroundColor = habit.color;
-                e.target.style.color = 'white';
-            } else {
-                e.target.style.backgroundColor = '';
-                e.target.style.color = '';
-            }
-        }
+            previousMonth() {
+                this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
+                this.renderMonth();
+            },
 
-        function renderFinance() {
-            // Calculate totals
-            const expenseTotal = finances.filter(f => f.type === 'expense').reduce((sum, f) => sum + f.amount, 0);
-            const incomeTotal = finances.filter(f => f.type === 'income').reduce((sum, f) => sum + f.amount, 0);
-            const investTotal = finances.filter(f => f.type === 'invest').reduce((sum, f) => sum + f.amount, 0);
-            
-            document.getElementById('totalExpense').textContent = `${persianNumber(expenseTotal.toLocaleString())} تومان`;
-            document.getElementById('totalIncome').textContent = `${persianNumber(incomeTotal.toLocaleString())} تومان`;
-            document.getElementById('totalInvest').textContent = `${persianNumber(investTotal.toLocaleString())} تومان`;
-            
-            // Render list
-            const container = document.getElementById('financeList');
-            container.innerHTML = '';
-            
-            finances.slice().reverse().forEach(finance => {
-                const li = document.createElement('li');
-                li.className = 'finance-item';
-                li.innerHTML = `
-                    <span>${finance.description}</span>
-                    <span class="finance-type ${finance.type}">${persianNumber(finance.amount.toLocaleString())} تومان</span>
+            nextMonth() {
+                this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
+                this.renderMonth();
+            },
+
+            // Collections Page
+            renderCollections() {
+                const grid = document.getElementById('collectionsGrid');
+                
+                if (this.data.collections.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary); grid-column: 1/-1;">مجموعه‌ای وجود ندارد</p>';
+                    return;
+                }
+                
+                grid.innerHTML = this.data.collections.map(collection => `
+                    <div class="collection-card" onclick="globalHandlers.openCollection('${collection.id}')">
+                        <h3>${collection.name}</h3>
+                        <p>${collection.items.length} مورد</p>
+                    </div>
+                `).join('');
+            },
+
+            addCollection() {
+                const content = `
+                    <div class="form-group">
+                        <label>نام مجموعه</label>
+                        <input type="text" id="collectionName" placeholder="نام مجموعه را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <textarea id="collectionDesc" rows="3" placeholder="توضیحات اختیاری..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.saveCollection()">ذخیره</button>
                 `;
-                container.appendChild(li);
-            });
-        }
+                this.openModal('مجموعه جدید', content);
+            },
 
-        function performSearch() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const results = document.getElementById('searchResults');
-            
-            if (!query) {
-                results.innerHTML = '';
-                return;
-            }
-            
-            const allText = [...entries, ...collections, ...habits, ...finances]
-                .map(item => {
-                    if (item.text) return item.text;
-                    if (item.title) return item.title;
-                    if (item.name) return item.name;
-                    if (item.description) return item.description;
-                    return '';
-                })
-                .filter(text => text && text.toLowerCase().includes(query));
-            
-            results.innerHTML = allText.length ? 
-                `<div class="p-4 bg-white rounded-lg">${allText.map(text => `<div>${text}</div>`).join('')}</div>` :
-                '<div class="p-4 text-center text-gray-500">نتیجه‌ای یافت نشد</div>';
-        }
+            saveCollection() {
+                const name = document.getElementById('collectionName').value;
+                const desc = document.getElementById('collectionDesc').value;
+                
+                if (!name) {
+                    this.showToast('نام مجموعه را وارد کنید');
+                    return;
+                }
+                
+                const collection = {
+                    id: Date.now().toString(),
+                    name,
+                    description: desc,
+                    items: [],
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.collections.push(collection);
+                this.saveData();
+                this.closeModal();
+                this.renderCollections();
+                this.showToast('مجموعه با موفقیت افزوده شد');
+            },
 
-        function saveData() {
-            localStorage.setItem('entries', JSON.stringify(entries));
-            localStorage.setItem('collections', JSON.stringify(collections));
-            localStorage.setItem('habits', JSON.stringify(habits));
-            localStorage.setItem('habitRecords', JSON.stringify(habitRecords));
-            localStorage.setItem('finances', JSON.stringify(finances));
-        }
+            openCollection(collectionId) {
+                const collection = this.data.collections.find(c => c.id === collectionId);
+                if (!collection) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>افزودن مورد به ${collection.name}</label>
+                        <input type="text" id="collectionItem" placeholder="مورد جدید...">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.addCollectionItem('${collectionId}')">افزودن</button>
+                    <div style="margin-top: 20px;">
+                        <h3>موارد موجود:</h3>
+                        <div id="collectionItems">
+                            ${collection.items.map((item, index) => `
+                                <div class="search-result-item">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span>${item}</span>
+                                        <button class="btn btn-secondary" onclick="globalHandlers.removeCollectionItem('${collectionId}', ${index})">حذف</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.openModal(collection.name, content);
+            },
 
-        function setupRippleEffect() {
-            const buttons = document.querySelectorAll('button, .nav-item, .tab-item, .habit-cell');
-            buttons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    const rect = this.getBoundingClientRect();
-                    const ripple = document.createElement('span');
-                    ripple.className = 'ripple';
-                    ripple.style.left = `${e.clientX - rect.left}px`;
-                    ripple.style.top = `${e.clientY - rect.top}px`;
-                    this.appendChild(ripple);
+            addCollectionItem(collectionId) {
+                const item = document.getElementById('collectionItem').value;
+                if (!item) {
+                    this.showToast('مورد را وارد کنید');
+                    return;
+                }
+                
+                const collection = this.data.collections.find(c => c.id === collectionId);
+                if (collection) {
+                    collection.items.push(item);
+                    this.saveData();
+                    this.openCollection(collectionId);
+                    this.showToast('مورد با موفقیت افزوده شد');
+                }
+            },
+
+            removeCollectionItem(collectionId, index) {
+                const collection = this.data.collections.find(c => c.id === collectionId);
+                if (collection) {
+                    collection.items.splice(index, 1);
+                    this.saveData();
+                    this.openCollection(collectionId);
+                    this.showToast('مورد با موفقیت حذف شد');
+                }
+            },
+
+            // Habits Page
+            renderHabits() {
+                const grid = document.getElementById('habitsGrid');
+                const today = new Date();
+                const daysInMonth = 30;
+                
+                if (this.data.habits.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">عادتی برای ردیابی وجود ندارد</p>';
+                    return;
+                }
+                
+                grid.innerHTML = this.data.habits.map(habit => `
+                    <div class="habit-row">
+                        <div class="habit-name">
+                            <div class="habit-color" style="background: ${habit.color}" onclick="globalHandlers.showColorPicker('${habit.id}', this)"></div>
+                            <span>${habit.name}</span>
+                        </div>
+                        <div class="habit-days">
+                            ${Array.from({length: daysInMonth}, (_, i) => {
+                                const date = new Date(today.getFullYear(), today.getMonth(), i + 1);
+                                const dateStr = date.toISOString().split('T')[0];
+                                const completed = habit.completedDates.includes(dateStr);
+                                return `<div class="habit-day ${completed ? 'active' : ''}" 
+                                    style="background: ${completed ? habit.color : 'transparent'}; 
+                                    border-color: ${completed ? habit.color : 'var(--divider)'}"
+                                    onclick="globalHandlers.toggleHabit('${habit.id}', '${dateStr}')"></div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            addHabit() {
+                const colors = ['#7c3aed', '#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+                const content = `
+                    <div class="form-group">
+                        <label>نام عادت</label>
+                        <input type="text" id="habitName" placeholder="نام عادت را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>رنگ</label>
+                        <div style="display: flex; gap: 8px;">
+                            ${colors.map(color => `
+                                <div class="color-option" style="background: ${color}" 
+                                    onclick="document.getElementById('selectedColor').value = '${color}'"></div>
+                            `).join('')}
+                        </div>
+                        <input type="hidden" id="selectedColor" value="${colors[0]}">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.saveHabit()">ذخیره</button>
+                `;
+                this.openModal('عادت جدید', content);
+            },
+
+            saveHabit() {
+                const name = document.getElementById('habitName').value;
+                const color = document.getElementById('selectedColor').value;
+                
+                if (!name) {
+                    this.showToast('نام عادت را وارد کنید');
+                    return;
+                }
+                
+                const habit = {
+                    id: Date.now().toString(),
+                    name,
+                    color,
+                    completedDates: [],
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.habits.push(habit);
+                this.saveData();
+                this.closeModal();
+                this.renderHabits();
+                this.showToast('عادت با موفقیت افزوده شد');
+            },
+
+            toggleHabit(habitId, dateStr) {
+                const habit = this.data.habits.find(h => h.id === habitId);
+                if (habit) {
+                    const index = habit.completedDates.indexOf(dateStr);
+                    if (index > -1) {
+                        habit.completedDates.splice(index, 1);
+                    } else {
+                        habit.completedDates.push(dateStr);
+                    }
+                    this.saveData();
+                    this.renderHabits();
+                }
+            },
+
+            showColorPicker(habitId, element) {
+                const colors = ['#7c3aed', '#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+                const picker = document.createElement('div');
+                picker.className = 'color-picker show';
+                picker.innerHTML = colors.map(color => `
+                    <div class="color-option" style="background: ${color}" 
+                        onclick="globalHandlers.changeHabitColor('${habitId}', '${color}')"></div>
+                `).join('');
+                
+                element.appendChild(picker);
+                
+                setTimeout(() => {
+                    document.addEventListener('click', function closePicker(e) {
+                        if (!picker.contains(e.target)) {
+                            picker.remove();
+                            document.removeEventListener('click', closePicker);
+                        }
+                    });
+                }, 100);
+            },
+
+            changeHabitColor(habitId, color) {
+                const habit = this.data.habits.find(h => h.id === habitId);
+                if (habit) {
+                    habit.color = color;
+                    this.saveData();
+                    this.renderHabits();
+                }
+            },
+
+            // Finance Page
+            renderFinance() {
+                const income = this.data.transactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const expense = this.data.transactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const invest = this.data.transactions
+                    .filter(t => t.type === 'invest')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const net = income - expense;
+                
+                document.getElementById('totalIncome').textContent = this.formatNumber(income) + ' ریال';
+                document.getElementById('totalExpense').textContent = this.formatNumber(expense) + ' ریال';
+                document.getElementById('totalInvest').textContent = this.formatNumber(invest) + ' ریال';
+                document.getElementById('netBalance').textContent = this.formatNumber(net) + ' ریال';
+                document.getElementById('netBalance').className = 'amount ' + (net >= 0 ? 'income' : 'expense');
+                
+                // Render transactions
+                const transactionsHtml = this.data.transactions
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 10)
+                    .map(t => `
+                        <div class="search-result-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div>${t.description}</div>
+                                    <small style="color: var(--text-secondary);">${new Date(t.date).toLocaleDateString('fa-IR')}</small>
+                                </div>
+                                <div class="amount ${t.type}">${this.formatNumber(t.amount)} ریال</div>
+                            </div>
+                        </div>
+                    `).join('');
+                
+                document.getElementById('transactionsList').innerHTML = transactionsHtml || 
+                    '<p style="text-align: center; color: var(--text-secondary);">تراکنشی وجود ندارد</p>';
+            },
+
+            formatNumber(num) {
+                return new Intl.NumberFormat('fa-IR').format(num);
+            },
+
+            addTransaction() {
+                const content = `
+                    <div class="form-group">
+                        <label>نوع تراکنش</label>
+                        <select id="transactionType">
+                            <option value="income">درآمد</option>
+                            <option value="expense">هزینه</option>
+                            <option value="invest">سرمایه‌گذاری</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>مبلغ (ریال)</label>
+                        <input type="number" id="transactionAmount" placeholder="مبلغ را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <input type="text" id="transactionDesc" placeholder="توضیحات تراکنش...">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="transactionDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.saveTransaction()">ذخیره</button>
+                `;
+                this.openModal('تراکنش جدید', content);
+            },
+
+            saveTransaction() {
+                const type = document.getElementById('transactionType').value;
+                const amount = parseInt(document.getElementById('transactionAmount').value);
+                const description = document.getElementById('transactionDesc').value;
+                const date = document.getElementById('transactionDate').value;
+                
+                if (!amount || amount <= 0) {
+                    this.showToast('مبلغ معتبر وارد کنید');
+                    return;
+                }
+                
+                const transaction = {
+                    id: Date.now().toString(),
+                    type,
+                    amount,
+                    description: description || type,
+                    date,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.transactions.push(transaction);
+                this.saveData();
+                this.closeModal();
+                this.renderFinance();
+                this.showToast('تراکنش با موفقیت ثبت شد');
+            },
+
+            exportFinanceCSV() {
+                const headers = ['تاریخ', 'نوع', 'مبلغ', 'توضیحات'];
+                const rows = this.data.transactions.map(t => [
+                    t.date,
+                    t.type === 'income' ? 'درآمد' : t.type === 'expense' ? 'هزینه' : 'سرمایه‌گذاری',
+                    t.amount,
+                    t.description
+                ]);
+                
+                const csv = [headers, ...rows]
+                    .map(row => row.map(cell => `"${cell}"`).join(','))
+                    .join('\n');
+                
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `finance_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+                
+                this.showToast('فایل CSV با موفقیت دانلود شد');
+            },
+
+            // Search Page
+            search() {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                const results = [];
+                
+                // Search in all data
+                Object.keys(this.data).forEach(type => {
+                    this.data[type].forEach(item => {
+                        if (item.text && item.text.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
+                        if (item.name && item.name.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
+                        if (item.description && item.description.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
+                    });
+                });
+                
+                const resultsHtml = results.length ? results.map(({ type, item }) => {
+                    const typeNames = {
+                        tasks: 'وظیفه',
+                        notes: 'یادداشت',
+                        habits: 'عادت',
+                        collections: 'مجموعه',
+                        transactions: 'تراکنش',
+                        events: 'رویداد'
+                    };
                     
-                    setTimeout(() => {
-                        ripple.remove();
-                    }, 600);
+                    return `
+                        <div class="search-result-item" onclick="globalHandlers.openSearchResult('${type}', '${item.id}')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div>
+                                    <div>${item.text || item.name || item.description}</div>
+                                    <small style="color: var(--text-secondary);">${typeNames[type]}</small>
+                                </div>
+                                <small style="color: var(--text-secondary);">${new Date(item.createdAt).toLocaleDateString('fa-IR')}</small>
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '<p style="text-align: center; color: var(--text-secondary);">نتیجه‌ای یافت نشد</p>';
+                
+                document.getElementById('searchResults').innerHTML = resultsHtml;
+            },
+
+            openSearchResult(type, id) {
+                const item = this.data[type].find(i => i.id === id);
+                if (!item) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>نوع</label>
+                        <input type="text" value="${type}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>محتوا</label>
+                        <textarea rows="4" readonly>${JSON.stringify(item, null, 2)}</textarea>
+                    </div>
+                    <button class="btn btn-secondary" onclick="globalHandlers.closeModal()">بستن</button>
+                `;
+                this.openModal('جزئیات', content);
+            },
+
+            // Quick Add
+            quickAdd() {
+                const input = document.getElementById('quickInput');
+                const text = input.value.trim();
+                
+                if (!text) {
+                    this.showToast('متن را وارد کنید');
+                    return;
+                }
+                
+                // Simple logic: if starts with # it's a note, else it's a task
+                if (text.startsWith('#')) {
+                    const note = {
+                        id: Date.now().toString(),
+                        text: text.substring(1),
+                        date: new Date().toISOString().split('T')[0],
+                        createdAt: new Date().toISOString()
+                    };
+                    this.data.notes.push(note);
+                } else {
+                    const task = {
+                        id: Date.now().toString(),
+                        text,
+                        date: new Date().toISOString().split('T')[0],
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    this.data.tasks.push(task);
+                }
+                
+                this.saveData();
+                input.value = '';
+                this.renderToday();
+                this.showToast('با موفقیت افزوده شد');
+            },
+
+            // Export Data
+            exportData() {
+                const dataStr = JSON.stringify(this.data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `bullet_journal_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                this.showToast('داده‌ها با موفقیت export شدند');
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update date display
+            document.getElementById('dateDisplay').textContent = globalHandlers.getShamsiDate();
+            
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    globalHandlers.addRipple(e.currentTarget, e);
+                    const page = e.currentTarget.dataset.page;
+                    globalHandlers.switchPage(page);
                 });
             });
-        }
-
-        // Make handlers global
-        window.deleteCollection = deleteCollection;
-        window.persianNumber = persianNumber;
+            
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    globalHandlers.addRipple(e.currentTarget, e);
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                });
+            });
+            
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+            
+            // Quick input enter key
+            document.getElementById('quickInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    globalHandlers.quickAdd();
+                }
+            });
+            
+            // Modal close on outside click
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if (e.target.id === 'modal') {
+                    globalHandlers.closeModal();
+                }
+            });
+            
+            // Initialize first page
+            globalHandlers.updatePageContent('today');
+            
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').then(() => {
+                    console.log('Service Worker registered');
+                });
+            }
+        });
     </script>
 </body>
 </html>
