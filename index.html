@@ -1,546 +1,935 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bullet Journal — مینیمال</title>
-  <style>
-    /* ===== Theme (Material-ish) ===== */
-    :root{
-      --bg:#f7f8fb; --surface:#ffffff; --surface-2:#fafafa; --text:#0f172a; --sub:#5b6b7e;
-      --primary:#7c4dff; /* violet */
-      --primary-10:#efe9ff; --primary-20:#e3d6ff; --primary-30:#d5c2ff;
-      --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --muted:#e6e9ef; --border:#e5e7eb;
-      --radius:16px; --shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08)
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto;overflow-x:hidden}
-    header{position:sticky;top:0;z-index:7;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.9));backdrop-filter:saturate(140%) blur(6px);border-bottom:1px solid var(--border)}
-    header h1{font-size:16px;margin:0;font-weight:800;color:#1f2937}
-    .app{display:grid;grid-template-columns:280px 1fr;height:calc(100dvh - 60px)}
-    aside{border-left:1px solid var(--border);background:var(--surface);padding:12px;overflow:auto}
-    main{padding:16px;overflow:auto}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
-    .row{display:flex;gap:8px;align-items:center}
-    .stack{display:flex;flex-direction:column;gap:10px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بولت ژورنال</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#E0B0FF">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        :root {
+            --primary: #E0B0FF;
+            --primary-dark: #BA68C8;
+            --surface: #FFFFFF;
+            --surface-light: #F5F5F5;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --divider: #E0E0E0;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+            --ripple-color: rgba(186, 104, 200, 0.3);
+        }
 
-    /* Buttons */
-    .btn{position:relative;isolation:isolate;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.02)}
-    .btn.primary{border-color:var(--primary-20);background:var(--primary-10);color:#3a2a85}
-    .btn:hover{filter:brightness(1.03)}
-    .btn:active{transform:translateY(1px)}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    /* Icon buttons */
-    .iconbtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#475569;cursor:pointer}
-    .iconbtn:hover{filter:brightness(1.03)}
-    .iconbtn:active{transform:translateY(1px)}
-    .iconbtn svg{width:22px;height:22px}
+        body {
+            background-color: var(--surface-light);
+            color: var(--text-primary);
+            direction: rtl;
+            font-family: 'Vazirmatn', sans-serif;
+        }
 
-    /* Ripple */
-    .ripple{position:absolute;inset:auto;pointer-events:none;border-radius:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.15);animation:ripple .6s ease-out}
-    @keyframes ripple{from{width:0;height:0;opacity:.35}to{width:180px;height:180px;opacity:0}}
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
 
-    /* Inputs */
-    input,select,textarea{background:#fff;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:12px;width:100%;outline:none;font-size:16px;min-height:44px}
-    input:focus,select:focus,textarea:focus{border-color:var(--primary-30);box-shadow:0 0 0 3px var(--primary-10)}
-    input[type="number"]{font-variant-numeric:tabular-nums}
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background-color: var(--surface);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
 
-    .list{display:flex;flex-direction:column;gap:12px}
-    .item{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;padding:12px;border-radius:12px;border:1px dashed var(--border);background:#fff}
-    .item.done{opacity:.6;text-decoration:line-through}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;color:var(--sub)}
-    .chips{display:flex;gap:6px;flex-wrap:wrap}
-    .chips button{border-radius:999px;padding:8px 12px;border:1px solid var(--border);background:#fff;color:#475569;cursor:pointer;font-size:14px}
-    .chips button.active{color:#3a2a85;background:var(--primary-10);border-color:var(--primary-20)}
-    .section-title{font-weight:800;margin:8px 0 4px 0;color:#3a2a85}
-    .muted{color:var(--sub)}
-    hr{border:none;border-top:1px solid var(--border);margin:8px 0}
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
 
-    /* Collections grid */
-    .cover{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:#f5f6fa}
-    .coll-grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)} /* دو ستون در هر اندازه */
-    .coll-card{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);cursor:pointer}
-    .coll-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .tagchip{display:inline-flex;gap:4px;align-items:center;padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#fff}
+        .sidebar-header {
+            padding: 24px 16px;
+            border-bottom: 1px solid var(--divider);
+        }
 
-    /* Habits table */
-    .hab-grid{overflow:auto}
-    table.hab{border-collapse:collapse;width:100%;min-width:680px}
-    .hab th,.hab td{border:1px solid var(--border);background:#fff;padding:10px;text-align:center}
-    .hab thead th{position:sticky;top:0;background:#f3f4f6;z-index:1}
-    .cell{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);margin:auto;cursor:pointer;transition:background .15s ease,border-color .15s ease}
-    .cell.on{background:var(--h, var(--primary-20));border-color:var(--h, var(--primary-30))}
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
 
-    /* Finance colored pills */
-    .pill.expense{background:#fee2e2;border-color:#fecaca;color:#991b1b}
-    .pill.income{background:#dcfce7;border-color:#bbf7d0;color:#14532d}
-    .pill.invest{background:#fef9c3;border-color:#fde68a;color:#854d0e}
-    .pill.net.pos{background:#e0f2fe;border-color:#bae6fd;color:#075985}
-    .pill.net.neg{background:#ffe4e6;border-color:#fecdd3;color:#9f1239}
+        .nav-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
 
-    /* Compact cover picker */
-    .cover-thumb{width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1px solid var(--border);background:#f5f6fa}
-    .file-hidden{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+        .nav-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background-color 0.2s;
+            border-radius: 0 8px 8px 0;
+        }
 
-    /* Mobile navigation + composer (hidden on desktop) */
-    .mobile-tabs{display:none}
-    .mobile-actions{display:none}
+        .nav-item:hover {
+            background-color: var(--surface-light);
+        }
 
-    /* ===== Mobile tweaks ===== */
-    @media (max-width:900px){
-      .app{grid-template-columns:1fr;height:auto}
-      aside{display:none !important}
-      main{padding:12px 12px 96px 12px}
-      .row{flex-wrap:wrap}
-      .item{grid-template-columns:28px 1fr auto}
-      header{background:var(--primary-10); border-bottom-color: var(--primary-20); padding:10px 12px}
-      header h1{font-size:14px}
-      .top-actions .iconbtn{width:36px;height:36px}
-      .mobile-tabs{display:flex;gap:6px;width:100%;overflow:auto;padding-top:6px}
-      .mobile-tabs .btn{flex:0 0 auto;padding:8px 10px}
-      .mobile-actions{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:8;gap:8px;align-items:center;background:#fff;border-top:1px solid var(--border);padding:10px 12px}
-      .mobile-actions input{flex:1}
-      .mobile-actions .chips{gap:6px}
-      #dailyList{padding-bottom:72px}
-      #collectionDetail .card{max-width:100%;overflow:hidden}
-    }
-  </style>
-  <link rel="manifest" id="manifestInline" />
-  <meta name="theme-color" content="#f7f8fb" />
-  <script>
-    const tinyPng='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/axu7sAAAAAASUVORK5CYII=';
-    const manifest={name:'Bullet Journal — مینیمال',short_name:'BuJo',start_url:'.',display:'standalone',background_color:'#f7f8fb',theme_color:'#7c4dff',lang:'fa',dir:'rtl',icons:[{src:tinyPng,sizes:'192x192',type:'image/png'},{src:tinyPng,sizes:'512x512',type:'image/png'}]};
-    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    document.addEventListener('DOMContentLoaded',()=>{const m=document.getElementById('manifestInline'); if(m) m.href=URL.createObjectURL(blob)});
-  </script>
+        .nav-item.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .nav-item i {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--surface);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .menu-toggle i {
+            width: 24px;
+            height: 24px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z'/%3E%3C/svg%3E");
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Tab Bar for Mobile */
+        .tab-bar {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background-color: var(--surface);
+            border-top: 1px solid var(--divider);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 800;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .tab-item.active {
+            color: var(--primary-dark);
+        }
+
+        .tab-item i {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* Quick Input */
+        .quick-input {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--surface);
+            border-top: 1px solid var(--divider);
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 800;
+        }
+
+        .quick-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--divider);
+            border-radius: 24px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .quick-input button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Page Content */
+        .page-content {
+            padding: 16px;
+            flex: 1;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Today Page */
+        .today-date {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: var(--primary-dark);
+        }
+
+        .entry-list {
+            list-style: none;
+        }
+
+        .entry-item {
+            background-color: var(--surface);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .entry-checkbox {
+            margin-top: 4px;
+        }
+
+        .entry-text {
+            flex: 1;
+        }
+
+        /* Collections Page */
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .collection-card {
+            background-color: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .collection-cover {
+            width: 100%;
+            height: 160px;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .collection-info {
+            padding: 12px;
+        }
+
+        .collection-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .collection-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .tag {
+            background-color: var(--surface-light);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .collection-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--text-secondary);
+        }
+
+        /* Habits Page */
+        .habits-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .habits-table th,
+        .habits-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--divider);
+        }
+
+        .habits-table th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .habit-cell {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .habit-cell:hover {
+            background-color: var(--surface-light);
+        }
+
+        .habit-cell.completed {
+            background-color: var(--success);
+            color: white;
+        }
+
+        /* Finance Page */
+        .finance-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background-color: var(--surface);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .summary-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .summary-amount {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .expense { color: var(--error); }
+        .income { color: var(--success); }
+        .invest { color: var(--warning); }
+
+        .finance-list {
+            list-style: none;
+        }
+
+        .finance-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .finance-type {
+            font-weight: 600;
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: var(--ripple-color);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                height: 100vh;
+                top: 0;
+                left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .tab-bar {
+                display: flex;
+            }
+
+            .collections-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Persian Font */
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>بولت ژورنال مینیمال</h1>
-    <span class="pill" id="todayLabel"></span>
-    <div class="row top-actions" style="margin-inline-start:auto">
-      <button class="iconbtn" title="خروجی JSON" onclick="exportData()" aria-label="Export">
-        <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 3v12m0 0l-4-4m4 4 4-4M4 21h16"/></svg>
-      </button>
-      <button class="iconbtn" title="ورود JSON" onclick="openFileInput()" aria-label="Import">
-        <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 21V9m0 0 4 4m-4-4-4 4M4 3h16"/></svg>
-      </button>
-      <input id="importFile" type="file" accept="application/json" style="display:none" />
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">بولت ژورنال</div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="today">
+                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E&quot;)"></i>
+                    امروز
+                </li>
+                <li class="nav-item" data-page="month">
+                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z'/%3E%3C/svg%3E&quot;)"></i>
+                    ماه
+                </li>
+                <li class="nav-item" data-page="collections">
+                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z'/%3E%3C/svg%3E&quot;)"></i>
+                    مجموعه‌ها
+                </li>
+                <li class="nav-item" data-page="habits">
+                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E&quot;)"></i>
+                    عادت‌ها
+                </li>
+                <li class="nav-item" data-page="finance">
+                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E&quot;)"></i>
+                    مالی
+                </li>
+                <li class="nav-item" data-page="search">
+                    <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E&quot;)"></i>
+                    جستجو
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-bar">
+                <button class="menu-toggle" id="menuToggle">
+                    <i></i>
+                </button>
+                <div class="page-title" id="pageTitle">امروز</div>
+                <div></div> <!-- Spacer -->
+            </div>
+
+            <div class="page-content">
+                <!-- Today Page -->
+                <div id="todayPage" class="page">
+                    <div class="today-date" id="todayDate"></div>
+                    <ul class="entry-list" id="todayEntries">
+                        <!-- Entries will be added here -->
+                    </ul>
+                </div>
+
+                <!-- Month Page -->
+                <div id="monthPage" class="page hidden">
+                    <h2>ورودی‌های ماه</h2>
+                    <ul class="entry-list" id="monthEntries">
+                        <!-- Month entries will be added here -->
+                    </ul>
+                </div>
+
+                <!-- Collections Page -->
+                <div id="collectionsPage" class="page hidden">
+                    <div class="collections-grid" id="collectionsGrid">
+                        <!-- Collection cards will be added here -->
+                    </div>
+                </div>
+
+                <!-- Habits Page -->
+                <div id="habitsPage" class="page hidden">
+                    <h2>عادت‌ها</h2>
+                    <table class="habits-table" id="habitsTable">
+                        <thead>
+                            <tr id="habitsHeader"></tr>
+                        </thead>
+                        <tbody id="habitsBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Finance Page -->
+                <div id="financePage" class="page hidden">
+                    <div class="finance-summary">
+                        <div class="summary-card">
+                            <div class="summary-title">هزینه‌ها</div>
+                            <div class="summary-amount expense" id="totalExpense">۰ تومان</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-title">درآمدها</div>
+                            <div class="summary-amount income" id="totalIncome">۰ تومان</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-title">سرمایه‌گذاری</div>
+                            <div class="summary-amount invest" id="totalInvest">۰ تومان</div>
+                        </div>
+                    </div>
+                    <ul class="finance-list" id="financeList">
+                        <!-- Finance entries will be added here -->
+                    </ul>
+                </div>
+
+                <!-- Search Page -->
+                <div id="searchPage" class="page hidden">
+                    <input type="text" id="searchInput" placeholder="جستجو..." class="w-full p-3 mb-4 rounded-lg border">
+                    <div id="searchResults">
+                        <!-- Search results will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Input -->
+            <div class="quick-input">
+                <input type="text" id="quickInput" placeholder="یادداشت سریع...">
+                <button id="addQuickEntry">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
     </div>
-    <!-- Mobile top tabs inside header -->
-    <nav class="mobile-tabs" aria-label="ناوبری">
-      <button class="btn" onclick="navigate('today')">امروز</button>
-      <button class="btn" onclick="navigate('month')">ماه</button>
-      <button class="btn" onclick="navigate('collections')">مجموعه‌ها</button>
-      <button class="btn" onclick="navigate('habits')">عادت‌ها</button>
-      <button class="btn" onclick="navigate('finance')">مالی</button>
-      <button class="btn" onclick="navigate('search')">جستجو</button>
-    </nav>
-  </header>
 
-  <div class="app">
-    <aside class="stack">
-      <div class="card stack">
-        <div class="section-title">صفحات</div>
-        <div class="chips">
-          <button id="nav-today" class="active" onclick="navigate('today')">امروز</button>
-          <button onclick="navigate('month')">ماه</button>
-          <button onclick="navigate('collections')">مجموعه‌ها</button>
-          <button onclick="navigate('habits')">عادت‌ها</button>
-          <button onclick="navigate('finance')">مالی</button>
-          <button onclick="navigate('search')">جستجو</button>
+    <!-- Tab Bar for Mobile -->
+    <div class="tab-bar">
+        <div class="tab-item active" data-page="today">
+            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/%3E%3C/svg%3E&quot;)"></i>
+            امروز
         </div>
-        <div class="section-title">کلیدها (Signifiers)</div>
-        <div class="stack muted">
-          <div><button class="btn" onclick="insertSignifier('• ')">• یادداشت</button></div>
-          <div><button class="btn" onclick="insertSignifier('◻︎ ')">◻︎ تسک → ✓ / » / ⤵︎</button></div>
-          <div><button class="btn" onclick="insertSignifier('○ ')">○ رویداد</button></div>
-          <div class="chips">
-            <button onclick="insertSignifier(' !')">! مهم</button>
-            <button onclick="insertSignifier(' ?')">? تحقیق</button>
-            <button onclick="insertSignifier(' #')">#برچسب</button>
-          </div>
-          <small class="muted">روی هر مورد بزن تا به «ورود سریع» افزوده شود.</small>
+        <div class="tab-item" data-page="collections">
+            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z'/%3E%3C/svg%3E&quot;)"></i>
+            مجموعه‌ها
         </div>
-      </div>
-
-      <div class="card stack">
-        <div class="section-title">مجموعهٔ سریع</div>
-        <div class="row">
-          <input id="newCollectionName" placeholder="نام مجموعه" />
-          <button class="btn primary" onclick="addCollection()">+ افزودن</button>
+        <div class="tab-item" data-page="habits">
+            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E&quot;)"></i>
+            عادت‌ها
         </div>
-        <div id="collectionsList" class="list"></div>
-      </div>
-
-      <div class="card footer">
-        داده‌ها فقط در مرورگر شما و در <b>localStorage</b> ذخیره می‌شوند. بدون حساب/سرور.
-      </div>
-    </aside>
-
-    <main>
-      <!-- Daily -->
-      <section id="view-today" class="stack">
-        <div class="row">
-          <input type="date" id="datePicker" />
-          <input id="quickInput" placeholder="ورود سریع (مثلاً: ◻︎ خرید میوه ! #خانه)" />
-          <button class="btn primary" onclick="quickAdd()">افزودن</button>
+        <div class="tab-item" data-page="finance">
+            <i style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E&quot;)"></i>
+            مالی
         </div>
-        <div class="chips">
-          <button onclick="bulk('complete')">✓ همه</button>
-          <button onclick="bulk('migrate')">» همه</button>
-          <button onclick="bulk('schedule')">⤵︎ همه</button>
-          <button onclick="clearDone()" class="btn">حذف انجام‌شده‌ها</button>
-        </div>
-        <div id="dailyList" class="list"></div>
-      </section>
-
-      <!-- Month -->
-      <section id="view-month" class="stack" style="display:none">
-        <div class="row"><input type="month" id="monthPicker" /> <span id="monthJLabel" class="pill"></span></div>
-        <div id="monthList" class="list"></div>
-      </section>
-
-      <!-- Collections -->
-      <section id="view-collections" class="stack" style="display:none">
-        <div class="card stack">
-          <div class="row" style="justify-content:space-between">
-            <div class="section-title">همهٔ مجموعه‌ها</div>
-            <div class="row"><input id="collSearch" placeholder="جستجو مجموعه..." style="max-width:240px"></div>
-          </div>
-          <div id="collectionsGrid" class="coll-grid"></div>
-        </div>
-        <div id="collectionDetail" class="stack"></div>
-      </section>
-
-      <!-- Habits -->
-      <section id="view-habits" class="stack" style="display:none">
-        <div class="card stack">
-          <div class="row">
-            <input id="hName" placeholder="نام عادت (مثلاً: ورزش، مطالعه)" />
-            <input type="color" id="hColor" value="#7c4dff" style="width:56px;padding:0;height:44px" />
-            <button class="btn primary" onclick="addHabit()">+ افزودن عادت</button>
-            <input type="month" id="hMonth" /> <span id="hMonthJLabel" class="pill"></span>
-          </div>
-          <div id="hSummary" class="row"></div>
-          <div id="hTable" class="hab-grid" style="max-width:100%"></div>
-        </div>
-      </section>
-
-      <!-- Finance -->
-      <section id="view-finance" class="stack" style="display:none">
-        <div class="card stack">
-          <div class="row">
-            <input type="date" id="fDate" />
-            <select id="fKind"><option value="expense">هزینه</option><option value="income">درآمد</option><option value="invest">سرمایه‌گذاری</option></select>
-            <input id="fCategory" placeholder="دسته (مثلاً: خوراک، حقوق، سهام)" />
-            <input id="fAmount" type="number" step="0.01" inputmode="decimal" placeholder="مبلغ" />
-            <input id="fNote" placeholder="یادداشت (اختیاری)" />
-            <button class="btn primary" onclick="addTxn()">+ افزودن تراکنش</button>
-          </div>
-          <div class="row">
-            <input type="month" id="fMonth" /> <span id="fMonthJLabel" class="pill"></span>
-            <button class="btn" onclick="exportFinanceCSV()">خروجی CSV</button>
-          </div>
-          <div class="row" id="fSummary"></div>
-          <div id="fTableWrap" class="stack"></div>
-        </div>
-      </section>
-
-      <!-- Search -->
-      <section id="view-search" class="stack" style="display:none">
-        <input id="searchInput" placeholder="جستجو در همهٔ صفحات، بر اساس متن یا #برچسب" />
-        <div id="searchList" class="list"></div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Mobile bottom composer -->
-  <div class="mobile-actions">
-    <input id="quickInputMobile" placeholder="◻︎ تسک/یادداشت… #برچسب" />
-    <button class="btn primary" onclick="quickAdd()">افزودن</button>
-    <div class="chips">
-      <button onclick="insertSignifier('◻︎ ')" aria-label="Task">◻︎</button>
-      <button onclick="insertSignifier('○ ')" aria-label="Event">○</button>
-      <button onclick="insertSignifier(' !')" aria-label="Important">!</button>
-      <button onclick="insertSignifier(' #')" aria-label="Tag">#</button>
     </div>
-  </div>
 
-<script>
-// ===== State =====
-const fmtJFull  = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-const fmtJShort = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {year:'numeric', month:'long', day:'numeric'});
-const fmtJMonth = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {year:'numeric', month:'long'});
-function jFull(iso){ try{ return fmtJFull.format(new Date(iso)); }catch{ return iso } }
-function jShort(iso){ try{ return fmtJShort.format(new Date(iso)); }catch{ return iso } }
-function jMonth(isoMonth){ try{ return fmtJMonth.format(new Date(isoMonth+'-01')); }catch{ return isoMonth } }
+    <script>
+        // Global handlers and data
+        let currentPage = 'today';
+        let entries = JSON.parse(localStorage.getItem('entries')) || [];
+        let collections = JSON.parse(localStorage.getItem('collections')) || [
+            { id: 1, title: 'پروژه‌های کاری', tags: ['کار', 'اولویت'], coverColor: '#9C27B0' },
+            { id: 2, title: 'اهداف شخصی', tags: ['شخصی', 'سلامت'], coverColor: '#673AB7' },
+            { id: 3, title: 'یادگیری', tags: ['تحصیل', 'مهارت'], coverColor: '#3F51B5' }
+        ];
+        let habits = JSON.parse(localStorage.getItem('habits')) || [
+            { id: 1, name: 'ورزش', color: '#4CAF50' },
+            { id: 2, name: 'خواندن', color: '#2196F3' },
+            { id: 3, name: 'مدیتیشن', color: '#FF9800' }
+        ];
+        let habitRecords = JSON.parse(localStorage.getItem('habitRecords')) || {};
+        let finances = JSON.parse(localStorage.getItem('finances')) || [];
 
-const storeKey='mini_bujo_v4';
-const $=s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
-const todayISO=()=>new Date().toISOString().slice(0,10);
-function load(){ let d; try{d=JSON.parse(localStorage.getItem(storeKey))||{days:{},collections:{},finance:[],habits:[]}}catch{d={days:{},collections:{},finance:[],habits:[]}}; d.collections=(d.collections||{}); d.finance=(d.finance||[]); d.habits=(d.habits||[]); return d }
-function save(d){ localStorage.setItem(storeKey,JSON.stringify(d)) }
-function uid(){ return Math.random().toString(36).slice(2,9) }
+        // Persian date formatting
+        const persianDate = (date = new Date()) => {
+            return new Intl.DateTimeFormat('fa-IR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            }).format(date);
+        };
 
-// ===== Ripple =====
-function attachRipples(){ $$('.btn,.iconbtn').forEach(b=>{ if(b.dataset.rippleBound) return; b.dataset.rippleBound='1'; b.addEventListener('click', (e)=>{ const r=document.createElement('span'); r.className='ripple'; const rect=b.getBoundingClientRect(); r.style.left=(e.clientX-rect.left)+'px'; r.style.top=(e.clientY-rect.top)+'px'; b.appendChild(r); setTimeout(()=>r.remove(),600); }) }) }
+        const persianMonth = (date = new Date()) => {
+            return new Intl.DateTimeFormat('fa-IR', {
+                year: 'numeric',
+                month: 'long'
+            }).format(date);
+        };
 
-// ===== Icons =====
-function svg(name){
-  const base='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="';
-  const end='"/></svg>';
-  const paths={ check:'M5 13l4 4L19 7', migrate:'M10 17l5-5-5-5M5 12h10', schedule:'M12 8v5l3 3 M7 4h10 M7 8h10', del:'M3 6h18 M8 6v12m8-12v12M5 6l1-2h12l1 2' };
-  return base + (paths[name]||'') + end;
-}
+        const persianNumber = (num) => {
+            return num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+        };
 
-// ===== Signifiers helper =====
-function getQuickInput(){ const m=$('#quickInputMobile'); if(m && getComputedStyle(m).display!=='none') return m; return $('#quickInput'); }
-function insertSignifier(text){ const i=getQuickInput(); if(!i) return; const pos=i.selectionStart||i.value.length; i.value=i.value.slice(0,pos)+text+i.value.slice(pos); i.focus(); i.setSelectionRange(pos+text.length,pos+text.length); }
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set today's date
+            document.getElementById('todayDate').textContent = persianDate();
+            
+            // Load data
+            renderTodayPage();
+            renderCollections();
+            renderHabits();
+            renderFinance();
+            
+            // Event listeners
+            setupEventListeners();
+            setupRippleEffect();
+            
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(console.error);
+            }
+        });
 
-// ===== Daily =====
-function signifierIcon(t){ return t==='task'?'◻︎': t==='event'?'○':'•' }
-function parseQuick(text){ const type=text.startsWith('◻︎')?'task': text.startsWith('○')?'event':'note'; const important=/(^|\s)!($|\s)/.test(text); const research=/(^|\s)\?($|\s)/.test(text); const tags=Array.from(text.matchAll(/#([\p{L}\d_\-]+)/gu)).map(m=>m[1]); const content=text.replace(/^([◻︎○•]\s*)?/,'').replace(/[!?]/g,'').trim(); return {type,content,tags,important,research} }
-function addItem(day,item){ const d=load(); d.days[day]=d.days[day]||[]; d.days[day].unshift({id:uid(),...item,done:false,migrated:false,scheduled:false,createdAt:Date.now()}); save(d); renderDaily() }
-function quickAdd(){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const im=$('#quickInputMobile'); const idt=$('#quickInput'); const src=(im && im.value.trim())? im : idt; if(!src) return; const txt=src.value.trim(); if(!txt) return; addItem(day,parseQuick(txt)); src.value='' }
-window.quickAdd = quickAdd;
-function itemRow(day,it){ const row=document.createElement('div'); row.className='item'+(it.done?' done':''); row.innerHTML=
-  '<div class="muted">'+signifierIcon(it.type)+'</div>'+
-  '<div><div>'+it.content+' '+(it.important?'<span class="pill">!</span>':'')+' '+(it.research?'<span class="pill">?</span>':'')+' '+it.tags.map(t=>'<span class="pill">#'+t+'</span>').join('')+'</div></div>'+
-  '<div class="row">'+
-    '<button class="iconbtn" title="انجام" onclick="toggleDone(\''+day+'\',\''+it.id+'\')">'+svg('check')+'</button>'+
-    '<button class="iconbtn" title="مهاجرت" onclick="migrateItem(\''+day+'\',\''+it.id+'\')">'+svg('migrate')+'</button>'+
-    '<button class="iconbtn" title="برنامه‌ریزی" onclick="scheduleItem(\''+day+'\',\''+it.id+'\')">'+svg('schedule')+'</button>'+
-    '<button class="iconbtn" title="حذف" onclick="removeItem(\''+day+'\',\''+it.id+'\')">'+svg('del')+'</button>'+
-  '</div>';
-  return row;
-}
-function renderDaily(){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); const list=$('#dailyList'); if(!list) return; list.innerHTML=''; (d.days[day]||[]).forEach(it=>list.appendChild(itemRow(day,it))); attachRipples() }
-function toggleDone(day,id){ const d=load(); const it=(d.days[day]||[]).find(x=>x.id===id); if(!it) return; it.done=!it.done; save(d); renderDaily() }
-function migrateItem(day,id){ const target=prompt('مهاجرت به چه تاریخی؟ (YYYY-MM-DD)',todayISO()); if(!target) return; const d=load(); const idx=(d.days[day]||[]).findIndex(x=>x.id===id); if(idx<0) return; const it=d.days[day][idx]; it.migrated=true; save(d); addItem(target,it) }
-function scheduleItem(day,id){ const target=prompt('برای کِی زمان‌بندی شود؟ (YYYY-MM-DD)',todayISO()); if(!target) return; const d=load(); const it=(d.days[day]||[]).find(x=>x.id===id); if(!it) return; it.scheduled=true; save(d) }
-function removeItem(day,id){ const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>x.id!==id); save(d); renderDaily() }
-function bulk(action){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); (d.days[day]||[]).forEach(it=>{ if(action==='complete') it.done=true; if(action==='migrate') it.migrated=true; if(action==='schedule') it.scheduled=true }); save(d); renderDaily() }
-function clearDone(){ const dp=$('#datePicker'); const day=(dp && dp.value)||todayISO(); const d=load(); d.days[day]=(d.days[day]||[]).filter(x=>!x.done); save(d); renderDaily() }
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-item, .tab-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.dataset.page;
+                    switchPage(page);
+                });
+            });
 
-// ===== Month =====
-function renderMonth(){ const d=load(); const mp=$('#monthPicker'); const m=(mp && mp.value)||new Date().toISOString().slice(0,7); const list=$('#monthList'); if(!list) return; list.innerHTML=''; Object.keys(d.days).filter(x=>x.startsWith(m)).sort().reverse().forEach(day=>{ const card=document.createElement('div'); card.className='card stack'; const cnt=(d.days[day]||[]).length; const done=(d.days[day]||[]).filter(x=>x.done).length; card.innerHTML='<div class="row" style="justify-content:space-between"><b>'+jShort(day)+'</b><span class="muted">'+done+'/'+cnt+' انجام‌شده</span></div>'; (d.days[day]||[]).slice(0,6).forEach(it=>card.appendChild(itemRow(day,it))); list.appendChild(card) }); attachRipples() }
+            // Menu toggle
+            document.getElementById('menuToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('hidden');
+            });
 
-// ===== Collections =====
-function addCollection(){ const name=$('#newCollectionName').value.trim(); if(!name){alert('نام مجموعه را وارد کنید');return} const d=load(); const id=uid(); d.collections[id]={id,name,items:[],cover:null,tags:[]}; save(d); $('#newCollectionName').value=''; renderCollectionsSidebar(); renderCollectionsGrid(); openCollection(id) }
-function renderCollectionsSidebar(){ const d=load(); const list=$('#collectionsList'); if(!list) return; list.innerHTML=''; const arr=Object.values(d.collections); if(arr.length===0){ list.innerHTML='<span class="muted">هنوز مجموعه‌ای نساختی</span>'; return } arr.forEach(c=>{ const div=document.createElement('div'); div.className='row'; div.innerHTML='<button class="btn" onclick="openCollection(\''+c.id+'\')">'+c.name+'</button>'; list.appendChild(div) }); attachRipples() }
-function renderCollectionsGrid(){ const d=load(); const grid=$('#collectionsGrid'); if(!grid) return; const si=$('#collSearch'); const q=(si && si.value ? si.value : '').trim(); grid.innerHTML=''; let arr=Object.values(d.collections); if(q) arr=arr.filter(c=>c.name.includes(q)||(c.tags||[]).some(t=>t.includes(q)));
-  arr.forEach(c=>{ const card=document.createElement('div'); card.className='coll-card'; card.onclick=function(){openCollection(c.id)}; card.innerHTML=
-      '<img class="cover" src="'+(c.cover||'')+'" alt="" onerror="this.style.background=\'#f2f3f7\';this.removeAttribute(\'src\')"/>'+
-      '<div class="coll-name">'+c.name+'</div>'+
-      '<div class="chips">'+(c.tags||[]).slice(0,3).map(t=>'<span class="tagchip">#'+t+'</span>').join('')+'</div>';
-    grid.appendChild(card)
-  })
-}
-function openCollection(id){ window.navigate('collections'); const d=load(); const c=d.collections[id]; if(!c) return; const detail=$('#collectionDetail'); if(!detail) return; detail.innerHTML='';
-  const card=document.createElement('div'); card.className='card stack';
-  const tagsHtml=(c.tags||[]).map(t=>`<span class="tagchip">#${t} <button class='btn' style='padding:2px 6px' onclick="removeTag('${id}','${t}')">×</button></span>`).join(' ');
-  const coverHtml=`<div class="row" style="flex-wrap:wrap">
-      <img class="cover-thumb" src="${c.cover||''}" alt="cover" onerror="this.style.background='#f2f3f7';this.removeAttribute('src')"/>
-      <div class="stack" style="flex:1;min-width:220px">
-        <div class="section-title">${c.name}</div>
-        <div class="row"><input id="cov${id}" type="file" accept="image/*" class="file-hidden"/>
-          <button class="btn" onclick="openFile('cov${id}')">انتخاب کاور</button>
-          <button class="btn" onclick="uploadCover('${id}')">بارگذاری</button>
-          <button class="btn" onclick="clearCover('${id}')">حذف کاور</button></div>
-        <div class="row">
-          <input id="tagInput${id}" placeholder="افزودن برچسب (Enter)" onkeydown="if(event.key==='Enter'){addTag('${id}')}" >
-          <div id="tagWrap${id}" class="row" style="flex-wrap:wrap;gap:6px">${tagsHtml||'<span class=muted>بدون برچسب</span>'}</div>
-        </div>
-      </div>
-    </div>`;
-  const controls=`<div class="chips">
-      <button class="btn" onclick="quickAddToCollection('${id}','project')">پروژه</button>
-      <button class="btn" onclick="quickAddToCollection('${id}','task')">تسک</button>
-      <button class="btn" onclick="quickAddToCollection('${id}','note')">یادداشت</button>
-      <button class="btn" style="background:#fee2e2;color:#991b1b" onclick="deleteCollection('${id}')">🗑 حذف مجموعه</button>
-    </div>
-    <div class="row"><input id="ci${id}" placeholder="آیتم جدید…"><button class="btn primary" onclick="addToCollection('${id}')">+ افزودن</button></div>`;
-  card.innerHTML=coverHtml+controls;
-  (c.items||[]).forEach(it=>{ const row=document.createElement('div'); row.className='item'; const text=(typeof it==='string')?it:it.text; const type=(typeof it==='string')?'note':(it.type||'note'); const tagstr=(typeof it==='string')?'':(it.tags||[]).map(t=>`<span class='pill'>#${t}</span>`).join(' '); row.innerHTML=`<div class="muted">${type==='task'?'◻︎': type==='project'?'◆':'•'}</div><div>${text} ${tagstr}</div><div><button class="btn" onclick="removeFromCollection('${id}','${encodeURIComponent(text)}')">🗑</button></div>`; card.appendChild(row) });
-  detail.appendChild(card); attachRipples()
-}
+            // Quick input
+            document.getElementById('addQuickEntry').addEventListener('click', addQuickEntry);
+            document.getElementById('quickInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addQuickEntry();
+            });
 
-function quickAddToCollection(id,type){ const inp=$('#ci'+id); if(!inp) return; if(!inp.value.trim()) inp.value = (type==='task'?'◻︎ ':'') + inp.value; inp.focus() }
-function addToCollection(id){ const inp=$('#ci'+id); const txt=inp.value.trim(); if(!txt) return; const d=load(); const c=d.collections[id]; const tagInput=$('#tagInput'+id); const tags=((tagInput && tagInput.value)||'').split(',').map(s=>s.trim()).filter(Boolean); const isTask=txt.startsWith('◻︎'); const item={text:txt.replace(/^◻︎\s*/,''), type: (isTask?'task':'note'), tags}; c.items.unshift(item); c.tags=[...new Set([...(c.tags||[]), ...tags])]; save(d); inp.value=''; if(tagInput) tagInput.value=''; openCollection(id) }
-function removeFromCollection(id,txtEnc){ const txt=decodeURIComponent(txtEnc); const d=load(); const c=d.collections[id]; c.items=c.items.filter(it=> (typeof it==='string')? it!==txt : it.text!==txt ); save(d); openCollection(id) }
-function addTag(id){ const inp=$('#tagInput'+id); const val=inp && inp.value ? inp.value.trim() : ''; if(!val) return; const d=load(); const c=d.collections[id]; c.tags=[...new Set([...(c.tags||[]), val])]; save(d); inp.value=''; openCollection(id) }
-function removeTag(id,t){ const d=load(); const c=d.collections[id]; c.tags=(c.tags||[]).filter(x=>x!==t); save(d); openCollection(id) }
-function openFile(id){ const el=document.getElementById(id); if(el) el.click(); }
-function openFileInput(){ const el=document.getElementById('importFile'); if(el) el.click(); }
-function uploadCover(id){ const inp=document.getElementById('cov'+id); if(!inp||!inp.files||!inp.files[0]){alert('عکسی انتخاب نشد');return} const reader=new FileReader(); reader.onload=function(e){ const d=load(); d.collections[id].cover=e.target.result; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.src=e.target.result; } }; reader.readAsDataURL(inp.files[0]) }
-function clearCover(id){ const d=load(); d.collections[id].cover=null; save(d); const img=document.querySelector('#collectionDetail .cover-thumb'); if(img){ img.removeAttribute('src'); img.style.background='#f2f3f7'; } }
-function deleteCollection(id){ if(!confirm('آیا مطمئنی می‌خواهی این مجموعه حذف شود؟')) return; const d=load(); delete d.collections[id]; save(d); const detail=document.getElementById('collectionDetail'); if(detail) detail.innerHTML=''; renderCollectionsSidebar(); renderCollectionsGrid(); }
+            // Search
+            document.getElementById('searchInput').addEventListener('input', performSearch);
+        }
 
-// ===== Habits =====
-function addHabit(){ const name=$('#hName').value.trim(); const color=$('#hColor').value; if(!name) {alert('نام عادت را وارد کنید'); return} const d=load(); d.habits.unshift({id:uid(),name,color,logs:{}}); save(d); $('#hName').value=''; renderHabits() }
-function renderHabits(){ const d=load(); const hm=$('#hMonth'); const month=(hm && hm.value)||new Date().toISOString().slice(0,7); if(hm) hm.value=month; const parts=month.split('-'); const yy=parseInt(parts[0],10), mm=parseInt(parts[1],10); const daysInMonth=new Date(yy, mm, 0).getDate(); const wrap=$('#hTable'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.className='hab';
-  let thead='<thead><tr><th>عادت</th>'; for(let i=1;i<=daysInMonth;i++){ thead+='<th>'+i.toLocaleString('fa-IR')+'</th>' } thead+='<th>درصد</th><th>حذف</th></tr></thead>';
-  table.innerHTML=thead; const tbody=document.createElement('tbody');
-  d.habits.forEach(h=>{ const tr=document.createElement('tr'); tr.style.setProperty('--h', h.color); let done=0; const first=document.createElement('td'); first.innerHTML='<span class="pill" style="border-color:'+h.color+'">'+h.name+'</span>'; tr.appendChild(first);
-    for(let i=1;i<=daysInMonth;i++){ const day=month+'-'+String(i).padStart(2,'0'); const on=!!h.logs[day]; if(on) done++; const td=document.createElement('td'); td.innerHTML='<div class="cell '+(on?'on':'')+'" title="'+day+'"></div>'; td.onclick=function(){toggleHabit(h.id,day)}; tr.appendChild(td) }
-    const rateTd=document.createElement('td'); const rate=Math.round((done/daysInMonth)*100)||0; rateTd.innerHTML='<span class="pill">'+rate+'%</span>'; tr.appendChild(rateTd);
-    const delTd=document.createElement('td'); delTd.innerHTML='<button class="btn" onclick="deleteHabit(\''+h.id+'\')">🗑</button>'; tr.appendChild(delTd);
-    tbody.appendChild(tr) });
-  table.appendChild(tbody); wrap.appendChild(table);
-  const totalCells=d.habits.reduce((s,h)=>s+Object.keys(h.logs).filter(k=>k.startsWith(month) && h.logs[k]).length,0);
-  const hs=$('#hSummary'); if(hs) hs.innerHTML='<span class="pill">عادت‌ها: '+d.habits.length+'</span><span class="pill">موارد انجام‌شده این ماه: '+totalCells+'</span>';
-  attachRipples() }
-function toggleHabit(hid,day){ const d=load(); const h=d.habits.find(x=>x.id===hid); if(!h) return; h.logs[day]=!h.logs[day]; save(d); renderHabits() }
-function deleteHabit(hid){ const d=load(); d.habits=d.habits.filter(x=>x.id!==hid); save(d); renderHabits() }
+        function switchPage(page) {
+            // Update active states
+            document.querySelectorAll('.nav-item, .tab-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === page);
+            });
+            
+            // Show correct page
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`${page}Page`).classList.remove('hidden');
+            document.getElementById('pageTitle').textContent = getPageTitle(page);
+            
+            currentPage = page;
+            document.getElementById('sidebar').classList.add('hidden');
+        }
 
-// ===== Finance =====
-function addTxn(){ const fd=$('#fDate'); const date=(fd && fd.value)||todayISO(); const kind=$('#fKind').value; const category=($('#fCategory').value.trim())||(kind==='income'?'درآمد':'متفرقه'); const amount=parseFloat($('#fAmount').value); const note=$('#fNote').value.trim(); if(!(amount>0)){alert('مبلغ را درست وارد کن');return} const d=load(); d.finance.unshift({id:uid(),date,kind,category,amount,note,createdAt:Date.now()}); save(d); $('#fAmount').value=''; $('#fNote').value=''; renderFinance() }
-function labelKind(k){ return k==='expense'?'هزینه':k==='income'?'درآمد':'سرمایه‌گذاری' }
-function renderFinance(){ const d=load(); const fm=$('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); if(fm) fm.value=month; const fd=$('#fDate'); if(fd && !fd.value) fd.value=todayISO(); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); let exp=0,inc=0,inv=0; rows.forEach(t=>{ if(t.kind==='expense') exp+=t.amount; else if(t.kind==='income') inc+=t.amount; else inv+=t.amount }); const net=inc-exp-inv;
-  const fs=$('#fSummary'); if(fs) fs.innerHTML =
-    '<span class="pill expense">هزینه: '+exp.toLocaleString('fa-IR')+'</span>'+
-    '<span class="pill income">درآمد: '+inc.toLocaleString('fa-IR')+'</span>'+
-    '<span class="pill invest">سرمایه‌گذاری: '+inv.toLocaleString('fa-IR')+'</span>'+
-    '<span class="pill net '+(net>=0?'pos':'neg')+'">خالص: '+net.toLocaleString('fa-IR')+'</span>';
-  const wrap=$('#fTableWrap'); if(!wrap) return; wrap.innerHTML=''; const table=document.createElement('table'); table.innerHTML='<thead><tr><th>تاریخ</th><th>نوع</th><th>دسته</th><th>مبلغ</th><th>یادداشت</th><th>عملیات</th></tr></thead><tbody></tbody>'; const tb=table.querySelector('tbody'); rows.forEach(t=>{ const tr=document.createElement('tr'); tr.innerHTML='<td>'+jShort(t.date)+'</td><td>'+labelKind(t.kind)+'</td><td>'+t.category+'</td><td>'+t.amount.toLocaleString('fa-IR')+'</td><td>'+(t.note||'')+'</td><td><button class="btn" onclick="delTxn(\''+t.id+'\')">🗑</button></td>'; tb.appendChild(tr) }); wrap.appendChild(table); attachRipples() }
-function delTxn(id){ const d=load(); d.finance=d.finance.filter(t=>t.id!==id); save(d); renderFinance() }
-function exportFinanceCSV(){ const d=load(); const fm=$('#fMonth'); const month=(fm && fm.value)||new Date().toISOString().slice(0,7); const rows=d.finance.filter(t=>(t.date||'').startsWith(month)); const lines=['date,kind,category,amount,note']; rows.forEach(t=>{ lines.push([t.date,t.kind,'"'+t.category.replace(/"/g,'""')+'"',t.amount,'"'+(t.note||'').replace(/"/g,'""')+'"'].join(',')) }); const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='finance-'+month+'.csv'; a.click() }
+        function getPageTitle(page) {
+            const titles = {
+                today: 'امروز',
+                month: 'ماه',
+                collections: 'مجموعه‌ها',
+                habits: 'عادت‌ها',
+                finance: 'مالی',
+                search: 'جستجو'
+            };
+            return titles[page] || page;
+        }
 
-// ===== Export/Import =====
-function exportData(){ const d=load(); const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='bujo.json'; a.click() }
-const importEl=document.getElementById('importFile');
-if(importEl){ importEl.addEventListener('change',function(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=function(ev){ try{ save(JSON.parse(ev.target.result)); render(); renderHabits(); renderCollectionsGrid(); }catch(e){ alert('فایل نامعتبر است') } }; r.readAsText(f) }) }
+        function addQuickEntry() {
+            const input = document.getElementById('quickInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const entry = {
+                id: Date.now(),
+                text: text,
+                date: new Date().toISOString(),
+                completed: false,
+                page: currentPage
+            };
+            
+            entries.push(entry);
+            saveData();
+            input.value = '';
+            
+            if (currentPage === 'today') {
+                renderTodayPage();
+            } else if (currentPage === 'month') {
+                renderMonthPage();
+            }
+        }
 
-// ===== Navigation =====
-function navigate(view){
-  $$('.chips button').forEach(function(b){ b.classList.remove('active') });
-  const nt=document.getElementById('nav-today'); if(view==='today' && nt) nt.classList.add('active');
-  ['today','month','collections','habits','finance','search'].forEach(function(v){
-    var sec=document.getElementById('view-'+v);
-    if(sec) sec.style.display=(v===view?'flex':'none');
-  });
-  if(view==='finance') renderFinance();
-  if(view==='habits') renderHabits();
-  if(view==='collections'){ renderCollectionsGrid(); var cd=document.getElementById('collectionDetail'); if(cd) cd.innerHTML=''; }
-  attachRipples();
-}
+        function renderTodayPage() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayEntries = entries.filter(e => 
+                e.date.startsWith(today) && e.page === 'today'
+            );
+            
+            const container = document.getElementById('todayEntries');
+            container.innerHTML = '';
+            
+            todayEntries.forEach(entry => {
+                const li = document.createElement('li');
+                li.className = 'entry-item';
+                li.innerHTML = `
+                    <input type="checkbox" class="entry-checkbox" ${entry.completed ? 'checked' : ''} data-id="${entry.id}">
+                    <div class="entry-text">${entry.text}</div>
+                `;
+                container.appendChild(li);
+            });
+            
+            // Add checkbox event listeners
+            document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', toggleEntryCompletion);
+            });
+        }
 
-// ===== Expose globals =====
-Object.assign(window, {
-  navigate, exportData, insertSignifier, quickAdd, bulk, clearDone,
-  toggleDone, migrateItem, scheduleItem, removeItem,
-  addCollection, renderCollectionsGrid, openCollection,
-  addToCollection, removeFromCollection, quickAddToCollection,
-  uploadCover, clearCover, addTag, removeTag, openFile, openFileInput,
-  addHabit, toggleHabit, deleteHabit,
-  addTxn, delTxn, exportFinanceCSV,
-  deleteCollection
-});
-window.render = render;
+        function toggleEntryCompletion(e) {
+            const id = parseInt(e.target.dataset.id);
+            const entry = entries.find(e => e.id === id);
+            if (entry) {
+                entry.completed = e.target.checked;
+                saveData();
+            }
+        }
 
-// ===== Core render =====
-function render(){
-  var dp = document.querySelector('#datePicker');
-  var currentDay = (dp && dp.value) || todayISO();
-  var tl = document.querySelector('#todayLabel');
-  if (tl) tl.textContent = jFull(currentDay);
+        function renderCollections() {
+            const container = document.getElementById('collectionsGrid');
+            container.innerHTML = '';
+            
+            collections.forEach(collection => {
+                const card = document.createElement('div');
+                card.className = 'collection-card';
+                card.innerHTML = `
+                    <div class="collection-cover" style="background-color: ${collection.coverColor}">
+                        ${collection.title}
+                    </div>
+                    <div class="collection-info">
+                        <div class="collection-title">${collection.title}</div>
+                        <div class="collection-tags">
+                            ${collection.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="collection-actions">
+                            <button class="action-btn" data-id="${collection.id}" onclick="deleteCollection(${collection.id})">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="currentColor"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
 
-  renderDaily();
-  renderMonth();
-  renderCollectionsSidebar();
+        function deleteCollection(id) {
+            collections = collections.filter(c => c.id !== id);
+            saveData();
+            renderCollections();
+        }
 
-  var mp = document.querySelector('#monthPicker');
-  if (mp) {
-    var mj = document.querySelector('#monthJLabel');
-    if (mj) mj.textContent = jMonth(mp.value);
-  }
+        function renderHabits() {
+            const daysInMonth = 30; // Simplified for demo
+            const header = document.getElementById('habitsHeader');
+            const body = document.getElementById('habitsBody');
+            
+            // Clear existing content
+            header.innerHTML = '<th>عادت</th>';
+            body.innerHTML = '';
+            
+            // Add day headers
+            for (let i = 1; i <= daysInMonth; i++) {
+                header.innerHTML += `<th>${persianNumber(i)}</th>`;
+            }
+            
+            // Add habit rows
+            habits.forEach(habit => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td style="background-color: ${habit.color}; color: white; font-weight: bold;">${habit.name}</td>`;
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateKey = `2023-10-${day.toString().padStart(2, '0')}`; // Simplified date
+                    const completed = habitRecords[dateKey] && habitRecords[dateKey].includes(habit.id);
+                    row.innerHTML += `
+                        <td class="habit-cell ${completed ? 'completed' : ''}" 
+                            data-habit-id="${habit.id}" 
+                            data-date="${dateKey}"
+                            style="${completed ? `background-color: ${habit.color}; color: white;` : ''}">
+                        </td>
+                    `;
+                }
+                body.appendChild(row);
+            });
+            
+            // Add click listeners to habit cells
+            document.querySelectorAll('.habit-cell').forEach(cell => {
+                cell.addEventListener('click', toggleHabit);
+            });
+        }
 
-  var hm = document.querySelector('#hMonth');
-  if (hm) {
-    var hj = document.querySelector('#hMonthJLabel');
-    if (hj) hj.textContent = jMonth(hm.value);
-  }
+        function toggleHabit(e) {
+            const habitId = parseInt(e.target.dataset.habitId);
+            const date = e.target.dataset.date;
+            
+            if (!habitRecords[date]) {
+                habitRecords[date] = [];
+            }
+            
+            const index = habitRecords[date].indexOf(habitId);
+            if (index > -1) {
+                habitRecords[date].splice(index, 1);
+            } else {
+                habitRecords[date].push(habitId);
+            }
+            
+            saveData();
+            e.target.classList.toggle('completed');
+            if (e.target.classList.contains('completed')) {
+                const habit = habits.find(h => h.id === habitId);
+                e.target.style.backgroundColor = habit.color;
+                e.target.style.color = 'white';
+            } else {
+                e.target.style.backgroundColor = '';
+                e.target.style.color = '';
+            }
+        }
 
-  var fm = document.querySelector('#fMonth');
-  if (fm) {
-    var fj = document.querySelector('#fMonthJLabel');
-    if (fj) fj.textContent = jMonth(fm.value);
-  }
-}
+        function renderFinance() {
+            // Calculate totals
+            const expenseTotal = finances.filter(f => f.type === 'expense').reduce((sum, f) => sum + f.amount, 0);
+            const incomeTotal = finances.filter(f => f.type === 'income').reduce((sum, f) => sum + f.amount, 0);
+            const investTotal = finances.filter(f => f.type === 'invest').reduce((sum, f) => sum + f.amount, 0);
+            
+            document.getElementById('totalExpense').textContent = `${persianNumber(expenseTotal.toLocaleString())} تومان`;
+            document.getElementById('totalIncome').textContent = `${persianNumber(incomeTotal.toLocaleString())} تومان`;
+            document.getElementById('totalInvest').textContent = `${persianNumber(investTotal.toLocaleString())} تومان`;
+            
+            // Render list
+            const container = document.getElementById('financeList');
+            container.innerHTML = '';
+            
+            finances.slice().reverse().forEach(finance => {
+                const li = document.createElement('li');
+                li.className = 'finance-item';
+                li.innerHTML = `
+                    <span>${finance.description}</span>
+                    <span class="finance-type ${finance.type}">${persianNumber(finance.amount.toLocaleString())} تومان</span>
+                `;
+                container.appendChild(li);
+            });
+        }
 
-// ===== Init =====
-function init(){
-  if(document.getElementById('datePicker')) document.getElementById('datePicker').value=todayISO();
-  if(document.getElementById('monthPicker')) document.getElementById('monthPicker').value=new Date().toISOString().slice(0,7);
-  if(document.getElementById('todayLabel')) document.getElementById('todayLabel').textContent=jFull(todayISO());
-  if(document.getElementById('hMonth')) document.getElementById('hMonth').value=new Date().toISOString().slice(0,7);
-  if(document.getElementById('fDate')) document.getElementById('fDate').value=todayISO();
-  if(document.getElementById('fMonth')) document.getElementById('fMonth').value=new Date().toISOString().slice(0,7);
-  if(document.getElementById('monthJLabel')) document.getElementById('monthJLabel').textContent=jMonth(document.getElementById('monthPicker')?document.getElementById('monthPicker').value:new Date().toISOString().slice(0,7));
-  if(document.getElementById('hMonthJLabel')) document.getElementById('hMonthJLabel').textContent=jMonth(document.getElementById('hMonth')?document.getElementById('hMonth').value:new Date().toISOString().slice(0,7));
-  if(document.getElementById('fMonthJLabel')) document.getElementById('fMonthJLabel').textContent=jMonth(document.getElementById('fMonth')?document.getElementById('fMonth').value:new Date().toISOString().slice(0,7));
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const results = document.getElementById('searchResults');
+            
+            if (!query) {
+                results.innerHTML = '';
+                return;
+            }
+            
+            const allText = [...entries, ...collections, ...habits, ...finances]
+                .map(item => {
+                    if (item.text) return item.text;
+                    if (item.title) return item.title;
+                    if (item.name) return item.name;
+                    if (item.description) return item.description;
+                    return '';
+                })
+                .filter(text => text && text.toLowerCase().includes(query));
+            
+            results.innerHTML = allText.length ? 
+                `<div class="p-4 bg-white rounded-lg">${allText.map(text => `<div>${text}</div>`).join('')}</div>` :
+                '<div class="p-4 text-center text-gray-500">نتیجه‌ای یافت نشد</div>';
+        }
 
-  const dpp=document.getElementById('datePicker'); if(dpp) dpp.addEventListener('change', function(){ renderDaily(); render(); });
-  const mpp=document.getElementById('monthPicker'); if(mpp) mpp.addEventListener('change', function(){ renderMonth(); const mj=document.getElementById('monthJLabel'); if(mj) mj.textContent=jMonth(mpp.value); });
-  const hmm=document.getElementById('hMonth'); if(hmm) hmm.addEventListener('change', function(){ renderHabits(); const hj=document.getElementById('hMonthJLabel'); if(hj) hj.textContent=jMonth(hmm.value); });
-  const fmm=document.getElementById('fMonth'); if(fmm) fmm.addEventListener('change', function(){ renderFinance(); const fj=document.getElementById('fMonthJLabel'); if(fj) fj.textContent=jMonth(fmm.value); });
-  const _cs=document.getElementById('collSearch'); if(_cs) _cs.addEventListener('input', renderCollectionsGrid);
-  const qim=document.getElementById('quickInputMobile'); if(qim) qim.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
-  const qi=document.getElementById('quickInput'); if(qi) qi.addEventListener('keydown', function(e){ if(e.key==='Enter'){ quickAdd(); }});
+        function saveData() {
+            localStorage.setItem('entries', JSON.stringify(entries));
+            localStorage.setItem('collections', JSON.stringify(collections));
+            localStorage.setItem('habits', JSON.stringify(habits));
+            localStorage.setItem('habitRecords', JSON.stringify(habitRecords));
+            localStorage.setItem('finances', JSON.stringify(finances));
+        }
 
-  render(); renderHabits(); renderCollectionsGrid(); attachRipples();
-}
+        function setupRippleEffect() {
+            const buttons = document.querySelectorAll('button, .nav-item, .tab-item, .habit-cell');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.left = `${e.clientX - rect.left}px`;
+                    ripple.style.top = `${e.clientY - rect.top}px`;
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        }
 
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded', init);
-}else{ init(); }
-
-// ===== Self tests (opt-in with ?selftest) =====
-(function(){ if(!location.search.includes('selftest')) return; console.log('✅ self tests start');
-  const backup=localStorage.getItem(storeKey);
-  try{
-    console.assert(typeof window.quickAdd==='function','window.quickAdd exists');
-    console.assert(typeof window.navigate==='function','window.navigate exists');
-    const d=todayISO(); const before=load(); addItem(d,{type:'note',content:'selftest',tags:[],important:false,research:false}); const after=load();
-    console.assert((after.days[d]||[]).length >= ((before.days[d]||[]).length+1),'addItem worked');
-  } finally {
-    if(backup!=null) localStorage.setItem(storeKey, backup); else localStorage.removeItem(storeKey);
-    renderDaily();
-  }
-  console.log('✅ self tests end');
-})();
-</script>
-
-<script>
-/* ===== SW guard (no blob) ===== */
-async function setupSW(){
-  try{
-    if(!('serviceWorker' in navigator)) return false;
-    const proto=location.protocol;
-    const allowed=(proto==='https:'|| (proto==='http:'&&location.hostname==='localhost')) && window.isSecureContext;
-    if(!allowed) return false;
-    const swUrl=new URL('sw.js',location.href).toString();
-    const res=await fetch(swUrl,{method:'GET',cache:'no-store'});
-    if(!res.ok) return false;
-    await navigator.serviceWorker.register(swUrl,{scope:'./'});
-    return true;
-  }catch(e){ return false }
-}
-setupSW();
-</script>
-
-<script>
-  // Force-hide sidebar on mobile as a safety (in case some browsers ignore media query)
-  function toggleSidebarForMobile(){
-    var as=document.querySelector('aside');
-    if(!as) return;
-    if(window.matchMedia('(max-width: 900px)').matches){ as.style.display='none'; }
-    else { as.style.display=''; }
-  }
-  toggleSidebarForMobile();
-  window.addEventListener('resize', toggleSidebarForMobile);
-</script>
-
+        // Make handlers global
+        window.deleteCollection = deleteCollection;
+        window.persianNumber = persianNumber;
+    </script>
 </body>
 </html>
