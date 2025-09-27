@@ -232,6 +232,15 @@
             color: white;
         }
 
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
         /* Quick Input */
         .quick-input {
             position: fixed;
@@ -261,26 +270,33 @@
             border-color: var(--primary);
         }
 
-        /* Habits Table */
+        /* Habits Table - Responsive Fix with Numbers */
         .habits-grid {
             display: grid;
-            gap: 12px;
+            gap: 16px;
         }
 
         .habit-row {
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 12px;
-            align-items: center;
-            padding: 12px;
             background: var(--background);
-            border-radius: 8px;
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .habit-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            min-width: 200px;
         }
 
         .habit-name {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 500;
         }
 
         .habit-color {
@@ -288,12 +304,32 @@
             height: 24px;
             border-radius: 50%;
             cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .habit-days-container {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            min-width: 600px;
         }
 
         .habit-days {
-            display: grid;
-            grid-template-columns: repeat(30, 1fr);
+            display: flex;
             gap: 4px;
+        }
+
+        .habit-day-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .habit-day-number {
+            font-size: 10px;
+            color: var(--text-secondary);
         }
 
         .habit-day {
@@ -303,35 +339,230 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
         .habit-day:hover {
             transform: scale(1.1);
         }
 
-        /* Finance Summary */
+        .habit-delete {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .habit-delete:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        /* Collections Grid - Vertical Cover */
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .collection-card {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .collection-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .collection-cover {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .collection-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .collection-cover-placeholder {
+            color: white;
+            font-size: 48px;
+            opacity: 0.5;
+        }
+
+        .collection-content {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .collection-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .collection-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        .collection-delete {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .collection-delete:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        /* Month Tasks List */
+        .month-tasks {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .month-task-item {
+            padding: 12px;
+            background: var(--background);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .month-task-item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .month-task-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Events Section */
+        .events-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .event-card {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .event-card:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .event-time {
+            background: var(--primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .event-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Finance Summary - Smaller and Mobile Friendly */
         .finance-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
             margin-bottom: 24px;
         }
 
         .finance-card {
             background: var(--background);
-            padding: 20px;
+            padding: 16px;
             border-radius: 12px;
             text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .finance-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .finance-card h3 {
-            font-size: 14px;
+            font-size: 12px;
             color: var(--text-secondary);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .finance-card .amount {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
         }
 
@@ -381,12 +612,47 @@
                 padding: 12px 16px;
             }
 
-            .habit-row {
-                grid-template-columns: 1fr;
+            .collections-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
             }
 
-            .habit-days {
-                grid-template-columns: repeat(15, 1fr);
+            .collection-card {
+                height: 240px;
+            }
+
+            .collection-cover {
+                height: 140px;
+            }
+
+            .habit-days-container {
+                min-width: 100%;
+            }
+
+            .event-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .event-time {
+                align-self: flex-end;
+            }
+
+            .finance-summary {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .finance-card {
+                padding: 12px;
+            }
+
+            .finance-card h3 {
+                font-size: 11px;
+            }
+
+            .finance-card .amount {
+                font-size: 16px;
             }
         }
 
@@ -447,6 +713,7 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
+            position: relative;
         }
 
         .modal-header {
@@ -513,36 +780,6 @@
             color: white;
         }
 
-        /* Collections Grid */
-        .collections-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 16px;
-        }
-
-        .collection-card {
-            background: var(--background);
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .collection-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .collection-card h3 {
-            margin-bottom: 8px;
-            color: var(--primary);
-        }
-
-        .collection-card p {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
         /* Loading Spinner */
         .spinner {
             display: inline-block;
@@ -577,6 +814,52 @@
         .toast.show {
             opacity: 1;
         }
+
+        /* Image Upload - Fixed */
+        .image-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+            height: 120px;
+            border: 2px dashed var(--divider);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .image-upload:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .image-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .image-upload-content {
+            position: relative;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
@@ -584,7 +867,7 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <svg viewBox="0 0 24 24">
-                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
             </svg>
             <h1>بولت ژورنال</h1>
         </div>
@@ -597,7 +880,7 @@
             </div>
             <div class="nav-item" data-page="month">
                 <svg viewBox="0 0 24 24">
-                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                    <path d="M19 3h-1V1h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
                 </svg>
                 <span>ماه</span>
             </div>
@@ -654,24 +937,7 @@
         <div class="content">
             <!-- Today Page -->
             <div class="page active" id="today">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">وظایف امروز</h2>
-                        <button class="btn btn-primary" onclick="globalHandlers.addTask()">
-                            افزودن وظیفه
-                        </button>
-                    </div>
-                    <div id="todayTasks"></div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">یادداشت‌های امروز</h2>
-                        <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
-                            افزودن یادداشت
-                        </button>
-                    </div>
-                    <div id="todayNotes"></div>
-                </div>
+                <div id="todayContent"></div>
             </div>
 
             <!-- Month Page -->
@@ -684,7 +950,7 @@
                             <button class="btn btn-secondary" onclick="globalHandlers.nextMonth()">ماه بعد</button>
                         </div>
                     </div>
-                    <div id="monthCalendar"></div>
+                    <div class="month-tasks" id="monthTasks"></div>
                 </div>
             </div>
 
@@ -908,32 +1174,139 @@
                 }
             },
 
-            // Today Page
+            // Today Page with Tab Support
+            currentTab: 'tasks',
+
             renderToday() {
                 const today = new Date().toISOString().split('T')[0];
-                const todayTasks = this.data.tasks.filter(task => task.date === today);
-                const todayNotes = this.data.notes.filter(note => note.date === today);
+                const content = document.getElementById('todayContent');
                 
-                const tasksHtml = todayTasks.length ? todayTasks.map(task => `
-                    <div class="search-result-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>${task.text}</span>
-                            <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
-                                ${task.completed ? '✓' : '○'}
-                            </button>
+                if (this.currentTab === 'tasks') {
+                    const todayTasks = this.data.tasks.filter(task => task.date === today);
+                    const tasksHtml = todayTasks.length ? todayTasks.map(task => `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">وظایف امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addTask()">
+                                    افزودن وظیفه
+                                </button>
+                            </div>
+                            ${todayTasks.map(task => `
+                                <div class="search-result-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>${task.text}</span>
+                                        <div>
+                                            <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
+                                                ${task.completed ? '✓' : '○'}
+                                            </button>
+                                            <button class="btn btn-danger" onclick="globalHandlers.deleteTask('${task.id}')">
+                                                حذف
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('') || '<p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>'}
                         </div>
-                    </div>
-                `).join('') : '<p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>';
-                
-                const notesHtml = todayNotes.length ? todayNotes.map(note => `
-                    <div class="search-result-item">
-                        <div>${note.text}</div>
-                        <small style="color: var(--text-secondary);">${new Date(note.createdAt).toLocaleTimeString('fa-IR')}</small>
-                    </div>
-                `).join('') : '<p style="text-align: center; color: var(--text-secondary);">یادداشتی برای امروز وجود ندارد</p>';
-                
-                document.getElementById('todayTasks').innerHTML = tasksHtml;
-                document.getElementById('todayNotes').innerHTML = notesHtml;
+                    `).join('') : `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">وظایف امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addTask()">
+                                    افزودن وظیفه
+                                </button>
+                            </div>
+                            <p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>
+                        </div>
+                    `;
+                    content.innerHTML = tasksHtml;
+                } else if (this.currentTab === 'notes') {
+                    const todayNotes = this.data.notes.filter(note => note.date === today);
+                    const notesHtml = todayNotes.length ? todayNotes.map(note => `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">یادداشت‌های امروز</h2>
+                                <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
+                                    افزودن یادداشت
+                                </button>
+                            </div>
+                            ${todayNotes.map(note => `
+                                <div class="search-result-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div>${note.text}</div>
+                                            <small style="color: var(--text-secondary);">${new Date(note.createdAt).toLocaleTimeString('fa-IR')}</small>
+                                        </div>
+                                        <button class="btn btn-danger" onclick="globalHandlers.deleteNote('${note.id}')">
+                                            حذف
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('') : `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">یادداشت‌های امروز</h2>
+                                <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
+                                    افزودن یادداشت
+                                </button>
+                            </div>
+                            <p style="text-align: center; color: var(--text-secondary);">یادداشتی برای امروز وجود ندارد</p>
+                        </div>
+                    `;
+                    content.innerHTML = notesHtml;
+                } else if (this.currentTab === 'events') {
+                    const todayEvents = this.data.events.filter(event => event.date === today);
+                    const eventsHtml = todayEvents.length ? todayEvents.map(event => `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">رویدادهای امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
+                                    افزودن رویداد
+                                </button>
+                            </div>
+                            ${todayEvents.map(event => `
+                                <div class="event-card">
+                                    <div class="event-time">${event.time}</div>
+                                    <div class="event-details">
+                                        <div class="event-title">${event.title}</div>
+                                        <div class="event-date">${new Date(event.date).toLocaleDateString('fa-IR')}</div>
+                                    </div>
+                                    <button class="btn btn-secondary" onclick="globalHandlers.deleteEvent('${event.id}')">حذف</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('') : `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">رویدادهای امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
+                                    افزودن رویداد
+                                </button>
+                            </div>
+                            <p style="text-align: center; color: var(--text-secondary);">رویدادی برای امروز وجود ندارد</p>
+                        </div>
+                    `;
+                    content.innerHTML = eventsHtml;
+                }
+            },
+
+            deleteTask(taskId) {
+                if (confirm('آیا از حذف این وظیفه مطمئن هستید؟')) {
+                    this.data.tasks = this.data.tasks.filter(t => t.id !== taskId);
+                    this.saveData();
+                    this.renderToday();
+                    this.showToast('وظیفه حذف شد');
+                }
+            },
+
+            deleteNote(noteId) {
+                if (confirm('آیا از حذف این یادداشت مطمئن هستید؟')) {
+                    this.data.notes = this.data.notes.filter(n => n.id !== noteId);
+                    this.saveData();
+                    this.renderToday();
+                    this.showToast('یادداشت حذف شد');
+                }
             },
 
             addTask() {
@@ -1017,35 +1390,88 @@
                 this.showToast('یادداشت با موفقیت افزوده شد');
             },
 
-            // Month Page
+            addEvent() {
+                const content = `
+                    <div class="form-group">
+                        <label>عنوان رویداد</label>
+                        <input type="text" id="eventTitle" placeholder="عنوان رویداد را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="eventDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label>ساعت</label>
+                        <input type="time" id="eventTime" value="${new Date().toTimeString().slice(0,5)}">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.saveEvent()">ذخیره</button>
+                `;
+                this.openModal('افزودن رویداد', content);
+            },
+
+            saveEvent() {
+                const title = document.getElementById('eventTitle').value;
+                const date = document.getElementById('eventDate').value;
+                const time = document.getElementById('eventTime').value;
+                
+                if (!title || !date || !time) {
+                    this.showToast('تمام فیلدها را پر کنید');
+                    return;
+                }
+                
+                const event = {
+                    id: Date.now().toString(),
+                    title,
+                    date,
+                    time,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.events.push(event);
+                this.saveData();
+                this.closeModal();
+                this.renderToday();
+                this.showToast('رویداد با موفقیت افزوده شد');
+            },
+
+            deleteEvent(eventId) {
+                if (confirm('آیا از حذف این رویداد مطمئن هستید؟')) {
+                    this.data.events = this.data.events.filter(e => e.id !== eventId);
+                    this.saveData();
+                    this.renderToday();
+                    this.showToast('رویداد حذف شد');
+                }
+            },
+
+            // Month Page - Tasks List
             currentMonth: new Date(),
 
             renderMonth() {
                 const title = document.getElementById('monthTitle');
                 title.textContent = this.getShamsiMonth(this.currentMonth);
                 
-                // Simple calendar implementation
-                const calendar = document.getElementById('monthCalendar');
-                const daysInMonth = 30; // Simplified for Persian calendar
-                let html = '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">';
+                // Get tasks for current month
+                const monthStart = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+                const monthEnd = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0);
                 
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const date = new Date(this.currentMonth);
-                    date.setDate(i);
-                    const dateStr = date.toISOString().split('T')[0];
-                    const hasEvents = this.data.events.some(e => e.date === dateStr) ||
-                                    this.data.tasks.some(t => t.date === dateStr);
-                    
-                    html += `
-                        <div class="habit-day ${hasEvents ? 'active' : ''}" style="position: relative;">
-                            ${i}
-                            ${hasEvents ? '<div style="position: absolute; bottom: 2px; left: 2px; width: 4px; height: 4px; background: var(--primary); border-radius: 50%;"></div>' : ''}
+                const monthTasks = this.data.tasks.filter(task => {
+                    const taskDate = new Date(task.date);
+                    return taskDate >= monthStart && taskDate <= monthEnd;
+                }).sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                const tasksHtml = monthTasks.length ? monthTasks.map(task => `
+                    <div class="month-task-item ${task.completed ? 'completed' : ''}">
+                        <div>
+                            <div>${task.text}</div>
+                            <div class="month-task-date">${new Date(task.date).toLocaleDateString('fa-IR')}</div>
                         </div>
-                    `;
-                }
+                        <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
+                            ${task.completed ? '✓' : '○'}
+                        </button>
+                    </div>
+                `).join('') : '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">وظیفه‌ای در این ماه وجود ندارد</p>';
                 
-                html += '</div>';
-                calendar.innerHTML = html;
+                document.getElementById('monthTasks').innerHTML = tasksHtml;
             },
 
             previousMonth() {
@@ -1058,7 +1484,7 @@
                 this.renderMonth();
             },
 
-            // Collections Page
+            // Collections Page - Vertical Cover with Delete
             renderCollections() {
                 const grid = document.getElementById('collectionsGrid');
                 
@@ -1068,11 +1494,32 @@
                 }
                 
                 grid.innerHTML = this.data.collections.map(collection => `
-                    <div class="collection-card" onclick="globalHandlers.openCollection('${collection.id}')">
-                        <h3>${collection.name}</h3>
-                        <p>${collection.items.length} مورد</p>
+                    <div class="collection-card">
+                        <button class="collection-delete" onclick="globalHandlers.deleteCollection('${collection.id}')">×</button>
+                        <div class="collection-cover" onclick="globalHandlers.openCollection('${collection.id}')">
+                            ${collection.coverImage ? 
+                                `<img src="${collection.coverImage}" alt="Cover" class="image-preview">` : 
+                                '<div class="collection-cover-placeholder">📚</div>'
+                            }
+                        </div>
+                        <div class="collection-content" onclick="globalHandlers.openCollection('${collection.id}')">
+                            <h3 class="collection-title">${collection.name}</h3>
+                            <div class="collection-meta">
+                                <span>${collection.items.length} مورد</span>
+                                <span>${new Date(collection.createdAt).toLocaleDateString('fa-IR')}</span>
+                            </div>
+                        </div>
                     </div>
                 `).join('');
+            },
+
+            deleteCollection(collectionId) {
+                if (confirm('آیا از حذف این مجموعه مطمئن هستید؟')) {
+                    this.data.collections = this.data.collections.filter(c => c.id !== collectionId);
+                    this.saveData();
+                    this.renderCollections();
+                    this.showToast('مجموعه با موفقیت حذف شد');
+                }
             },
 
             addCollection() {
@@ -1080,6 +1527,15 @@
                     <div class="form-group">
                         <label>نام مجموعه</label>
                         <input type="text" id="collectionName" placeholder="نام مجموعه را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>کاور عکس</label>
+                        <div class="image-upload">
+                            <input type="file" id="collectionCover" accept="image/*" onchange="globalHandlers.previewImage(event)">
+                            <div class="image-upload-content" id="uploadText">
+                                برای انتخاب عکس کلیک کنید
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>توضیحات</label>
@@ -1090,19 +1546,47 @@
                 this.openModal('مجموعه جدید', content);
             },
 
+            previewImage(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const uploadContent = document.getElementById('uploadText');
+                        uploadContent.innerHTML = `<img src="${e.target.result}" class="image-preview">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
             saveCollection() {
                 const name = document.getElementById('collectionName').value;
                 const desc = document.getElementById('collectionDesc').value;
+                const coverFile = document.getElementById('collectionCover').files[0];
                 
                 if (!name) {
                     this.showToast('نام مجموعه را وارد کنید');
                     return;
                 }
                 
+                let coverImage = '';
+                if (coverFile) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        coverImage = e.target.result;
+                        this.saveCollectionWithCover(name, desc, coverImage);
+                    };
+                    reader.readAsDataURL(coverFile);
+                } else {
+                    this.saveCollectionWithCover(name, desc, coverImage);
+                }
+            },
+
+            saveCollectionWithCover(name, desc, coverImage) {
                 const collection = {
                     id: Date.now().toString(),
                     name,
                     description: desc,
+                    coverImage,
                     items: [],
                     createdAt: new Date().toISOString()
                 };
@@ -1120,12 +1604,12 @@
                 
                 const content = `
                     <div class="form-group">
-                        <label>افزودن مورد به ${collection.name}</label>
-                        <input type="text" id="collectionItem" placeholder="مورد جدید...">
+                        <label>وظایف جدید برای ${collection.name}</label>
+                        <input type="text" id="collectionItem" placeholder="وظیفه جدید...">
                     </div>
                     <button class="btn btn-primary" onclick="globalHandlers.addCollectionItem('${collectionId}')">افزودن</button>
                     <div style="margin-top: 20px;">
-                        <h3>موارد موجود:</h3>
+                        <h3>وظایف موجود:</h3>
                         <div id="collectionItems">
                             ${collection.items.map((item, index) => `
                                 <div class="search-result-item">
@@ -1144,7 +1628,7 @@
             addCollectionItem(collectionId) {
                 const item = document.getElementById('collectionItem').value;
                 if (!item) {
-                    this.showToast('مورد را وارد کنید');
+                    this.showToast('وظیفه را وارد کنید');
                     return;
                 }
                 
@@ -1153,7 +1637,7 @@
                     collection.items.push(item);
                     this.saveData();
                     this.openCollection(collectionId);
-                    this.showToast('مورد با موفقیت افزوده شد');
+                    this.showToast('وظیفه با موفقیت افزوده شد');
                 }
             },
 
@@ -1163,11 +1647,11 @@
                     collection.items.splice(index, 1);
                     this.saveData();
                     this.openCollection(collectionId);
-                    this.showToast('مورد با موفقیت حذف شد');
+                    this.showToast('وظیفه با موفقیت حذف شد');
                 }
             },
 
-            // Habits Page
+            // Habits Page - With Numbers and Delete
             renderHabits() {
                 const grid = document.getElementById('habitsGrid');
                 const today = new Date();
@@ -1180,23 +1664,42 @@
                 
                 grid.innerHTML = this.data.habits.map(habit => `
                     <div class="habit-row">
-                        <div class="habit-name">
-                            <div class="habit-color" style="background: ${habit.color}" onclick="globalHandlers.showColorPicker('${habit.id}', this)"></div>
-                            <span>${habit.name}</span>
+                        <button class="habit-delete" onclick="globalHandlers.deleteHabit('${habit.id}')">×</button>
+                        <div class="habit-header">
+                            <div class="habit-name">
+                                <div class="habit-color" style="background: ${habit.color}" onclick="globalHandlers.showColorPicker('${habit.id}', this)"></div>
+                                <span>${habit.name}</span>
+                            </div>
                         </div>
-                        <div class="habit-days">
-                            ${Array.from({length: daysInMonth}, (_, i) => {
-                                const date = new Date(today.getFullYear(), today.getMonth(), i + 1);
-                                const dateStr = date.toISOString().split('T')[0];
-                                const completed = habit.completedDates.includes(dateStr);
-                                return `<div class="habit-day ${completed ? 'active' : ''}" 
-                                    style="background: ${completed ? habit.color : 'transparent'}; 
-                                    border-color: ${completed ? habit.color : 'var(--divider)'}"
-                                    onclick="globalHandlers.toggleHabit('${habit.id}', '${dateStr}')"></div>`;
-                            }).join('')}
+                        <div class="habit-days-container">
+                            <div class="habit-days">
+                                ${Array.from({length: daysInMonth}, (_, i) => {
+                                    const date = new Date(today.getFullYear(), today.getMonth(), i + 1);
+                                    const dateStr = date.toISOString().split('T')[0];
+                                    const completed = habit.completedDates.includes(dateStr);
+                                    return `
+                                        <div class="habit-day-wrapper">
+                                            <div class="habit-day-number">${i + 1}</div>
+                                            <div class="habit-day ${completed ? 'active' : ''}" 
+                                                style="background: ${completed ? habit.color : 'transparent'}; 
+                                                border-color: ${completed ? habit.color : 'var(--divider)'}"
+                                                onclick="globalHandlers.toggleHabit('${habit.id}', '${dateStr}')"></div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
                         </div>
                     </div>
                 `).join('');
+            },
+
+            deleteHabit(habitId) {
+                if (confirm('آیا از حذف این عادت مطمئن هستید؟')) {
+                    this.data.habits = this.data.habits.filter(h => h.id !== habitId);
+                    this.saveData();
+                    this.renderHabits();
+                    this.showToast('عادت با موفقیت حذف شد');
+                }
             },
 
             addHabit() {
@@ -1428,6 +1931,9 @@
                         if (item.description && item.description.toLowerCase().includes(query)) {
                             results.push({ type, item });
                         }
+                        if (item.title && item.title.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
                     });
                 });
                 
@@ -1445,7 +1951,7 @@
                         <div class="search-result-item" onclick="globalHandlers.openSearchResult('${type}', '${item.id}')">
                             <div style="display: flex; justify-content: space-between;">
                                 <div>
-                                    <div>${item.text || item.name || item.description}</div>
+                                    <div>${item.text || item.name || item.description || item.title}</div>
                                     <small style="color: var(--text-secondary);">${typeNames[type]}</small>
                                 </div>
                                 <small style="color: var(--text-secondary);">${new Date(item.createdAt).toLocaleDateString('fa-IR')}</small>
@@ -1542,8 +2048,17 @@
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
                     globalHandlers.addRipple(e.currentTarget, e);
+                    const tabName = e.currentTarget.dataset.tab;
+                    
+                    // Update active tab
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     e.currentTarget.classList.add('active');
+                    
+                    // Update current tab and render today page
+                    globalHandlers.currentTab = tabName;
+                    if (document.getElementById('today').classList.contains('active')) {
+                        globalHandlers.renderToday();
+                    }
                 });
             });
             
