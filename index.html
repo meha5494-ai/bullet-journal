@@ -1356,130 +1356,151 @@
                     const todayTasks = this.data.tasks.filter(task => task.date === today)
                         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی از جدید به قدیم
                     
-                    const tasksHtml = todayTasks.length ? todayTasks.map(task => `
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">وظایف امروز</h2>
-                                <button class="btn btn-primary" onclick="globalHandlers.addTask()">
-                                    افزودن وظیفه
-                                </button>
-                            </div>
-                            ${todayTasks.map(task => `
-                                <div class="search-result-item">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span class="${task.completed ? 'completed-task' : ''}">${task.text}</span>
-                                        <div>
-                                            <!-- ترتیب جدید: تیک، ویرایش، حذف -->
-                                            <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
-                                                ${task.completed ? '✓' : '○'}
-                                            </button>
-                                            <svg class="edit-icon" onclick="globalHandlers.editTask('${task.id}')" viewBox="0 0 24 24">
-                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                            </svg>
-                                            <svg class="delete-icon" onclick="globalHandlers.deleteTask('${task.id}')" viewBox="0 0 24 24">
-                                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                            </svg>
-                                        </div>
-                                    </div>
+                    let tasksHtml = '';
+                    if (todayTasks.length > 0) {
+                        tasksHtml = `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">وظایف امروز</h2>
+                                    <button class="btn btn-primary" onclick="globalHandlers.addTask()">
+                                        افزودن وظیفه
+                                    </button>
                                 </div>
-                            `).join('') || '<p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>'}
-                        </div>
-                    `).join('') : `
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">وظایف امروز</h2>
-                                <button class="btn btn-primary" onclick="globalHandlers.addTask()">
-                                    افزودن وظیفه
-                                </button>
+                                <div>
+                                    ${todayTasks.map(task => `
+                                        <div class="search-result-item">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <span class="${task.completed ? 'completed-task' : ''}">${task.text}</span>
+                                                <div>
+                                                    <!-- ترتیب جدید: تیک، ویرایش، حذف -->
+                                                    <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
+                                                        ${task.completed ? '✓' : '○'}
+                                                    </button>
+                                                    <svg class="edit-icon" onclick="globalHandlers.editTask('${task.id}')" viewBox="0 0 24 24">
+                                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                                    </svg>
+                                                    <svg class="delete-icon" onclick="globalHandlers.deleteTask('${task.id}')" viewBox="0 0 24 24">
+                                                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
-                            <p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        tasksHtml = `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">وظایف امروز</h2>
+                                    <button class="btn btn-primary" onclick="globalHandlers.addTask()">
+                                        افزودن وظیفه
+                                    </button>
+                                </div>
+                                <p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>
+                            </div>
+                        `;
+                    }
                     content.innerHTML = tasksHtml;
                 } else if (this.currentTab === 'notes') {
                     const todayNotes = this.data.notes.filter(note => note.date === today)
                         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی از جدید به قدیم
                     
-                    const notesHtml = todayNotes.length ? todayNotes.map(note => `
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">یادداشت‌های امروز</h2>
-                                <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
-                                    افزودن یادداشت
-                                </button>
-                            </div>
-                            ${todayNotes.map(note => `
-                                <div class="search-result-item">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <div>
-                                            <div>${note.text}</div>
-                                            <small style="color: var(--text-secondary);">${new Date(note.createdAt).toLocaleTimeString('fa-IR')}</small>
-                                        </div>
-                                        <div>
-                                            <svg class="edit-icon" onclick="globalHandlers.editNote('${note.id}')" viewBox="0 0 24 24">
-                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                            </svg>
-                                            <svg class="delete-icon" onclick="globalHandlers.deleteNote('${note.id}')" viewBox="0 0 24 24">
-                                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                            </svg>
-                                        </div>
-                                    </div>
+                    let notesHtml = '';
+                    if (todayNotes.length > 0) {
+                        notesHtml = `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">یادداشت‌های امروز</h2>
+                                    <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
+                                        افزودن یادداشت
+                                    </button>
                                 </div>
-                            `).join('')}
-                        </div>
-                    `).join('') : `
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">یادداشت‌های امروز</h2>
-                                <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
-                                    افزودن یادداشت
-                                </button>
+                                <div>
+                                    ${todayNotes.map(note => `
+                                        <div class="search-result-item">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div>
+                                                    <div>${note.text}</div>
+                                                    <small style="color: var(--text-secondary);">${new Date(note.createdAt).toLocaleTimeString('fa-IR')}</small>
+                                                </div>
+                                                <div>
+                                                    <svg class="edit-icon" onclick="globalHandlers.editNote('${note.id}')" viewBox="0 0 24 24">
+                                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                                    </svg>
+                                                    <svg class="delete-icon" onclick="globalHandlers.deleteNote('${note.id}')" viewBox="0 0 24 24">
+                                                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
-                            <p style="text-align: center; color: var(--text-secondary);">یادداشتی برای امروز وجود ندارد</p>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        notesHtml = `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">یادداشت‌های امروز</h2>
+                                    <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
+                                        افزودن یادداشت
+                                    </button>
+                                </div>
+                                <p style="text-align: center; color: var(--text-secondary);">یادداشتی برای امروز وجود ندارد</p>
+                            </div>
+                        `;
+                    }
                     content.innerHTML = notesHtml;
                 } else if (this.currentTab === 'events') {
                     const todayEvents = this.data.events.filter(event => event.date === today)
                         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی از جدید به قدیم
                     
-                    const eventsHtml = todayEvents.length ? todayEvents.map(event => `
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">رویدادهای امروز</h2>
-                                <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
-                                    افزودن رویداد
-                                </button>
-                            </div>
-                            ${todayEvents.map(event => `
-                                <div class="event-card">
-                                    <div class="event-time">${event.time}</div>
-                                    <div class="event-details">
-                                        <div class="event-title">${event.title}</div>
-                                        <div class="event-date">${new Date(event.date).toLocaleDateString('fa-IR')}</div>
-                                    </div>
-                                    <div>
-                                        <svg class="edit-icon" onclick="globalHandlers.editEvent('${event.id}')" viewBox="0 0 24 24">
-                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                        </svg>
-                                        <svg class="delete-icon" onclick="globalHandlers.deleteEvent('${event.id}')" viewBox="0 0 24 24">
-                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                        </svg>
-                                    </div>
+                    let eventsHtml = '';
+                    if (todayEvents.length > 0) {
+                        eventsHtml = `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">رویدادهای امروز</h2>
+                                    <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
+                                        افزودن رویداد
+                                    </button>
                                 </div>
-                            `).join('')}
-                        </div>
-                    `).join('') : `
-                        <div class="card">
-                            <div class="card-header">
-                                <h2 class="card-title">رویدادهای امروز</h2>
-                                <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
-                                    افزودن رویداد
-                                </button>
+                                <div class="events-grid">
+                                    ${todayEvents.map(event => `
+                                        <div class="event-card">
+                                            <div class="event-time">${event.time}</div>
+                                            <div class="event-details">
+                                                <div class="event-title">${event.title}</div>
+                                                <div class="event-date">${new Date(event.date).toLocaleDateString('fa-IR')}</div>
+                                            </div>
+                                            <div>
+                                                <svg class="edit-icon" onclick="globalHandlers.editEvent('${event.id}')" viewBox="0 0 24 24">
+                                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                                </svg>
+                                                <svg class="delete-icon" onclick="globalHandlers.deleteEvent('${event.id}')" viewBox="0 0 24 24">
+                                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
-                            <p style="text-align: center; color: var(--text-secondary);">رویدادی برای امروز وجود ندارد</p>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        eventsHtml = `
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">رویدادهای امروز</h2>
+                                    <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
+                                        افزودن رویداد
+                                    </button>
+                                </div>
+                                <p style="text-align: center; color: var(--text-secondary);">رویدادی برای امروز وجود ندارد</p>
+                            </div>
+                        `;
+                    }
                     content.innerHTML = eventsHtml;
                 }
             },
