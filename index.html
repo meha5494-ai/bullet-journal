@@ -1,1735 +1,2826 @@
-// Global Handlers
-const globalHandlers = {
-    // Data Management
-    data: {
-        tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
-        notes: JSON.parse(localStorage.getItem('notes') || '[]'),
-        habits: JSON.parse(localStorage.getItem('habits') || '[]'),
-        collections: JSON.parse(localStorage.getItem('collections') || '[]'),
-        transactions: JSON.parse(localStorage.getItem('transactions') || '[]'),
-        events: JSON.parse(localStorage.getItem('events') || '[]')
-    },
-
-    saveData() {
-        Object.keys(this.data).forEach(key => {
-            localStorage.setItem(key, JSON.stringify(this.data[key]));
-        });
-    },
-
-    // Date Functions
-    getShamsiDate(date = new Date()) {
-        const options = { 
-            calendar: 'persian', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            weekday: 'long'
-        };
-        return new Intl.DateTimeFormat('fa-IR', options).format(date);
-    },
-
-    getShamsiMonth(date = new Date()) {
-        const options = { 
-            calendar: 'persian', 
-            year: 'numeric', 
-            month: 'long'
-        };
-        return new Intl.DateTimeFormat('fa-IR', options).format(date);
-    },
-
-    // UI Functions
-    showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    },
-
-    addRipple(element, event) {
-        const ripple = document.createElement('span');
-        ripple.classList.add('ripple');
-        
-        const rect = element.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = event.clientX - rect.left - size / 2;
-        const y = event.clientY - rect.top - size / 2;
-        
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        
-        element.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
-    },
-
-    // Modal Functions
-    openModal(title, content) {
-        document.getElementById('modalTitle').textContent = title;
-        document.getElementById('modalBody').innerHTML = content;
-        document.getElementById('modal').classList.add('show');
-    },
-
-    closeModal() {
-        document.getElementById('modal').classList.remove('show');
-    },
-
-    // Navigation
-    switchPage(pageId) {
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active');
-        });
-        document.getElementById(pageId).classList.add('active');
-        
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
-        
-        // Close sidebar on mobile
-        if (window.innerWidth <= 768) {
-            document.getElementById('sidebar').classList.remove('open');
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#B47CFF">
+    <title>بولت ژورنال من</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <!-- اضافه کردن فونت وزیرمتن -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        // Update page content
-        this.updatePageContent(pageId);
-    },
 
-    updatePageContent(pageId) {
-        switch(pageId) {
-            case 'today':
+        :root {
+            --primary: #B47CFF;
+            --primary-dark: #9F5FFF;
+            --primary-light: #C5A3FF;
+            --secondary: #ec4899;
+            --background: #fafafa;
+            --surface: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --divider: #e5e7eb;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            direction: rtl;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header svg {
+            width: 40px;
+            height: 40px;
+            fill: var(--primary);
+        }
+
+        .sidebar-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-right: 280px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            padding: 20px 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .date-display {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px 30px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--divider);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Quick Input */
+        .quick-input {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            padding: 16px 30px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .quick-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .quick-input input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Habits Table - Responsive Fix with Numbers */
+        .habits-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .habit-row {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .habit-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            min-width: 200px;
+        }
+
+        .habit-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .habit-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .habit-days-container {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            min-width: 600px;
+        }
+
+        .habit-days {
+            display: flex;
+            gap: 4px;
+        }
+
+        .habit-day-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .habit-day-number {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .habit-day {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--divider);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .habit-day:hover {
+            transform: scale(1.1);
+        }
+
+        .habit-delete {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .habit-delete:hover {
+            transform: scale(1.1);
+        }
+
+        /* Collections Grid - Vertical Cover with Delete */
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .collection-card {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .collection-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .collection-cover {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .collection-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .collection-cover-placeholder {
+            color: white;
+            font-size: 48px;
+            opacity: 0.5;
+        }
+
+        .collection-content {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .collection-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .collection-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: auto;
+        }
+
+        .collection-delete {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+        }
+
+        .collection-delete:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+
+        .collection-delete svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--primary);
+        }
+
+        /* Month Tasks List */
+        .month-tasks {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .month-task-item {
+            padding: 12px;
+            background: var(--background);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .month-task-item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .month-task-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Events Section */
+        .events-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .event-card {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .event-card:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .event-time {
+            background: var(--primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .event-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Finance Summary - Smaller and Mobile Friendly */
+        .finance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .finance-card {
+            background: var(--background);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .finance-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .finance-card h3 {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .finance-card .amount {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .income { color: #10b981; }
+        .expense { color: #ef4444; }
+        .invest { color: #3b82f6; }
+
+        /* Transaction Item */
+        .transaction-item {
+            padding: 16px;
+            background: var(--background);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .transaction-item:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-description {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .transaction-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .transaction-tag {
+            background: var(--primary-light);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            margin-left: 12px;
+        }
+
+        .transaction-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Tag Filter */
+        .tag-filter {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .tag-chip {
+            background: var(--background);
+            border: 1px solid var(--divider);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tag-chip:hover {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+
+        .tag-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-right: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .quick-input {
+                padding: 12px 16px;
+            }
+
+            .collections-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .collection-card {
+                height: 240px;
+            }
+
+            .collection-cover {
+                height: 140px;
+            }
+
+            .habit-days-container {
+                min-width: 100%;
+            }
+
+            .event-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .event-time {
+                align-self: flex-end;
+            }
+
+            .finance-summary {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .finance-card {
+                padding: 12px;
+            }
+
+            .finance-card h3 {
+                font-size: 11px;
+            }
+
+            .finance-card .amount {
+                font-size: 16px;
+            }
+        }
+
+        /* Color Picker */
+        .color-picker {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            z-index: 1000;
+        }
+
+        .color-picker.show {
+            display: grid;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+        }
+
+        /* Tag Input */
+        .tag-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid var(--divider);
+            border-radius: 8px;
+            min-height: 44px;
+            align-items: center;
+        }
+
+        .tag-input-container:focus-within {
+            border-color: var(--primary);
+        }
+
+        .tag-item {
+            background: var(--primary-light);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tag-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            font-size: 14px;
+        }
+
+        /* Search Results */
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .search-result-item {
+            padding: 16px;
+            background: var(--background);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--divider);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Image Upload - Fixed */
+        .image-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+            height: 120px;
+            border: 2px dashed var(--divider);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .image-upload:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .image-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .image-upload-content {
+            position: relative;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        /* Delete Icon */
+        .delete-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .delete-icon:hover {
+            transform: scale(1.2);
+        }
+
+        /* Edit Icon */
+        .edit-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .edit-icon:hover {
+            transform: scale(1.2);
+        }
+
+        /* Completed task style */
+        .completed-task {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Button disabled state */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+            <h1>بولت ژورنال</h1>
+        </div>
+        <nav>
+            <div class="nav-item active" data-page="today">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V1h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                </svg>
+                <span>امروز</span>
+            </div>
+            <div class="nav-item" data-page="month">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                </svg>
+                <span>ماه</span>
+            </div>
+            <div class="nav-item" data-page="collections">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2l-5.5 9h11z M12 5.84L13.93 9h-3.87z M17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zM3 21.5h8v-8H3v8z"/>
+                </svg>
+                <span>مجموعه‌ها</span>
+            </div>
+            <div class="nav-item" data-page="habits">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                </svg>
+                <span>عادت‌ها</span>
+            </div>
+            <div class="nav-item" data-page="finance">
+                <svg viewBox="0 0 24 24">
+                    <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                </svg>
+                <span>مالی</span>
+            </div>
+            <div class="nav-item" data-page="search">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <span>جستجو</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <button class="menu-toggle" id="menuToggle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                </svg>
+            </button>
+            <div class="date-display" id="dateDisplay"></div>
+            <button class="btn btn-primary" onclick="globalHandlers.exportData()">
+                خروجی داده‌ها
+            </button>
+        </header>
+
+        <!-- Tabs -->
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-tab="tasks">وظایف</div>
+            <div class="tab" data-tab="notes">یادداشت‌ها</div>
+            <div class="tab" data-tab="events">رویدادها</div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Today Page -->
+            <div class="page active" id="today">
+                <div id="todayContent"></div>
+            </div>
+
+            <!-- Month Page -->
+            <div class="page" id="month">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" id="monthTitle"></h2>
+                        <div>
+                            <button class="btn btn-secondary" onclick="globalHandlers.previousMonth()">ماه قبل</button>
+                            <button class="btn btn-secondary" onclick="globalHandlers.nextMonth()">ماه بعد</button>
+                        </div>
+                    </div>
+                    <div class="month-tasks" id="monthTasks"></div>
+                </div>
+            </div>
+
+            <!-- Collections Page -->
+            <div class="page" id="collections">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">مجموعه‌ها</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.addCollection()">
+                            مجموعه جدید
+                        </button>
+                    </div>
+                    <div class="collections-grid" id="collectionsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Habits Page -->
+            <div class="page" id="habits">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">ردیابی عادت‌ها</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.addHabit()">
+                            عادت جدید
+                        </button>
+                    </div>
+                    <div class="habits-grid" id="habitsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Finance Page -->
+            <div class="page" id="finance">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">خلاصه مالی</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.exportFinanceCSV()">
+                            خروجی CSV
+                        </button>
+                    </div>
+                    <div class="finance-summary">
+                        <div class="finance-card">
+                            <h3>درآمد</h3>
+                            <div class="amount income" id="totalIncome">۰ ریال</div>
+                        </div>
+                        <div class="finance-card">
+                            <h3>هزینه</h3>
+                            <div class="amount expense" id="totalExpense">۰ ریال</div>
+                        </div>
+                        <div class="finance-card">
+                            <h3>سرمایه‌گذاری</h3>
+                            <div class="amount invest" id="totalInvest">۰ ریال</div>
+                        </div>
+                        <div class="finance-card">
+                            <h3>خالص</h3>
+                            <div class="amount" id="netBalance">۰ ریال</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">تراکنش‌ها</h2>
+                        <button class="btn btn-primary" onclick="globalHandlers.addTransaction()">
+                            افزودن تراکنش
+                        </button>
+                    </div>
+                    <!-- Tag Filter -->
+                    <div class="tag-filter" id="tagFilter">
+                        <div class="tag-chip active" onclick="globalHandlers.filterByTag('all')">همه</div>
+                    </div>
+                    <div id="transactionsList"></div>
+                </div>
+            </div>
+
+            <!-- Search Page -->
+            <div class="page" id="search">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">جستجو</h2>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="searchInput" placeholder="جستجو در تمام داده‌ها..." onkeyup="globalHandlers.search()">
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Input -->
+        <div class="quick-input">
+            <input type="text" id="quickInput" placeholder="ورودی سریع...">
+            <button class="btn btn-primary" onclick="globalHandlers.quickAdd()">افزودن</button>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">عنوان</h2>
+                <button class="modal-close" onclick="globalHandlers.closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Global Handlers
+        const globalHandlers = {
+            // Data Management
+            data: {
+                tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
+                notes: JSON.parse(localStorage.getItem('notes') || '[]'),
+                habits: JSON.parse(localStorage.getItem('habits') || '[]'),
+                collections: JSON.parse(localStorage.getItem('collections') || '[]'),
+                transactions: JSON.parse(localStorage.getItem('transactions') || '[]'),
+                events: JSON.parse(localStorage.getItem('events') || '[]')
+            },
+
+            saveData() {
+                Object.keys(this.data).forEach(key => {
+                    localStorage.setItem(key, JSON.stringify(this.data[key]));
+                });
+            },
+
+            // Date Functions
+            getShamsiDate(date = new Date()) {
+                const options = { 
+                    calendar: 'persian', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    weekday: 'long'
+                };
+                return new Intl.DateTimeFormat('fa-IR', options).format(date);
+            },
+
+            getShamsiMonth(date = new Date()) {
+                const options = { 
+                    calendar: 'persian', 
+                    year: 'numeric', 
+                    month: 'long'
+                };
+                return new Intl.DateTimeFormat('fa-IR', options).format(date);
+            },
+
+            // UI Functions
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            },
+
+            addRipple(element, event) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                
+                const rect = element.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                element.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            },
+
+            // Modal Functions
+            openModal(title, content) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalBody').innerHTML = content;
+                document.getElementById('modal').classList.add('show');
+            },
+
+            closeModal() {
+                document.getElementById('modal').classList.remove('show');
+            },
+
+            // Navigation
+            switchPage(pageId) {
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+                
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+                
+                // Close sidebar on mobile
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('open');
+                }
+                
+                // Update page content
+                this.updatePageContent(pageId);
+            },
+
+            updatePageContent(pageId) {
+                switch(pageId) {
+                    case 'today':
+                        this.renderToday();
+                        break;
+                    case 'month':
+                        this.renderMonth();
+                        break;
+                    case 'collections':
+                        this.renderCollections();
+                        break;
+                    case 'habits':
+                        this.renderHabits();
+                        break;
+                    case 'finance':
+                        this.renderFinance();
+                        break;
+                    case 'search':
+                        document.getElementById('searchInput').focus();
+                        break;
+                }
+            },
+
+            // Today Page with Tab Support
+            currentTab: 'tasks',
+
+            renderToday() {
+                const today = new Date().toISOString().split('T')[0];
+                const content = document.getElementById('todayContent');
+                
+                if (this.currentTab === 'tasks') {
+                    const todayTasks = this.data.tasks.filter(task => task.date === today)
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی از جدید به قدیم
+                    
+                    const tasksHtml = todayTasks.length ? todayTasks.map(task => `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">وظایف امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addTask()">
+                                    افزودن وظیفه
+                                </button>
+                            </div>
+                            ${todayTasks.map(task => `
+                                <div class="search-result-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span class="${task.completed ? 'completed-task' : ''}">${task.text}</span>
+                                        <div>
+                                            <!-- ترتیب جدید: تیک، ویرایش، حذف -->
+                                            <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
+                                                ${task.completed ? '✓' : '○'}
+                                            </button>
+                                            <svg class="edit-icon" onclick="globalHandlers.editTask('${task.id}')" viewBox="0 0 24 24">
+                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                            </svg>
+                                            <svg class="delete-icon" onclick="globalHandlers.deleteTask('${task.id}')" viewBox="0 0 24 24">
+                                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('') || '<p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>'}
+                        </div>
+                    `).join('') : `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">وظایف امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addTask()">
+                                    افزودن وظیفه
+                                </button>
+                            </div>
+                            <p style="text-align: center; color: var(--text-secondary);">وظیفه‌ای برای امروز وجود ندارد</p>
+                        </div>
+                    `;
+                    content.innerHTML = tasksHtml;
+                } else if (this.currentTab === 'notes') {
+                    const todayNotes = this.data.notes.filter(note => note.date === today)
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی از جدید به قدیم
+                    
+                    const notesHtml = todayNotes.length ? todayNotes.map(note => `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">یادداشت‌های امروز</h2>
+                                <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
+                                    افزودن یادداشت
+                                </button>
+                            </div>
+                            ${todayNotes.map(note => `
+                                <div class="search-result-item">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <div>${note.text}</div>
+                                            <small style="color: var(--text-secondary);">${new Date(note.createdAt).toLocaleTimeString('fa-IR')}</small>
+                                        </div>
+                                        <div>
+                                            <svg class="edit-icon" onclick="globalHandlers.editNote('${note.id}')" viewBox="0 0 24 24">
+                                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                            </svg>
+                                            <svg class="delete-icon" onclick="globalHandlers.deleteNote('${note.id}')" viewBox="0 0 24 24">
+                                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('') : `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">یادداشت‌های امروز</h2>
+                                <button class="btn btn-secondary" onclick="globalHandlers.addNote()">
+                                    افزودن یادداشت
+                                </button>
+                            </div>
+                            <p style="text-align: center; color: var(--text-secondary);">یادداشتی برای امروز وجود ندارد</p>
+                        </div>
+                    `;
+                    content.innerHTML = notesHtml;
+                } else if (this.currentTab === 'events') {
+                    const todayEvents = this.data.events.filter(event => event.date === today)
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی از جدید به قدیم
+                    
+                    const eventsHtml = todayEvents.length ? todayEvents.map(event => `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">رویدادهای امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
+                                    افزودن رویداد
+                                </button>
+                            </div>
+                            ${todayEvents.map(event => `
+                                <div class="event-card">
+                                    <div class="event-time">${event.time}</div>
+                                    <div class="event-details">
+                                        <div class="event-title">${event.title}</div>
+                                        <div class="event-date">${new Date(event.date).toLocaleDateString('fa-IR')}</div>
+                                    </div>
+                                    <div>
+                                        <svg class="edit-icon" onclick="globalHandlers.editEvent('${event.id}')" viewBox="0 0 24 24">
+                                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                        </svg>
+                                        <svg class="delete-icon" onclick="globalHandlers.deleteEvent('${event.id}')" viewBox="0 0 24 24">
+                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('') : `
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">رویدادهای امروز</h2>
+                                <button class="btn btn-primary" onclick="globalHandlers.addEvent()">
+                                    افزودن رویداد
+                                </button>
+                            </div>
+                            <p style="text-align: center; color: var(--text-secondary);">رویدادی برای امروز وجود ندارد</p>
+                        </div>
+                    `;
+                    content.innerHTML = eventsHtml;
+                }
+            },
+
+            deleteTask(taskId) {
+                if (confirm('آیا از حذف این وظیفه مطمئن هستید؟')) {
+                    this.data.tasks = this.data.tasks.filter(t => t.id !== taskId);
+                    this.saveData();
+                    this.renderToday();
+                    this.showToast('وظیفه حذف شد');
+                }
+            },
+
+            deleteNote(noteId) {
+                if (confirm('آیا از حذف این یادداشت مطمئن هستید؟')) {
+                    this.data.notes = this.data.notes.filter(n => n.id !== noteId);
+                    this.saveData();
+                    this.renderToday();
+                    this.showToast('یادداشت حذف شد');
+                }
+            },
+
+            editTask(taskId) {
+                const task = this.data.tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>متن وظیفه</label>
+                        <input type="text" id="taskText" value="${task.text}">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="taskDate" value="${task.date}">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.updateTask('${taskId}')">به‌روزرسانی</button>
+                `;
+                this.openModal('ویرایش وظیفه', content);
+            },
+
+            updateTask(taskId) {
+                const text = document.getElementById('taskText').value;
+                const date = document.getElementById('taskDate').value;
+                
+                if (!text) {
+                    this.showToast('متن وظیفه را وارد کنید');
+                    return;
+                }
+                
+                const task = this.data.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.text = text;
+                    task.date = date;
+                    this.saveData();
+                    this.closeModal();
+                    this.renderToday();
+                    this.showToast('وظیفه با موفقیت به‌روزرسانی شد');
+                }
+            },
+
+            editNote(noteId) {
+                const note = this.data.notes.find(n => n.id === noteId);
+                if (!note) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>متن یادداشت</label>
+                        <textarea id="noteText" rows="4">${note.text}</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.updateNote('${noteId}')">به‌روزرسانی</button>
+                `;
+                this.openModal('ویرایش یادداشت', content);
+            },
+
+            updateNote(noteId) {
+                const text = document.getElementById('noteText').value;
+                
+                if (!text) {
+                    this.showToast('متن یادداشت را وارد کنید');
+                    return;
+                }
+                
+                const note = this.data.notes.find(n => n.id === noteId);
+                if (note) {
+                    note.text = text;
+                    this.saveData();
+                    this.closeModal();
+                    this.renderToday();
+                    this.showToast('یادداشت با موفقیت به‌روزرسانی شد');
+                }
+            },
+
+            editEvent(eventId) {
+                const event = this.data.events.find(e => e.id === eventId);
+                if (!event) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>عنوان رویداد</label>
+                        <input type="text" id="eventTitle" value="${event.title}">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="eventDate" value="${event.date}">
+                    </div>
+                    <div class="form-group">
+                        <label>ساعت</label>
+                        <input type="time" id="eventTime" value="${event.time}">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.updateEvent('${eventId}')">به‌روزرسانی</button>
+                `;
+                this.openModal('ویرایش رویداد', content);
+            },
+
+            updateEvent(eventId) {
+                const title = document.getElementById('eventTitle').value;
+                const date = document.getElementById('eventDate').value;
+                const time = document.getElementById('eventTime').value;
+                
+                if (!title || !date || !time) {
+                    this.showToast('تمام فیلدها را پر کنید');
+                    return;
+                }
+                
+                const event = this.data.events.find(e => e.id === eventId);
+                if (event) {
+                    event.title = title;
+                    event.date = date;
+                    event.time = time;
+                    this.saveData();
+                    this.closeModal();
+                    this.renderToday();
+                    this.showToast('رویداد با موفقیت به‌روزرسانی شد');
+                }
+            },
+
+            addTask() {
+                const content = `
+                    <div class="form-group">
+                        <label>متن وظیفه</label>
+                        <input type="text" id="taskText" placeholder="وظیفه را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="taskDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <button class="btn btn-primary" id="saveTaskBtn" onclick="globalHandlers.saveTask()">ذخیره</button>
+                `;
+                this.openModal('افزودن وظیفه', content);
+            },
+
+            saveTask() {
+                const text = document.getElementById('taskText').value;
+                const date = document.getElementById('taskDate').value;
+                const saveBtn = document.getElementById('saveTaskBtn');
+                
+                if (!text) {
+                    this.showToast('متن وظیفه را وارد کنید');
+                    return;
+                }
+                
+                // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
+                
+                // بررسی تکراری نبودن وظیفه
+                const existingTask = this.data.tasks.find(task => 
+                    task.text === text && task.date === date
+                );
+                
+                if (existingTask) {
+                    this.showToast('این وظیفه قبلاً اضافه شده است');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'ذخیره';
+                    return;
+                }
+                
+                const task = {
+                    id: Date.now().toString(),
+                    text,
+                    date,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.tasks.push(task);
+                this.saveData();
+                this.closeModal();
                 this.renderToday();
-                break;
-            case 'month':
-                this.renderMonth();
-                break;
-            case 'collections':
-                this.renderCollections();
-                break;
-            case 'habits':
-                this.renderHabits();
-                break;
-            case 'finance':
-                this.renderFinance();
-                break;
-            case 'search':
-                document.getElementById('searchInput').focus();
-                break;
-        }
-    },
+                this.showToast('وظیفه با موفقیت افزوده شد');
+                
+                // فعال کردن مجدد دکمه ذخیره
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'ذخیره';
+            },
 
-    // Today Page with Tab Support
-    currentTab: 'tasks',
+            toggleTask(taskId) {
+                const task = this.data.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveData();
+                    this.renderToday();
+                }
+            },
 
-    renderToday() {
-        const today = new Date().toISOString().split('T')[0];
-        const content = document.getElementById('todayContent');
-        
-        // Clear previous content
-        content.innerHTML = '';
-        
-        if (this.currentTab === 'tasks') {
-            this.renderTasks(today, content);
-        } else if (this.currentTab === 'notes') {
-            this.renderNotes(today, content);
-        } else if (this.currentTab === 'events') {
-            this.renderEvents(today, content);
-        }
-    },
+            addNote() {
+                const content = `
+                    <div class="form-group">
+                        <label>متن یادداشت</label>
+                        <textarea id="noteText" rows="4" placeholder="یادداشت را وارد کنید..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="saveNoteBtn" onclick="globalHandlers.saveNote()">ذخیره</button>
+                `;
+                this.openModal('افزودن یادداشت', content);
+            },
 
-    renderTasks(today, content) {
-        const todayTasks = this.data.tasks
-            .filter(task => task.date === today)
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        const tasksCard = document.createElement('div');
-        tasksCard.className = 'card';
-        
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header';
-        cardHeader.innerHTML = `
-            <h2 class="card-title">وظایف امروز</h2>
-            <button class="btn btn-primary" onclick="globalHandlers.addTask()">افزودن وظیفه</button>
-        `;
-        tasksCard.appendChild(cardHeader);
-        
-        if (todayTasks.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.style.textAlign = 'center';
-            emptyMessage.style.color = 'var(--text-secondary)';
-            emptyMessage.textContent = 'وظیفه‌ای برای امروز وجود ندارد';
-            tasksCard.appendChild(emptyMessage);
-        } else {
-            todayTasks.forEach(task => {
-                const taskItem = document.createElement('div');
-                taskItem.className = 'search-result-item';
-                taskItem.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="${task.completed ? 'completed-task' : ''}">${task.text}</span>
+            saveNote() {
+                const text = document.getElementById('noteText').value;
+                const saveBtn = document.getElementById('saveNoteBtn');
+                
+                if (!text) {
+                    this.showToast('متن یادداشت را وارد کنید');
+                    return;
+                }
+                
+                // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
+                
+                // بررسی تکراری نبودن یادداشت
+                const today = new Date().toISOString().split('T')[0];
+                const existingNote = this.data.notes.find(note => 
+                    note.text === text && note.date === today
+                );
+                
+                if (existingNote) {
+                    this.showToast('این یادداشت قبلاً اضافه شده است');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'ذخیره';
+                    return;
+                }
+                
+                const note = {
+                    id: Date.now().toString(),
+                    text,
+                    date: today,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.notes.push(note);
+                this.saveData();
+                this.closeModal();
+                this.renderToday();
+                this.showToast('یادداشت با موفقیت افزوده شد');
+                
+                // فعال کردن مجدد دکمه ذخیره
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'ذخیره';
+            },
+
+            addEvent() {
+                const content = `
+                    <div class="form-group">
+                        <label>عنوان رویداد</label>
+                        <input type="text" id="eventTitle" placeholder="عنوان رویداد را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="eventDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label>ساعت</label>
+                        <input type="time" id="eventTime" value="${new Date().toTimeString().slice(0,5)}">
+                    </div>
+                    <button class="btn btn-primary" id="saveEventBtn" onclick="globalHandlers.saveEvent()">ذخیره</button>
+                `;
+                this.openModal('افزودن رویداد', content);
+            },
+
+            saveEvent() {
+                const title = document.getElementById('eventTitle').value;
+                const date = document.getElementById('eventDate').value;
+                const time = document.getElementById('eventTime').value;
+                const saveBtn = document.getElementById('saveEventBtn');
+                
+                if (!title || !date || !time) {
+                    this.showToast('تمام فیلدها را پر کنید');
+                    return;
+                }
+                
+                // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
+                
+                // بررسی تکراری نبودن رویداد
+                const existingEvent = this.data.events.find(event => 
+                    event.title === title && event.date === date && event.time === time
+                );
+                
+                if (existingEvent) {
+                    this.showToast('این رویداد قبلاً اضافه شده است');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'ذخیره';
+                    return;
+                }
+                
+                const event = {
+                    id: Date.now().toString(),
+                    title,
+                    date,
+                    time,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.events.push(event);
+                this.saveData();
+                this.closeModal();
+                this.renderToday();
+                this.showToast('رویداد با موفقیت افزوده شد');
+                
+                // فعال کردن مجدد دکمه ذخیره
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'ذخیره';
+            },
+
+            deleteEvent(eventId) {
+                if (confirm('آیا از حذف این رویداد مطمئن هستید؟')) {
+                    this.data.events = this.data.events.filter(e => e.id !== eventId);
+                    this.saveData();
+                    this.renderToday();
+                    this.showToast('رویداد حذف شد');
+                }
+            },
+
+            // Month Page - Tasks List
+            currentMonth: new Date(),
+
+            renderMonth() {
+                const title = document.getElementById('monthTitle');
+                title.textContent = this.getShamsiMonth(this.currentMonth);
+                
+                // Get tasks for current month
+                const monthStart = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+                const monthEnd = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0);
+                
+                const monthTasks = this.data.tasks.filter(task => {
+                    const taskDate = new Date(task.date);
+                    return taskDate >= monthStart && taskDate <= monthEnd;
+                }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // مرتب‌سازی از جدید به قدیم
+                
+                const tasksHtml = monthTasks.length ? monthTasks.map(task => `
+                    <div class="month-task-item ${task.completed ? 'completed' : ''}">
+                        <div>
+                            <div class="${task.completed ? 'completed-task' : ''}">${task.text}</div>
+                            <div class="month-task-date">${new Date(task.date).toLocaleDateString('fa-IR')}</div>
+                        </div>
                         <div>
                             <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
                                 ${task.completed ? '✓' : '○'}
                             </button>
-                            <svg class="edit-icon" onclick="globalHandlers.editTask('${task.id}')" viewBox="0 0 24 24">
-                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                            </svg>
-                            <svg class="delete-icon" onclick="globalHandlers.deleteTask('${task.id}')" viewBox="0 0 24 24">
+                            <svg class="delete-icon" onclick="globalHandlers.deleteTaskFromMonth('${task.id}')" viewBox="0 0 24 24">
                                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                             </svg>
                         </div>
                     </div>
-                `;
-                tasksCard.appendChild(taskItem);
-            });
-        }
-        
-        content.appendChild(tasksCard);
-    },
+                `).join('') : '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">وظیفه‌ای در این ماه وجود ندارد</p>';
+                
+                document.getElementById('monthTasks').innerHTML = tasksHtml;
+            },
 
-    renderNotes(today, content) {
-        const todayNotes = this.data.notes
-            .filter(note => note.date === today)
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        const notesCard = document.createElement('div');
-        notesCard.className = 'card';
-        
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header';
-        cardHeader.innerHTML = `
-            <h2 class="card-title">یادداشت‌های امروز</h2>
-            <button class="btn btn-secondary" onclick="globalHandlers.addNote()">افزودن یادداشت</button>
-        `;
-        notesCard.appendChild(cardHeader);
-        
-        if (todayNotes.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.style.textAlign = 'center';
-            emptyMessage.style.color = 'var(--text-secondary)';
-            emptyMessage.textContent = 'یادداشتی برای امروز وجود ندارد';
-            notesCard.appendChild(emptyMessage);
-        } else {
-            todayNotes.forEach(note => {
-                const noteItem = document.createElement('div');
-                noteItem.className = 'search-result-item';
-                noteItem.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div>${note.text}</div>
-                            <small style="color: var(--text-secondary);">${new Date(note.createdAt).toLocaleTimeString('fa-IR')}</small>
-                        </div>
-                        <div>
-                            <svg class="edit-icon" onclick="globalHandlers.editNote('${note.id}')" viewBox="0 0 24 24">
-                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                            </svg>
-                            <svg class="delete-icon" onclick="globalHandlers.deleteNote('${note.id}')" viewBox="0 0 24 24">
+            deleteTaskFromMonth(taskId) {
+                if (confirm('آیا از حذف این وظیفه مطمئن هستید؟')) {
+                    this.data.tasks = this.data.tasks.filter(t => t.id !== taskId);
+                    this.saveData();
+                    this.renderMonth();
+                    this.showToast('وظیفه حذف شد');
+                }
+            },
+
+            previousMonth() {
+                this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
+                this.renderMonth();
+            },
+
+            nextMonth() {
+                this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
+                this.renderMonth();
+            },
+
+            // Collections Page - Vertical Cover with Delete
+            renderCollections() {
+                const grid = document.getElementById('collectionsGrid');
+                
+                if (this.data.collections.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary); grid-column: 1/-1;">مجموعه‌ای وجود ندارد</p>';
+                    return;
+                }
+                
+                grid.innerHTML = this.data.collections.map(collection => `
+                    <div class="collection-card" data-id="${collection.id}">
+                        <button class="collection-delete" data-id="${collection.id}" title="حذف مجموعه">
+                            <svg viewBox="0 0 24 24">
                                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                             </svg>
+                        </button>
+                        <div class="collection-cover" onclick="globalHandlers.openCollection('${collection.id}')">
+                            ${collection.coverImage ? 
+                                `<img src="${collection.coverImage}" alt="Cover" class="image-preview">` : 
+                                '<div class="collection-cover-placeholder">📚</div>'
+                            }
                         </div>
-                    </div>
-                `;
-                notesCard.appendChild(noteItem);
-            });
-        }
-        
-        content.appendChild(notesCard);
-    },
-
-    renderEvents(today, content) {
-        const todayEvents = this.data.events
-            .filter(event => event.date === today)
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        const eventsCard = document.createElement('div');
-        eventsCard.className = 'card';
-        
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header';
-        cardHeader.innerHTML = `
-            <h2 class="card-title">رویدادهای امروز</h2>
-            <button class="btn btn-primary" onclick="globalHandlers.addEvent()">افزودن رویداد</button>
-        `;
-        eventsCard.appendChild(cardHeader);
-        
-        if (todayEvents.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.style.textAlign = 'center';
-            emptyMessage.style.color = 'var(--text-secondary)';
-            emptyMessage.textContent = 'رویدادی برای امروز وجود ندارد';
-            eventsCard.appendChild(emptyMessage);
-        } else {
-            todayEvents.forEach(event => {
-                const eventItem = document.createElement('div');
-                eventItem.className = 'event-card';
-                eventItem.innerHTML = `
-                    <div class="event-time">${event.time}</div>
-                    <div class="event-details">
-                        <div class="event-title">${event.title}</div>
-                        <div class="event-date">${new Date(event.date).toLocaleDateString('fa-IR')}</div>
-                    </div>
-                    <div>
-                        <svg class="edit-icon" onclick="globalHandlers.editEvent('${event.id}')" viewBox="0 0 24 24">
-                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                        </svg>
-                        <svg class="delete-icon" onclick="globalHandlers.deleteEvent('${event.id}')" viewBox="0 0 24 24">
-                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                        </svg>
-                    </div>
-                `;
-                eventsCard.appendChild(eventItem);
-            });
-        }
-        
-        content.appendChild(eventsCard);
-    },
-
-    // Task Functions
-    deleteTask(taskId) {
-        if (confirm('آیا از حذف این وظیفه مطمئن هستید؟')) {
-            this.data.tasks = this.data.tasks.filter(t => t.id !== taskId);
-            this.saveData();
-            this.renderToday();
-            this.showToast('وظیفه حذف شد');
-        }
-    },
-
-    editTask(taskId) {
-        const task = this.data.tasks.find(t => t.id === taskId);
-        if (!task) return;
-        
-        const content = `
-            <div class="form-group">
-                <label>متن وظیفه</label>
-                <input type="text" id="taskText" value="${task.text}">
-            </div>
-            <div class="form-group">
-                <label>تاریخ</label>
-                <input type="date" id="taskDate" value="${task.date}">
-            </div>
-            <button class="btn btn-primary" onclick="globalHandlers.updateTask('${taskId}')">به‌روزرسانی</button>
-        `;
-        this.openModal('ویرایش وظیفه', content);
-    },
-
-    updateTask(taskId) {
-        const text = document.getElementById('taskText').value;
-        const date = document.getElementById('taskDate').value;
-        
-        if (!text) {
-            this.showToast('متن وظیفه را وارد کنید');
-            return;
-        }
-        
-        const task = this.data.tasks.find(t => t.id === taskId);
-        if (task) {
-            task.text = text;
-            task.date = date;
-            this.saveData();
-            this.closeModal();
-            this.renderToday();
-            this.showToast('وظیفه با موفقیت به‌روزرسانی شد');
-        }
-    },
-
-    toggleTask(taskId) {
-        const task = this.data.tasks.find(t => t.id === taskId);
-        if (task) {
-            task.completed = !task.completed;
-            this.saveData();
-            this.renderToday();
-        }
-    },
-
-    addTask() {
-        const content = `
-            <div class="form-group">
-                <label>متن وظیفه</label>
-                <input type="text" id="taskText" placeholder="وظیفه را وارد کنید...">
-            </div>
-            <div class="form-group">
-                <label>تاریخ</label>
-                <input type="date" id="taskDate" value="${new Date().toISOString().split('T')[0]}">
-            </div>
-            <button class="btn btn-primary" id="saveTaskBtn" onclick="globalHandlers.saveTask()">ذخیره</button>
-        `;
-        this.openModal('افزودن وظیفه', content);
-    },
-
-    saveTask() {
-        const text = document.getElementById('taskText').value;
-        const date = document.getElementById('taskDate').value;
-        const saveBtn = document.getElementById('saveTaskBtn');
-        
-        if (!text) {
-            this.showToast('متن وظیفه را وارد کنید');
-            return;
-        }
-        
-        // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'در حال ذخیره...';
-        
-        // بررسی تکراری نبودن وظیفه
-        const existingTask = this.data.tasks.find(task => 
-            task.text === text && task.date === date
-        );
-        
-        if (existingTask) {
-            this.showToast('این وظیفه قبلاً اضافه شده است');
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'ذخیره';
-            return;
-        }
-        
-        const task = {
-            id: Date.now().toString(),
-            text,
-            date,
-            completed: false,
-            createdAt: new Date().toISOString()
-        };
-        
-        this.data.tasks.push(task);
-        this.saveData();
-        this.closeModal();
-        this.renderToday();
-        this.showToast('وظیفه با موفقیت افزوده شد');
-        
-        // فعال کردن مجدد دکمه ذخیره
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'ذخیره';
-    },
-
-    // Note Functions
-    deleteNote(noteId) {
-        if (confirm('آیا از حذف این یادداشت مطمئن هستید؟')) {
-            this.data.notes = this.data.notes.filter(n => n.id !== noteId);
-            this.saveData();
-            this.renderToday();
-            this.showToast('یادداشت حذف شد');
-        }
-    },
-
-    editNote(noteId) {
-        const note = this.data.notes.find(n => n.id === noteId);
-        if (!note) return;
-        
-        const content = `
-            <div class="form-group">
-                <label>متن یادداشت</label>
-                <textarea id="noteText" rows="4">${note.text}</textarea>
-            </div>
-            <button class="btn btn-primary" onclick="globalHandlers.updateNote('${noteId}')">به‌روزرسانی</button>
-        `;
-        this.openModal('ویرایش یادداشت', content);
-    },
-
-    updateNote(noteId) {
-        const text = document.getElementById('noteText').value;
-        
-        if (!text) {
-            this.showToast('متن یادداشت را وارد کنید');
-            return;
-        }
-        
-        const note = this.data.notes.find(n => n.id === noteId);
-        if (note) {
-            note.text = text;
-            this.saveData();
-            this.closeModal();
-            this.renderToday();
-            this.showToast('یادداشت با موفقیت به‌روزرسانی شد');
-        }
-    },
-
-    addNote() {
-        const content = `
-            <div class="form-group">
-                <label>متن یادداشت</label>
-                <textarea id="noteText" rows="4" placeholder="یادداشت را وارد کنید..."></textarea>
-            </div>
-            <button class="btn btn-primary" id="saveNoteBtn" onclick="globalHandlers.saveNote()">ذخیره</button>
-        `;
-        this.openModal('افزودن یادداشت', content);
-    },
-
-    saveNote() {
-        const text = document.getElementById('noteText').value;
-        const saveBtn = document.getElementById('saveNoteBtn');
-        
-        if (!text) {
-            this.showToast('متن یادداشت را وارد کنید');
-            return;
-        }
-        
-        // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'در حال ذخیره...';
-        
-        // بررسی تکراری نبودن یادداشت
-        const today = new Date().toISOString().split('T')[0];
-        const existingNote = this.data.notes.find(note => 
-            note.text === text && note.date === today
-        );
-        
-        if (existingNote) {
-            this.showToast('این یادداشت قبلاً اضافه شده است');
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'ذخیره';
-            return;
-        }
-        
-        const note = {
-            id: Date.now().toString(),
-            text,
-            date: today,
-            createdAt: new Date().toISOString()
-        };
-        
-        this.data.notes.push(note);
-        this.saveData();
-        this.closeModal();
-        this.renderToday();
-        this.showToast('یادداشت با موفقیت افزوده شد');
-        
-        // فعال کردن مجدد دکمه ذخیره
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'ذخیره';
-    },
-
-    // Event Functions
-    deleteEvent(eventId) {
-        if (confirm('آیا از حذف این رویداد مطمئن هستید؟')) {
-            this.data.events = this.data.events.filter(e => e.id !== eventId);
-            this.saveData();
-            this.renderToday();
-            this.showToast('رویداد حذف شد');
-        }
-    },
-
-    editEvent(eventId) {
-        const event = this.data.events.find(e => e.id === eventId);
-        if (!event) return;
-        
-        const content = `
-            <div class="form-group">
-                <label>عنوان رویداد</label>
-                <input type="text" id="eventTitle" value="${event.title}">
-            </div>
-            <div class="form-group">
-                <label>تاریخ</label>
-                <input type="date" id="eventDate" value="${event.date}">
-            </div>
-            <div class="form-group">
-                <label>ساعت</label>
-                <input type="time" id="eventTime" value="${event.time}">
-            </div>
-            <button class="btn btn-primary" onclick="globalHandlers.updateEvent('${eventId}')">به‌روزرسانی</button>
-        `;
-        this.openModal('ویرایش رویداد', content);
-    },
-
-    updateEvent(eventId) {
-        const title = document.getElementById('eventTitle').value;
-        const date = document.getElementById('eventDate').value;
-        const time = document.getElementById('eventTime').value;
-        
-        if (!title || !date || !time) {
-            this.showToast('تمام فیلدها را پر کنید');
-            return;
-        }
-        
-        const event = this.data.events.find(e => e.id === eventId);
-        if (event) {
-            event.title = title;
-            event.date = date;
-            event.time = time;
-            this.saveData();
-            this.closeModal();
-            this.renderToday();
-            this.showToast('رویداد با موفقیت به‌روزرسانی شد');
-        }
-    },
-
-    addEvent() {
-        const content = `
-            <div class="form-group">
-                <label>عنوان رویداد</label>
-                <input type="text" id="eventTitle" placeholder="عنوان رویداد را وارد کنید...">
-            </div>
-            <div class="form-group">
-                <label>تاریخ</label>
-                <input type="date" id="eventDate" value="${new Date().toISOString().split('T')[0]}">
-            </div>
-            <div class="form-group">
-                <label>ساعت</label>
-                <input type="time" id="eventTime" value="${new Date().toTimeString().slice(0,5)}">
-            </div>
-            <button class="btn btn-primary" id="saveEventBtn" onclick="globalHandlers.saveEvent()">ذخیره</button>
-        `;
-        this.openModal('افزودن رویداد', content);
-    },
-
-    saveEvent() {
-        const title = document.getElementById('eventTitle').value;
-        const date = document.getElementById('eventDate').value;
-        const time = document.getElementById('eventTime').value;
-        const saveBtn = document.getElementById('saveEventBtn');
-        
-        if (!title || !date || !time) {
-            this.showToast('تمام فیلدها را پر کنید');
-            return;
-        }
-        
-        // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'در حال ذخیره...';
-        
-        // بررسی تکراری نبودن رویداد
-        const existingEvent = this.data.events.find(event => 
-            event.title === title && event.date === date && event.time === time
-        );
-        
-        if (existingEvent) {
-            this.showToast('این رویداد قبلاً اضافه شده است');
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'ذخیره';
-            return;
-        }
-        
-        const event = {
-            id: Date.now().toString(),
-            title,
-            date,
-            time,
-            createdAt: new Date().toISOString()
-        };
-        
-        this.data.events.push(event);
-        this.saveData();
-        this.closeModal();
-        this.renderToday();
-        this.showToast('رویداد با موفقیت افزوده شد');
-        
-        // فعال کردن مجدد دکمه ذخیره
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'ذخیره';
-    },
-
-    // Month Page - Tasks List
-    currentMonth: new Date(),
-
-    renderMonth() {
-        const title = document.getElementById('monthTitle');
-        title.textContent = this.getShamsiMonth(this.currentMonth);
-        
-        // Get tasks for current month
-        const monthStart = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
-        const monthEnd = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0);
-        
-        const monthTasks = this.data.tasks.filter(task => {
-            const taskDate = new Date(task.date);
-            return taskDate >= monthStart && taskDate <= monthEnd;
-        }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        const tasksHtml = monthTasks.length ? monthTasks.map(task => `
-            <div class="month-task-item ${task.completed ? 'completed' : ''}">
-                <div>
-                    <div class="${task.completed ? 'completed-task' : ''}">${task.text}</div>
-                    <div class="month-task-date">${new Date(task.date).toLocaleDateString('fa-IR')}</div>
-                </div>
-                <div>
-                    <button class="btn btn-secondary" onclick="globalHandlers.toggleTask('${task.id}')">
-                        ${task.completed ? '✓' : '○'}
-                    </button>
-                    <svg class="delete-icon" onclick="globalHandlers.deleteTaskFromMonth('${task.id}')" viewBox="0 0 24 24">
-                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                    </svg>
-                </div>
-            </div>
-        `).join('') : '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">وظیفه‌ای در این ماه وجود ندارد</p>';
-        
-        document.getElementById('monthTasks').innerHTML = tasksHtml;
-    },
-
-    deleteTaskFromMonth(taskId) {
-        if (confirm('آیا از حذف این وظیفه مطمئن هستید؟')) {
-            this.data.tasks = this.data.tasks.filter(t => t.id !== taskId);
-            this.saveData();
-            this.renderMonth();
-            this.showToast('وظیفه حذف شد');
-        }
-    },
-
-    previousMonth() {
-        this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
-        this.renderMonth();
-    },
-
-    nextMonth() {
-        this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
-        this.renderMonth();
-    },
-
-    // Collections Page - Vertical Cover with Delete
-    renderCollections() {
-        const grid = document.getElementById('collectionsGrid');
-        
-        // Clear previous content
-        grid.innerHTML = '';
-        
-        if (this.data.collections.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.style.textAlign = 'center';
-            emptyMessage.style.color = 'var(--text-secondary)';
-            emptyMessage.textContent = 'مجموعه‌ای وجود ندارد';
-            emptyMessage.style.gridColumn = '1/-1';
-            grid.appendChild(emptyMessage);
-            return;
-        }
-        
-        this.data.collections.forEach(collection => {
-            const collectionCard = document.createElement('div');
-            collectionCard.className = 'collection-card';
-            collectionCard.setAttribute('data-id', collection.id);
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'collection-delete';
-            deleteBtn.setAttribute('data-id', collection.id);
-            deleteBtn.setAttribute('title', 'حذف مجموعه');
-            deleteBtn.innerHTML = `
-                <svg viewBox="0 0 24 24">
-                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
-            `;
-            
-            const collectionCover = document.createElement('div');
-            collectionCover.className = 'collection-cover';
-            collectionCover.onclick = () => this.openCollection(collection.id);
-            
-            if (collection.coverImage) {
-                const img = document.createElement('img');
-                img.src = collection.coverImage;
-                img.alt = 'Cover';
-                img.className = 'image-preview';
-                collectionCover.appendChild(img);
-            } else {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'collection-cover-placeholder';
-                placeholder.textContent = '📚';
-                collectionCover.appendChild(placeholder);
-            }
-            
-            const collectionContent = document.createElement('div');
-            collectionContent.className = 'collection-content';
-            collectionContent.onclick = () => this.openCollection(collection.id);
-            
-            const collectionTitle = document.createElement('h3');
-            collectionTitle.className = 'collection-title';
-            collectionTitle.textContent = collection.name;
-            
-            const collectionMeta = document.createElement('div');
-            collectionMeta.className = 'collection-meta';
-            collectionMeta.innerHTML = `
-                <span>${collection.items.length} مورد</span>
-                <span>${new Date(collection.createdAt).toLocaleDateString('fa-IR')}</span>
-            `;
-            
-            collectionContent.appendChild(collectionTitle);
-            collectionContent.appendChild(collectionMeta);
-            
-            collectionCard.appendChild(deleteBtn);
-            collectionCard.appendChild(collectionCover);
-            collectionCard.appendChild(collectionContent);
-            
-            grid.appendChild(collectionCard);
-            
-            // Add event listener to delete button
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.deleteCollection(collection.id);
-            });
-        });
-    },
-
-    deleteCollection(collectionId) {
-        if (confirm('آیا از حذف این مجموعه مطمئن هستید؟')) {
-            this.data.collections = this.data.collections.filter(c => c.id !== collectionId);
-            this.saveData();
-            this.renderCollections();
-            this.showToast('مجموعه با موفقیت حذف شد');
-        }
-    },
-
-    addCollection() {
-        const content = `
-            <div class="form-group">
-                <label>نام مجموعه</label>
-                <input type="text" id="collectionName" placeholder="نام مجموعه را وارد کنید...">
-            </div>
-            <div class="form-group">
-                <label>کاور عکس</label>
-                <div class="image-upload">
-                    <input type="file" id="collectionCover" accept="image/*" onchange="globalHandlers.previewImage(event)">
-                    <div class="image-upload-content" id="uploadText">
-                        برای انتخاب عکس کلیک کنید
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>توضیحات</label>
-                <textarea id="collectionDesc" rows="3" placeholder="توضیحات اختیاری..."></textarea>
-            </div>
-            <button class="btn btn-primary" id="saveCollectionBtn" onclick="globalHandlers.saveCollection()">ذخیره</button>
-        `;
-        this.openModal('مجموعه جدید', content);
-    },
-
-    previewImage(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const uploadContent = document.getElementById('uploadText');
-                uploadContent.innerHTML = `<img src="${e.target.result}" class="image-preview">`;
-            };
-            reader.readAsDataURL(file);
-        }
-    },
-
-    saveCollection() {
-        const name = document.getElementById('collectionName').value;
-        const desc = document.getElementById('collectionDesc').value;
-        const coverFile = document.getElementById('collectionCover').files[0];
-        const saveBtn = document.getElementById('saveCollectionBtn');
-        
-        if (!name) {
-            this.showToast('نام مجموعه را وارد کنید');
-            return;
-        }
-        
-        // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'در حال ذخیره...';
-        
-        let coverImage = '';
-        if (coverFile) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                coverImage = e.target.result;
-                this.saveCollectionWithCover(name, desc, coverImage);
-            };
-            reader.readAsDataURL(coverFile);
-        } else {
-            this.saveCollectionWithCover(name, desc, coverImage);
-        }
-    },
-
-    saveCollectionWithCover(name, desc, coverImage) {
-        const collection = {
-            id: Date.now().toString(),
-            name,
-            description: desc,
-            coverImage,
-            items: [],
-            createdAt: new Date().toISOString()
-        };
-        
-        this.data.collections.push(collection);
-        this.saveData();
-        this.closeModal();
-        this.renderCollections();
-        this.showToast('مجموعه با موفقیت افزوده شد');
-        
-        // فعال کردن مجدد دکمه ذخیره
-        const saveBtn = document.getElementById('saveCollectionBtn');
-        if (saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'ذخیره';
-        }
-    },
-
-    openCollection(collectionId) {
-        const collection = this.data.collections.find(c => c.id === collectionId);
-        if (!collection) return;
-        
-        const content = `
-            <div class="form-group">
-                <label>وظایف جدید برای ${collection.name}</label>
-                <input type="text" id="collectionItem" placeholder="وظیفه جدید...">
-            </div>
-            <button class="btn btn-primary" onclick="globalHandlers.addCollectionItem('${collectionId}')">افزودن</button>
-            <div style="margin-top: 20px;">
-                <h3>وظایف موجود:</h3>
-                <div id="collectionItems">
-                    ${collection.items.map((item, index) => `
-                        <div class="search-result-item">
-                            <div style="display: flex; justify-content: space-between;">
-                                <span>${item}</span>
-                                <svg class="delete-icon" onclick="globalHandlers.removeCollectionItem('${collectionId}', ${index})" viewBox="0 0 24 24">
-                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                </svg>
+                        <div class="collection-content" onclick="globalHandlers.openCollection('${collection.id}')">
+                            <h3 class="collection-title">${collection.name}</h3>
+                            <div class="collection-meta">
+                                <span>${collection.items.length} مورد</span>
+                                <span>${new Date(collection.createdAt).toLocaleDateString('fa-IR')}</span>
                             </div>
                         </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-        this.openModal(collection.name, content);
-    },
-
-    addCollectionItem(collectionId) {
-        const item = document.getElementById('collectionItem').value;
-        if (!item) {
-            this.showToast('وظیفه را وارد کنید');
-            return;
-        }
-        
-        // بررسی تکراری نبودن آیتم
-        const collection = this.data.collections.find(c => c.id === collectionId);
-        if (collection && collection.items.includes(item)) {
-            this.showToast('این وظیفه قبلاً اضافه شده است');
-            return;
-        }
-        
-        if (collection) {
-            collection.items.push(item);
-            this.saveData();
-            this.openCollection(collectionId);
-            this.showToast('وظیفه با موفقیت افزوده شد');
-        }
-    },
-
-    removeCollectionItem(collectionId, index) {
-        const collection = this.data.collections.find(c => c.id === collectionId);
-        if (collection) {
-            collection.items.splice(index, 1);
-            this.saveData();
-            this.openCollection(collectionId);
-            this.showToast('وظیفه با موفقیت حذف شد');
-        }
-    },
-
-    // Habits Page - With Numbers and Delete
-    renderHabits() {
-        const grid = document.getElementById('habitsGrid');
-        
-        // Clear previous content
-        grid.innerHTML = '';
-        
-        const today = new Date();
-        const daysInMonth = 30;
-        
-        if (this.data.habits.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.style.textAlign = 'center';
-            emptyMessage.style.color = 'var(--text-secondary)';
-            emptyMessage.textContent = 'عادتی برای ردیابی وجود ندارد';
-            grid.appendChild(emptyMessage);
-            return;
-        }
-        
-        this.data.habits.forEach(habit => {
-            const habitRow = document.createElement('div');
-            habitRow.className = 'habit-row';
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'habit-delete';
-            deleteBtn.innerHTML = `
-                <svg class="delete-icon" viewBox="0 0 24 24">
-                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
-            `;
-            deleteBtn.onclick = () => this.deleteHabit(habit.id);
-            
-            const habitHeader = document.createElement('div');
-            habitHeader.className = 'habit-header';
-            
-            const habitName = document.createElement('div');
-            habitName.className = 'habit-name';
-            
-            const habitColor = document.createElement('div');
-            habitColor.className = 'habit-color';
-            habitColor.style.background = habit.color;
-            habitColor.onclick = () => this.showColorPicker(habit.id, habitColor);
-            
-            const habitNameText = document.createElement('span');
-            habitNameText.textContent = habit.name;
-            
-            habitName.appendChild(habitColor);
-            habitName.appendChild(habitNameText);
-            habitHeader.appendChild(habitName);
-            
-            const habitDaysContainer = document.createElement('div');
-            habitDaysContainer.className = 'habit-days-container';
-            
-            const habitDays = document.createElement('div');
-            habitDays.className = 'habit-days';
-            
-            for (let i = 0; i < daysInMonth; i++) {
-                const date = new Date(today.getFullYear(), today.getMonth(), i + 1);
-                const dateStr = date.toISOString().split('T')[0];
-                const completed = habit.completedDates.includes(dateStr);
+                    </div>
+                `).join('');
                 
-                const habitDayWrapper = document.createElement('div');
-                habitDayWrapper.className = 'habit-day-wrapper';
-                
-                const habitDayNumber = document.createElement('div');
-                habitDayNumber.className = 'habit-day-number';
-                habitDayNumber.textContent = i + 1;
-                
-                const habitDay = document.createElement('div');
-                habitDay.className = `habit-day ${completed ? 'active' : ''}`;
-                habitDay.style.background = completed ? habit.color : 'transparent';
-                habitDay.style.borderColor = completed ? habit.color : 'var(--divider)';
-                habitDay.onclick = () => this.toggleHabit(habit.id, dateStr);
-                
-                habitDayWrapper.appendChild(habitDayNumber);
-                habitDayWrapper.appendChild(habitDay);
-                habitDays.appendChild(habitDayWrapper);
-            }
-            
-            habitDaysContainer.appendChild(habitDays);
-            
-            habitRow.appendChild(deleteBtn);
-            habitRow.appendChild(habitHeader);
-            habitRow.appendChild(habitDaysContainer);
-            
-            grid.appendChild(habitRow);
-        });
-    },
+                // اضافه کردن رویدادهای کلیک پس از رندر کردن
+                setTimeout(() => {
+                    document.querySelectorAll('.collection-delete').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const collectionId = this.getAttribute('data-id');
+                            globalHandlers.deleteCollection(collectionId);
+                        });
+                    });
+                }, 100);
+            },
 
-    deleteHabit(habitId) {
-        if (confirm('آیا از حذف این عادت مطمئن هستید؟')) {
-            this.data.habits = this.data.habits.filter(h => h.id !== habitId);
-            this.saveData();
-            this.renderHabits();
-            this.showToast('عادت با موفقیت حذف شد');
-        }
-    },
-
-    addHabit() {
-        const colors = ['#B47CFF', '#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
-        const content = `
-            <div class="form-group">
-                <label>نام عادت</label>
-                <input type="text" id="habitName" placeholder="نام عادت را وارد کنید...">
-            </div>
-            <div class="form-group">
-                <label>رنگ</label>
-                <div style="display: flex; gap: 8px;">
-                    ${colors.map(color => `
-                        <div class="color-option" style="background: ${color}" 
-                            onclick="document.getElementById('selectedColor').value = '${color}'"></div>
-                    `).join('')}
-                </div>
-                <input type="hidden" id="selectedColor" value="${colors[0]}">
-            </div>
-            <button class="btn btn-primary" id="saveHabitBtn" onclick="globalHandlers.saveHabit()">ذخیره</button>
-        `;
-        this.openModal('عادت جدید', content);
-    },
-
-    saveHabit() {
-        const name = document.getElementById('habitName').value;
-        const color = document.getElementById('selectedColor').value;
-        const saveBtn = document.getElementById('saveHabitBtn');
-        
-        if (!name) {
-            this.showToast('نام عادت را وارد کنید');
-            return;
-        }
-        
-        // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'در حال ذخیره...';
-        
-        // بررسی تکراری نبودن عادت
-        const existingHabit = this.data.habits.find(habit => habit.name === name);
-        if (existingHabit) {
-            this.showToast('این عادت قبلاً اضافه شده است');
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'ذخیره';
-            return;
-        }
-        
-        const habit = {
-            id: Date.now().toString(),
-            name,
-            color,
-            completedDates: [],
-            createdAt: new Date().toISOString()
-        };
-        
-        this.data.habits.push(habit);
-        this.saveData();
-        this.closeModal();
-        this.renderHabits();
-        this.showToast('عادت با موفقیت افزوده شد');
-        
-        // فعال کردن مجدد دکمه ذخیره
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'ذخیره';
-    },
-
-    toggleHabit(habitId, dateStr) {
-        const habit = this.data.habits.find(h => h.id === habitId);
-        if (habit) {
-            const index = habit.completedDates.indexOf(dateStr);
-            if (index > -1) {
-                habit.completedDates.splice(index, 1);
-            } else {
-                habit.completedDates.push(dateStr);
-            }
-            this.saveData();
-            this.renderHabits();
-        }
-    },
-
-    showColorPicker(habitId, element) {
-        const colors = ['#B47CFF', '#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
-        const picker = document.createElement('div');
-        picker.className = 'color-picker show';
-        picker.innerHTML = colors.map(color => `
-            <div class="color-option" style="background: ${color}" 
-                onclick="globalHandlers.changeHabitColor('${habitId}', '${color}')"></div>
-        `).join('');
-        
-        element.appendChild(picker);
-        
-        setTimeout(() => {
-            document.addEventListener('click', function closePicker(e) {
-                if (!picker.contains(e.target)) {
-                    picker.remove();
-                    document.removeEventListener('click', closePicker);
+            deleteCollection(collectionId) {
+                if (confirm('آیا از حذف این مجموعه مطمئن هستید؟')) {
+                    this.data.collections = this.data.collections.filter(c => c.id !== collectionId);
+                    this.saveData();
+                    this.renderCollections();
+                    this.showToast('مجموعه با موفقیت حذف شد');
                 }
-            });
-        }, 100);
-    },
+            },
 
-    changeHabitColor(habitId, color) {
-        const habit = this.data.habits.find(h => h.id === habitId);
-        if (habit) {
-            habit.color = color;
-            this.saveData();
-            this.renderHabits();
-        }
-    },
-
-    // Finance Page
-    currentTagFilter: 'all',
-
-    renderFinance() {
-        const income = this.data.transactions
-            .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
-            .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + t.amount, 0);
-        
-        const expense = this.data.transactions
-            .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
-            .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0);
-        
-        const invest = this.data.transactions
-            .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
-            .filter(t => t.type === 'invest')
-            .reduce((sum, t) => sum + t.amount, 0);
-        
-        const net = income - expense;
-        
-        document.getElementById('totalIncome').textContent = this.formatNumber(income) + ' ریال';
-        document.getElementById('totalExpense').textContent = this.formatNumber(expense) + ' ریال';
-        document.getElementById('totalInvest').textContent = this.formatNumber(invest) + ' ریال';
-        document.getElementById('netBalance').textContent = this.formatNumber(net) + ' ریال';
-        document.getElementById('netBalance').className = 'amount ' + (net >= 0 ? 'income' : 'expense');
-        
-        // Render tag filter
-        this.renderTagFilter();
-        
-        // Render transactions
-        const transactionsList = document.getElementById('transactionsList');
-        transactionsList.innerHTML = '';
-        
-        const filteredTransactions = this.data.transactions
-            .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(0, 10);
-        
-        if (filteredTransactions.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.style.textAlign = 'center';
-            emptyMessage.style.color = 'var(--text-secondary)';
-            emptyMessage.textContent = 'تراکنشی وجود ندارد';
-            transactionsList.appendChild(emptyMessage);
-        } else {
-            filteredTransactions.forEach(t => {
-                const transactionItem = document.createElement('div');
-                transactionItem.className = 'transaction-item';
-                transactionItem.innerHTML = `
-                    <div class="transaction-info">
-                        <div class="transaction-description">${t.description}</div>
-                        <div class="transaction-meta">
-                            <span>${new Date(t.date).toLocaleDateString('fa-IR')}</span>
-                            ${t.tags && t.tags.length > 0 ? t.tags.map(tag => `<span class="transaction-tag">${tag}</span>`).join('') : ''}
+            addCollection() {
+                const content = `
+                    <div class="form-group">
+                        <label>نام مجموعه</label>
+                        <input type="text" id="collectionName" placeholder="نام مجموعه را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>کاور عکس</label>
+                        <div class="image-upload">
+                            <input type="file" id="collectionCover" accept="image/*" onchange="globalHandlers.previewImage(event)">
+                            <div class="image-upload-content" id="uploadText">
+                                برای انتخاب عکس کلیک کنید
+                            </div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <div class="transaction-amount ${t.type}">${this.formatNumber(t.amount)} ریال</div>
-                        <div class="transaction-actions">
-                            <svg class="edit-icon" onclick="globalHandlers.editTransaction('${t.id}')" viewBox="0 0 24 24">
-                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                            </svg>
-                            <svg class="delete-icon" onclick="globalHandlers.deleteTransaction('${t.id}')" viewBox="0 0 24 24">
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <textarea id="collectionDesc" rows="3" placeholder="توضیحات اختیاری..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" id="saveCollectionBtn" onclick="globalHandlers.saveCollection()">ذخیره</button>
+                `;
+                this.openModal('مجموعه جدید', content);
+            },
+
+            previewImage(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const uploadContent = document.getElementById('uploadText');
+                        uploadContent.innerHTML = `<img src="${e.target.result}" class="image-preview">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            saveCollection() {
+                const name = document.getElementById('collectionName').value;
+                const desc = document.getElementById('collectionDesc').value;
+                const coverFile = document.getElementById('collectionCover').files[0];
+                const saveBtn = document.getElementById('saveCollectionBtn');
+                
+                if (!name) {
+                    this.showToast('نام مجموعه را وارد کنید');
+                    return;
+                }
+                
+                // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
+                
+                let coverImage = '';
+                if (coverFile) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        coverImage = e.target.result;
+                        this.saveCollectionWithCover(name, desc, coverImage);
+                    };
+                    reader.readAsDataURL(coverFile);
+                } else {
+                    this.saveCollectionWithCover(name, desc, coverImage);
+                }
+            },
+
+            saveCollectionWithCover(name, desc, coverImage) {
+                const collection = {
+                    id: Date.now().toString(),
+                    name,
+                    description: desc,
+                    coverImage,
+                    items: [],
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.collections.push(collection);
+                this.saveData();
+                this.closeModal();
+                this.renderCollections();
+                this.showToast('مجموعه با موفقیت افزوده شد');
+                
+                // فعال کردن مجدد دکمه ذخیره
+                const saveBtn = document.getElementById('saveCollectionBtn');
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'ذخیره';
+                }
+            },
+
+            openCollection(collectionId) {
+                const collection = this.data.collections.find(c => c.id === collectionId);
+                if (!collection) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>وظایف جدید برای ${collection.name}</label>
+                        <input type="text" id="collectionItem" placeholder="وظیفه جدید...">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.addCollectionItem('${collectionId}')">افزودن</button>
+                    <div style="margin-top: 20px;">
+                        <h3>وظایف موجود:</h3>
+                        <div id="collectionItems">
+                            ${collection.items.map((item, index) => `
+                                <div class="search-result-item">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span>${item}</span>
+                                        <svg class="delete-icon" onclick="globalHandlers.removeCollectionItem('${collectionId}', ${index})" viewBox="0 0 24 24">
+                                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                this.openModal(collection.name, content);
+            },
+
+            addCollectionItem(collectionId) {
+                const item = document.getElementById('collectionItem').value;
+                if (!item) {
+                    this.showToast('وظیفه را وارد کنید');
+                    return;
+                }
+                
+                // بررسی تکراری نبودن آیتم
+                const collection = this.data.collections.find(c => c.id === collectionId);
+                if (collection && collection.items.includes(item)) {
+                    this.showToast('این وظیفه قبلاً اضافه شده است');
+                    return;
+                }
+                
+                if (collection) {
+                    collection.items.push(item);
+                    this.saveData();
+                    this.openCollection(collectionId);
+                    this.showToast('وظیفه با موفقیت افزوده شد');
+                }
+            },
+
+            removeCollectionItem(collectionId, index) {
+                const collection = this.data.collections.find(c => c.id === collectionId);
+                if (collection) {
+                    collection.items.splice(index, 1);
+                    this.saveData();
+                    this.openCollection(collectionId);
+                    this.showToast('وظیفه با موفقیت حذف شد');
+                }
+            },
+
+            // Habits Page - With Numbers and Delete
+            renderHabits() {
+                const grid = document.getElementById('habitsGrid');
+                const today = new Date();
+                const daysInMonth = 30;
+                
+                if (this.data.habits.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">عادتی برای ردیابی وجود ندارد</p>';
+                    return;
+                }
+                
+                grid.innerHTML = this.data.habits.map(habit => `
+                    <div class="habit-row">
+                        <button class="habit-delete" onclick="globalHandlers.deleteHabit('${habit.id}')">
+                            <svg class="delete-icon" viewBox="0 0 24 24">
                                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                             </svg>
+                        </button>
+                        <div class="habit-header">
+                            <div class="habit-name">
+                                <div class="habit-color" style="background: ${habit.color}" onclick="globalHandlers.showColorPicker('${habit.id}', this)"></div>
+                                <span>${habit.name}</span>
+                            </div>
+                        </div>
+                        <div class="habit-days-container">
+                            <div class="habit-days">
+                                ${Array.from({length: daysInMonth}, (_, i) => {
+                                    const date = new Date(today.getFullYear(), today.getMonth(), i + 1);
+                                    const dateStr = date.toISOString().split('T')[0];
+                                    const completed = habit.completedDates.includes(dateStr);
+                                    return `
+                                        <div class="habit-day-wrapper">
+                                            <div class="habit-day-number">${i + 1}</div>
+                                            <div class="habit-day ${completed ? 'active' : ''}" 
+                                                style="background: ${completed ? habit.color : 'transparent'}; 
+                                                border-color: ${completed ? habit.color : 'var(--divider)'}"
+                                                onclick="globalHandlers.toggleHabit('${habit.id}', '${dateStr}')"></div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
                         </div>
                     </div>
+                `).join('');
+            },
+
+            deleteHabit(habitId) {
+                if (confirm('آیا از حذف این عادت مطمئن هستید؟')) {
+                    this.data.habits = this.data.habits.filter(h => h.id !== habitId);
+                    this.saveData();
+                    this.renderHabits();
+                    this.showToast('عادت با موفقیت حذف شد');
+                }
+            },
+
+            addHabit() {
+                const colors = ['#B47CFF', '#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+                const content = `
+                    <div class="form-group">
+                        <label>نام عادت</label>
+                        <input type="text" id="habitName" placeholder="نام عادت را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>رنگ</label>
+                        <div style="display: flex; gap: 8px;">
+                            ${colors.map(color => `
+                                <div class="color-option" style="background: ${color}" 
+                                    onclick="document.getElementById('selectedColor').value = '${color}'"></div>
+                            `).join('')}
+                        </div>
+                        <input type="hidden" id="selectedColor" value="${colors[0]}">
+                    </div>
+                    <button class="btn btn-primary" id="saveHabitBtn" onclick="globalHandlers.saveHabit()">ذخیره</button>
                 `;
-                transactionsList.appendChild(transactionItem);
-            });
-        }
-    },
+                this.openModal('عادت جدید', content);
+            },
 
-    renderTagFilter() {
-        const tagFilter = document.getElementById('tagFilter');
-        
-        // Clear previous content
-        tagFilter.innerHTML = '';
-        
-        // Get all unique tags
-        const allTags = new Set();
-        this.data.transactions.forEach(t => {
-            if (t.tags) {
-                t.tags.forEach(tag => allTags.add(tag));
-            }
-        });
-        
-        const allChip = document.createElement('div');
-        allChip.className = `tag-chip ${this.currentTagFilter === 'all' ? 'active' : ''}`;
-        allChip.textContent = 'همه';
-        allChip.onclick = () => this.filterByTag('all');
-        tagFilter.appendChild(allChip);
-        
-        Array.from(allTags).forEach(tag => {
-            const tagChip = document.createElement('div');
-            tagChip.className = `tag-chip ${this.currentTagFilter === tag ? 'active' : ''}`;
-            tagChip.textContent = tag;
-            tagChip.onclick = () => this.filterByTag(tag);
-            tagFilter.appendChild(tagChip);
-        });
-    },
+            saveHabit() {
+                const name = document.getElementById('habitName').value;
+                const color = document.getElementById('selectedColor').value;
+                const saveBtn = document.getElementById('saveHabitBtn');
+                
+                if (!name) {
+                    this.showToast('نام عادت را وارد کنید');
+                    return;
+                }
+                
+                // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
+                
+                // بررسی تکراری نبودن عادت
+                const existingHabit = this.data.habits.find(habit => habit.name === name);
+                if (existingHabit) {
+                    this.showToast('این عادت قبلاً اضافه شده است');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'ذخیره';
+                    return;
+                }
+                
+                const habit = {
+                    id: Date.now().toString(),
+                    name,
+                    color,
+                    completedDates: [],
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.habits.push(habit);
+                this.saveData();
+                this.closeModal();
+                this.renderHabits();
+                this.showToast('عادت با موفقیت افزوده شد');
+                
+                // فعال کردن مجدد دکمه ذخیره
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'ذخیره';
+            },
 
-    filterByTag(tag) {
-        this.currentTagFilter = tag;
-        this.renderFinance();
-    },
+            toggleHabit(habitId, dateStr) {
+                const habit = this.data.habits.find(h => h.id === habitId);
+                if (habit) {
+                    const index = habit.completedDates.indexOf(dateStr);
+                    if (index > -1) {
+                        habit.completedDates.splice(index, 1);
+                    } else {
+                        habit.completedDates.push(dateStr);
+                    }
+                    this.saveData();
+                    this.renderHabits();
+                }
+            },
 
-    formatNumber(num) {
-        return new Intl.NumberFormat('fa-IR').format(num);
-    },
+            showColorPicker(habitId, element) {
+                const colors = ['#B47CFF', '#ec4899', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+                const picker = document.createElement('div');
+                picker.className = 'color-picker show';
+                picker.innerHTML = colors.map(color => `
+                    <div class="color-option" style="background: ${color}" 
+                        onclick="globalHandlers.changeHabitColor('${habitId}', '${color}')"></div>
+                `).join('');
+                
+                element.appendChild(picker);
+                
+                setTimeout(() => {
+                    document.addEventListener('click', function closePicker(e) {
+                        if (!picker.contains(e.target)) {
+                            picker.remove();
+                            document.removeEventListener('click', closePicker);
+                        }
+                    });
+                }, 100);
+            },
 
-    addTransaction() {
-        const content = `
-            <div class="form-group">
-                <label>نوع تراکنش</label>
-                <select id="transactionType">
-                    <option value="income">درآمد</option>
-                    <option value="expense">هزینه</option>
-                    <option value="invest">سرمایه‌گذاری</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>مبلغ (ریال)</label>
-                <input type="number" id="transactionAmount" placeholder="مبلغ را وارد کنید...">
-            </div>
-            <div class="form-group">
-                <label>برچسب‌ها</label>
-                <div class="tag-input-container" id="tagInputContainer">
+            changeHabitColor(habitId, color) {
+                const habit = this.data.habits.find(h => h.id === habitId);
+                if (habit) {
+                    habit.color = color;
+                    this.saveData();
+                    this.renderHabits();
+                }
+            },
+
+            // Finance Page
+            currentTagFilter: 'all',
+
+            renderFinance() {
+                const income = this.data.transactions
+                    .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const expense = this.data.transactions
+                    .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const invest = this.data.transactions
+                    .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
+                    .filter(t => t.type === 'invest')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const net = income - expense;
+                
+                document.getElementById('totalIncome').textContent = this.formatNumber(income) + ' ریال';
+                document.getElementById('totalExpense').textContent = this.formatNumber(expense) + ' ریال';
+                document.getElementById('totalInvest').textContent = this.formatNumber(invest) + ' ریال';
+                document.getElementById('netBalance').textContent = this.formatNumber(net) + ' ریال';
+                document.getElementById('netBalance').className = 'amount ' + (net >= 0 ? 'income' : 'expense');
+                
+                // Render tag filter
+                this.renderTagFilter();
+                
+                // Render transactions
+                const transactionsHtml = this.data.transactions
+                    .filter(t => this.currentTagFilter === 'all' || (t.tags && t.tags.includes(this.currentTagFilter)))
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // مرتب‌سازی از جدید به قدیم
+                    .slice(0, 10)
+                    .map(t => `
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-description">${t.description}</div>
+                                <div class="transaction-meta">
+                                    <span>${new Date(t.date).toLocaleDateString('fa-IR')}</span>
+                                    ${t.tags && t.tags.length > 0 ? t.tags.map(tag => `<span class="transaction-tag">${tag}</span>`).join('') : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <div class="transaction-amount ${t.type}">${this.formatNumber(t.amount)} ریال</div>
+                                <div class="transaction-actions">
+                                    <svg class="edit-icon" onclick="globalHandlers.editTransaction('${t.id}')" viewBox="0 0 24 24">
+                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                    </svg>
+                                    <svg class="delete-icon" onclick="globalHandlers.deleteTransaction('${t.id}')" viewBox="0 0 24 24">
+                                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                
+                document.getElementById('transactionsList').innerHTML = transactionsHtml || 
+                    '<p style="text-align: center; color: var(--text-secondary);">تراکنشی وجود ندارد</p>';
+            },
+
+            renderTagFilter() {
+                const tagFilter = document.getElementById('tagFilter');
+                
+                // Get all unique tags
+                const allTags = new Set();
+                this.data.transactions.forEach(t => {
+                    if (t.tags) {
+                        t.tags.forEach(tag => allTags.add(tag));
+                    }
+                });
+                
+                const tagsHtml = Array.from(allTags).map(tag => `
+                    <div class="tag-chip ${this.currentTagFilter === tag ? 'active' : ''}" onclick="globalHandlers.filterByTag('${tag}')">${tag}</div>
+                `).join('');
+                
+                tagFilter.innerHTML = `
+                    <div class="tag-chip ${this.currentTagFilter === 'all' ? 'active' : ''}" onclick="globalHandlers.filterByTag('all')">همه</div>
+                    ${tagsHtml}
+                `;
+            },
+
+            filterByTag(tag) {
+                this.currentTagFilter = tag;
+                this.renderFinance();
+            },
+
+            formatNumber(num) {
+                return new Intl.NumberFormat('fa-IR').format(num);
+            },
+
+            addTransaction() {
+                const content = `
+                    <div class="form-group">
+                        <label>نوع تراکنش</label>
+                        <select id="transactionType">
+                            <option value="income">درآمد</option>
+                            <option value="expense">هزینه</option>
+                            <option value="invest">سرمایه‌گذاری</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>مبلغ (ریال)</label>
+                        <input type="number" id="transactionAmount" placeholder="مبلغ را وارد کنید...">
+                    </div>
+                    <div class="form-group">
+                        <label>برچسب‌ها</label>
+                        <div class="tag-input-container" id="tagInputContainer">
+                            <input type="text" class="tag-input" id="tagInput" placeholder="برچسب را وارد کرده و Enter را بزنید">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <input type="text" id="transactionDesc" placeholder="توضیحات تراکنش...">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="transactionDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <button class="btn btn-primary" id="saveTransactionBtn" onclick="globalHandlers.saveTransaction()">ذخیره</button>
+                `;
+                this.openModal('تراکنش جدید', content);
+                
+                // Initialize tag input
+                this.initializeTagInput();
+            },
+
+            initializeTagInput() {
+                const tagInput = document.getElementById('tagInput');
+                const tagInputContainer = document.getElementById('tagInputContainer');
+                let tags = [];
+                
+                tagInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.target.value.trim()) {
+                        e.preventDefault();
+                        const tag = e.target.value.trim();
+                        if (!tags.includes(tag)) {
+                            tags.push(tag);
+                            this.renderTags(tags, tagInputContainer);
+                            e.target.value = '';
+                        }
+                    }
+                });
+                
+                // Store tags globally for save function
+                window.currentTransactionTags = tags;
+            },
+
+            renderTags(tags, container) {
+                const tagsHtml = tags.map(tag => `
+                    <span class="tag-item">
+                        ${tag}
+                        <span class="tag-remove" onclick="globalHandlers.removeTag('${tag}')">&times;</span>
+                    </span>
+                `).join('');
+                
+                container.innerHTML = `
+                    ${tagsHtml}
                     <input type="text" class="tag-input" id="tagInput" placeholder="برچسب را وارد کرده و Enter را بزنید">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>توضیحات</label>
-                <input type="text" id="transactionDesc" placeholder="توضیحات تراکنش...">
-            </div>
-            <div class="form-group">
-                <label>تاریخ</label>
-                <input type="date" id="transactionDate" value="${new Date().toISOString().split('T')[0]}">
-            </div>
-            <button class="btn btn-primary" id="saveTransactionBtn" onclick="globalHandlers.saveTransaction()">ذخیره</button>
-        `;
-        this.openModal('تراکنش جدید', content);
-        
-        // Initialize tag input
-        this.initializeTagInput();
-    },
-
-    initializeTagInput() {
-        const tagInput = document.getElementById('tagInput');
-        const tagInputContainer = document.getElementById('tagInputContainer');
-        let tags = [];
-        
-        tagInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.value.trim()) {
-                e.preventDefault();
-                const tag = e.target.value.trim();
-                if (!tags.includes(tag)) {
-                    tags.push(tag);
-                    this.renderTags(tags, tagInputContainer);
-                    e.target.value = '';
-                }
-            }
-        });
-        
-        // Store tags globally for save function
-        window.currentTransactionTags = tags;
-    },
-
-    renderTags(tags, container) {
-        const tagsHtml = tags.map(tag => `
-            <span class="tag-item">
-                ${tag}
-                <span class="tag-remove" onclick="globalHandlers.removeTag('${tag}')">&times;</span>
-            </span>
-        `).join('');
-        
-        container.innerHTML = `
-            ${tagsHtml}
-            <input type="text" class="tag-input" id="tagInput" placeholder="برچسب را وارد کرده و Enter را بزنید">
-        `;
-        
-        // Re-initialize input
-        const tagInput = document.getElementById('tagInput');
-        tagInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.value.trim()) {
-                e.preventDefault();
-                const tag = e.target.value.trim();
-                if (!tags.includes(tag)) {
-                    tags.push(tag);
-                    this.renderTags(tags, container);
-                    e.target.value = '';
-                }
-            }
-        });
-        
-        window.currentTransactionTags = tags;
-    },
-
-    removeTag(tag) {
-        const tags = window.currentTransactionTags;
-        const index = tags.indexOf(tag);
-        if (index > -1) {
-            tags.splice(index, 1);
-            this.renderTags(tags, document.getElementById('tagInputContainer'));
-        }
-    },
-
-    saveTransaction() {
-        const type = document.getElementById('transactionType').value;
-        const amount = parseInt(document.getElementById('transactionAmount').value);
-        const description = document.getElementById('transactionDesc').value;
-        const date = document.getElementById('transactionDate').value;
-        const tags = window.currentTransactionTags || [];
-        const saveBtn = document.getElementById('saveTransactionBtn');
-        
-        if (!amount || amount <= 0) {
-            this.showToast('مبلغ معتبر وارد کنید');
-            return;
-        }
-        
-        // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'در حال ذخیره...';
-        
-        const transaction = {
-            id: Date.now().toString(),
-            type,
-            amount,
-            description: description || type,
-            tags,
-            date,
-            createdAt: new Date().toISOString()
-        };
-        
-        this.data.transactions.push(transaction);
-        this.saveData();
-        this.closeModal();
-        this.renderFinance();
-        this.showToast('تراکنش با موفقیت ثبت شد');
-        
-        // فعال کردن مجدد دکمه ذخیره
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'ذخیره';
-    },
-
-    editTransaction(transactionId) {
-        const transaction = this.data.transactions.find(t => t.id === transactionId);
-        if (!transaction) return;
-        
-        const content = `
-            <div class="form-group">
-                <label>نوع تراکنش</label>
-                <select id="transactionType">
-                    <option value="income" ${transaction.type === 'income' ? 'selected' : ''}>درآمد</option>
-                    <option value="expense" ${transaction.type === 'expense' ? 'selected' : ''}>هزینه</option>
-                    <option value="invest" ${transaction.type === 'invest' ? 'selected' : ''}>سرمایه‌گذاری</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>مبلغ (ریال)</label>
-                <input type="number" id="transactionAmount" value="${transaction.amount}">
-            </div>
-            <div class="form-group">
-                <label>برچسب‌ها</label>
-                <div class="tag-input-container" id="editTagInputContainer">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>توضیحات</label>
-                <input type="text" id="transactionDesc" value="${transaction.description}">
-            </div>
-            <div class="form-group">
-                <label>تاریخ</label>
-                <input type="date" id="transactionDate" value="${transaction.date}">
-            </div>
-            <button class="btn btn-primary" onclick="globalHandlers.updateTransaction('${transactionId}')">به‌روزرسانی</button>
-        `;
-        this.openModal('ویرایش تراکنش', content);
-        
-        // Initialize tag input with existing tags
-        this.initializeEditTagInput(transaction.tags || []);
-    },
-
-    initializeEditTagInput(existingTags) {
-        const tagInputContainer = document.getElementById('editTagInputContainer');
-        let tags = [...existingTags];
-        
-        this.renderEditTags(tags, tagInputContainer);
-        
-        window.currentEditTransactionTags = tags;
-    },
-
-    renderEditTags(tags, container) {
-        const tagsHtml = tags.map(tag => `
-            <span class="tag-item">
-                ${tag}
-                <span class="tag-remove" onclick="globalHandlers.removeEditTag('${tag}')">&times;</span>
-            </span>
-        `).join('');
-        
-        container.innerHTML = `
-            ${tagsHtml}
-            <input type="text" class="tag-input" id="editTagInput" placeholder="برچسب را وارد کرده و Enter را بزنید">
-        `;
-        
-        // Re-initialize input
-        const tagInput = document.getElementById('editTagInput');
-        tagInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.value.trim()) {
-                e.preventDefault();
-                const tag = e.target.value.trim();
-                if (!tags.includes(tag)) {
-                    tags.push(tag);
-                    this.renderEditTags(tags, container);
-                    e.target.value = '';
-                }
-            }
-        });
-        
-        window.currentEditTransactionTags = tags;
-    },
-
-    removeEditTag(tag) {
-        const tags = window.currentEditTransactionTags;
-        const index = tags.indexOf(tag);
-        if (index > -1) {
-            tags.splice(index, 1);
-            this.renderEditTags(tags, document.getElementById('editTagInputContainer'));
-        }
-    },
-
-    updateTransaction(transactionId) {
-        const type = document.getElementById('transactionType').value;
-        const amount = parseInt(document.getElementById('transactionAmount').value);
-        const description = document.getElementById('transactionDesc').value;
-        const date = document.getElementById('transactionDate').value;
-        const tags = window.currentEditTransactionTags || [];
-        
-        if (!amount || amount <= 0) {
-            this.showToast('مبلغ معتبر وارد کنید');
-            return;
-        }
-        
-        const transaction = this.data.transactions.find(t => t.id === transactionId);
-        if (transaction) {
-            transaction.type = type;
-            transaction.amount = amount;
-            transaction.description = description;
-            transaction.tags = tags;
-            transaction.date = date;
-            this.saveData();
-            this.closeModal();
-            this.renderFinance();
-            this.showToast('تراکنش با موفقیت به‌روزرسانی شد');
-        }
-    },
-
-    deleteTransaction(transactionId) {
-        if (confirm('آیا از حذف این تراکنش مطمئن هستید؟')) {
-            this.data.transactions = this.data.transactions.filter(t => t.id !== transactionId);
-            this.saveData();
-            this.renderFinance();
-            this.showToast('تراکنش حذف شد');
-        }
-    },
-
-    exportFinanceCSV() {
-        const headers = ['تاریخ', 'نوع', 'مبلغ', 'توضیحات', 'برچسب‌ها'];
-        const rows = this.data.transactions.map(t => [
-            t.date,
-            t.type === 'income' ? 'درآمد' : t.type === 'expense' ? 'هزینه' : 'سرمایه‌گذاری',
-            t.amount,
-            t.description,
-            t.tags ? t.tags.join(';') : ''
-        ]);
-        
-        const csv = [headers, ...rows]
-            .map(row => row.map(cell => `"${cell}"`).join(','))
-            .join('\n');
-        
-        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `finance_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
-        
-        this.showToast('فایل CSV با موفقیت دانلود شد');
-    },
-
-    // Search Page
-    search() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const results = [];
-        
-        // Search in all data
-        Object.keys(this.data).forEach(type => {
-            this.data[type].forEach(item => {
-                if (item.text && item.text.toLowerCase().includes(query)) {
-                    results.push({ type, item });
-                }
-                if (item.name && item.name.toLowerCase().includes(query)) {
-                    results.push({ type, item });
-                }
-                if (item.description && item.description.toLowerCase().includes(query)) {
-                    results.push({ type, item });
-                }
-                if (item.title && item.title.toLowerCase().includes(query)) {
-                    results.push({ type, item });
-                }
-                if (item.tags && item.tags.some(tag => tag.toLowerCase().includes(query))) {
-                    results.push({ type, item });
-                }
-            });
-        });
-        
-        const searchResults = document.getElementById('searchResults');
-        searchResults.innerHTML = '';
-        
-        if (results.length === 0) {
-            const emptyMessage = document.createElement('p');
-            emptyMessage.style.textAlign = 'center';
-            emptyMessage.style.color = 'var(--text-secondary)';
-            emptyMessage.textContent = 'نتیجه‌ای یافت نشد';
-            searchResults.appendChild(emptyMessage);
-        } else {
-            const typeNames = {
-                tasks: 'وظیفه',
-                notes: 'یادداشت',
-                habits: 'عادت',
-                collections: 'مجموعه',
-                transactions: 'تراکنش',
-                events: 'رویداد'
-            };
-            
-            results.forEach(({ type, item }) => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                resultItem.onclick = () => this.openSearchResult(type, item.id);
-                resultItem.innerHTML = `
-                    <div style="display: flex; justify-content: space-between;">
-                        <div>
-                            <div>${item.text || item.name || item.description || item.title}</div>
-                            <small style="color: var(--text-secondary);">${typeNames[type]}</small>
-                        </div>
-                        <small style="color: var(--text-secondary);">${new Date(item.createdAt).toLocaleDateString('fa-IR')}</small>
-                    </div>
                 `;
-                searchResults.appendChild(resultItem);
+                
+                // Re-initialize input
+                const tagInput = document.getElementById('tagInput');
+                tagInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.target.value.trim()) {
+                        e.preventDefault();
+                        const tag = e.target.value.trim();
+                        if (!tags.includes(tag)) {
+                            tags.push(tag);
+                            this.renderTags(tags, container);
+                            e.target.value = '';
+                        }
+                    }
+                });
+                
+                window.currentTransactionTags = tags;
+            },
+
+            removeTag(tag) {
+                const tags = window.currentTransactionTags;
+                const index = tags.indexOf(tag);
+                if (index > -1) {
+                    tags.splice(index, 1);
+                    this.renderTags(tags, document.getElementById('tagInputContainer'));
+                }
+            },
+
+            saveTransaction() {
+                const type = document.getElementById('transactionType').value;
+                const amount = parseInt(document.getElementById('transactionAmount').value);
+                const description = document.getElementById('transactionDesc').value;
+                const date = document.getElementById('transactionDate').value;
+                const tags = window.currentTransactionTags || [];
+                const saveBtn = document.getElementById('saveTransactionBtn');
+                
+                if (!amount || amount <= 0) {
+                    this.showToast('مبلغ معتبر وارد کنید');
+                    return;
+                }
+                
+                // غیرفعال کردن دکمه ذخیره برای جلوگیری از ارسال چندباره
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'در حال ذخیره...';
+                
+                const transaction = {
+                    id: Date.now().toString(),
+                    type,
+                    amount,
+                    description: description || type,
+                    tags,
+                    date,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.data.transactions.push(transaction);
+                this.saveData();
+                this.closeModal();
+                this.renderFinance();
+                this.showToast('تراکنش با موفقیت ثبت شد');
+                
+                // فعال کردن مجدد دکمه ذخیره
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'ذخیره';
+            },
+
+            editTransaction(transactionId) {
+                const transaction = this.data.transactions.find(t => t.id === transactionId);
+                if (!transaction) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>نوع تراکنش</label>
+                        <select id="transactionType">
+                            <option value="income" ${transaction.type === 'income' ? 'selected' : ''}>درآمد</option>
+                            <option value="expense" ${transaction.type === 'expense' ? 'selected' : ''}>هزینه</option>
+                            <option value="invest" ${transaction.type === 'invest' ? 'selected' : ''}>سرمایه‌گذاری</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>مبلغ (ریال)</label>
+                        <input type="number" id="transactionAmount" value="${transaction.amount}">
+                    </div>
+                    <div class="form-group">
+                        <label>برچسب‌ها</label>
+                        <div class="tag-input-container" id="editTagInputContainer">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <input type="text" id="transactionDesc" value="${transaction.description}">
+                    </div>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="transactionDate" value="${transaction.date}">
+                    </div>
+                    <button class="btn btn-primary" onclick="globalHandlers.updateTransaction('${transactionId}')">به‌روزرسانی</button>
+                `;
+                this.openModal('ویرایش تراکنش', content);
+                
+                // Initialize tag input with existing tags
+                this.initializeEditTagInput(transaction.tags || []);
+            },
+
+            initializeEditTagInput(existingTags) {
+                const tagInputContainer = document.getElementById('editTagInputContainer');
+                let tags = [...existingTags];
+                
+                this.renderEditTags(tags, tagInputContainer);
+                
+                window.currentEditTransactionTags = tags;
+            },
+
+            renderEditTags(tags, container) {
+                const tagsHtml = tags.map(tag => `
+                    <span class="tag-item">
+                        ${tag}
+                        <span class="tag-remove" onclick="globalHandlers.removeEditTag('${tag}')">&times;</span>
+                    </span>
+                `).join('');
+                
+                container.innerHTML = `
+                    ${tagsHtml}
+                    <input type="text" class="tag-input" id="editTagInput" placeholder="برچسب را وارد کرده و Enter را بزنید">
+                `;
+                
+                // Re-initialize input
+                const tagInput = document.getElementById('editTagInput');
+                tagInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.target.value.trim()) {
+                        e.preventDefault();
+                        const tag = e.target.value.trim();
+                        if (!tags.includes(tag)) {
+                            tags.push(tag);
+                            this.renderEditTags(tags, container);
+                            e.target.value = '';
+                        }
+                    }
+                });
+                
+                window.currentEditTransactionTags = tags;
+            },
+
+            removeEditTag(tag) {
+                const tags = window.currentEditTransactionTags;
+                const index = tags.indexOf(tag);
+                if (index > -1) {
+                    tags.splice(index, 1);
+                    this.renderEditTags(tags, document.getElementById('editTagInputContainer'));
+                }
+            },
+
+            updateTransaction(transactionId) {
+                const type = document.getElementById('transactionType').value;
+                const amount = parseInt(document.getElementById('transactionAmount').value);
+                const description = document.getElementById('transactionDesc').value;
+                const date = document.getElementById('transactionDate').value;
+                const tags = window.currentEditTransactionTags || [];
+                
+                if (!amount || amount <= 0) {
+                    this.showToast('مبلغ معتبر وارد کنید');
+                    return;
+                }
+                
+                const transaction = this.data.transactions.find(t => t.id === transactionId);
+                if (transaction) {
+                    transaction.type = type;
+                    transaction.amount = amount;
+                    transaction.description = description;
+                    transaction.tags = tags;
+                    transaction.date = date;
+                    this.saveData();
+                    this.closeModal();
+                    this.renderFinance();
+                    this.showToast('تراکنش با موفقیت به‌روزرسانی شد');
+                }
+            },
+
+            deleteTransaction(transactionId) {
+                if (confirm('آیا از حذف این تراکنش مطمئن هستید؟')) {
+                    this.data.transactions = this.data.transactions.filter(t => t.id !== transactionId);
+                    this.saveData();
+                    this.renderFinance();
+                    this.showToast('تراکنش حذف شد');
+                }
+            },
+
+            exportFinanceCSV() {
+                const headers = ['تاریخ', 'نوع', 'مبلغ', 'توضیحات', 'برچسب‌ها'];
+                const rows = this.data.transactions.map(t => [
+                    t.date,
+                    t.type === 'income' ? 'درآمد' : t.type === 'expense' ? 'هزینه' : 'سرمایه‌گذاری',
+                    t.amount,
+                    t.description,
+                    t.tags ? t.tags.join(';') : ''
+                ]);
+                
+                const csv = [headers, ...rows]
+                    .map(row => row.map(cell => `"${cell}"`).join(','))
+                    .join('\n');
+                
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `finance_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+                
+                this.showToast('فایل CSV با موفقیت دانلود شد');
+            },
+
+            // Search Page
+            search() {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                const results = [];
+                
+                // Search in all data
+                Object.keys(this.data).forEach(type => {
+                    this.data[type].forEach(item => {
+                        if (item.text && item.text.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
+                        if (item.name && item.name.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
+                        if (item.description && item.description.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
+                        if (item.title && item.title.toLowerCase().includes(query)) {
+                            results.push({ type, item });
+                        }
+                        if (item.tags && item.tags.some(tag => tag.toLowerCase().includes(query))) {
+                            results.push({ type, item });
+                        }
+                    });
+                });
+                
+                const resultsHtml = results.length ? results.map(({ type, item }) => {
+                    const typeNames = {
+                        tasks: 'وظیفه',
+                        notes: 'یادداشت',
+                        habits: 'عادت',
+                        collections: 'مجموعه',
+                        transactions: 'تراکنش',
+                        events: 'رویداد'
+                    };
+                    
+                    return `
+                        <div class="search-result-item" onclick="globalHandlers.openSearchResult('${type}', '${item.id}')">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div>
+                                    <div>${item.text || item.name || item.description || item.title}</div>
+                                    <small style="color: var(--text-secondary);">${typeNames[type]}</small>
+                                </div>
+                                <small style="color: var(--text-secondary);">${new Date(item.createdAt).toLocaleDateString('fa-IR')}</small>
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '<p style="text-align: center; color: var(--text-secondary);">نتیجه‌ای یافت نشد</p>';
+                
+                document.getElementById('searchResults').innerHTML = resultsHtml;
+            },
+
+            openSearchResult(type, id) {
+                const item = this.data[type].find(i => i.id === id);
+                if (!item) return;
+                
+                const content = `
+                    <div class="form-group">
+                        <label>نوع</label>
+                        <input type="text" value="${type}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>محتوا</label>
+                        <textarea rows="4" readonly>${JSON.stringify(item, null, 2)}</textarea>
+                    </div>
+                    <button class="btn btn-secondary" onclick="globalHandlers.closeModal()">بستن</button>
+                `;
+                this.openModal('جزئیات', content);
+            },
+
+            // Quick Add
+            quickAdd() {
+                const input = document.getElementById('quickInput');
+                const text = input.value.trim();
+                
+                if (!text) {
+                    this.showToast('متن را وارد کنید');
+                    return;
+                }
+                
+                // غیرفعال کردن دکمه برای جلوگیری از ارسال چندباره
+                const addBtn = document.querySelector('.quick-input .btn-primary');
+                addBtn.disabled = true;
+                addBtn.textContent = 'در حال افزودن...';
+                
+                // Simple logic: if starts with # it's a note, else it's a task
+                if (text.startsWith('#')) {
+                    const noteText = text.substring(1);
+                    
+                    // بررسی تکراری نبودن یادداشت
+                    const today = new Date().toISOString().split('T')[0];
+                    const existingNote = this.data.notes.find(note => 
+                        note.text === noteText && note.date === today
+                    );
+                    
+                    if (existingNote) {
+                        this.showToast('این یادداشت قبلاً اضافه شده است');
+                        addBtn.disabled = false;
+                        addBtn.textContent = 'افزودن';
+                        return;
+                    }
+                    
+                    const note = {
+                        id: Date.now().toString(),
+                        text: noteText,
+                        date: today,
+                        createdAt: new Date().toISOString()
+                    };
+                    this.data.notes.push(note);
+                } else {
+                    // بررسی تکراری نبودن وظیفه
+                    const today = new Date().toISOString().split('T')[0];
+                    const existingTask = this.data.tasks.find(task => 
+                        task.text === text && task.date === today
+                    );
+                    
+                    if (existingTask) {
+                        this.showToast('این وظیفه قبلاً اضافه شده است');
+                        addBtn.disabled = false;
+                        addBtn.textContent = 'افزودن';
+                        return;
+                    }
+                    
+                    const task = {
+                        id: Date.now().toString(),
+                        text,
+                        date: today,
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    this.data.tasks.push(task);
+                }
+                
+                this.saveData();
+                input.value = '';
+                this.renderToday();
+                this.showToast('با موفقیت افزوده شد');
+                
+                // فعال کردن مجدد دکمه
+                addBtn.disabled = false;
+                addBtn.textContent = 'افزودن';
+            },
+
+            // Export Data
+            exportData() {
+                const dataStr = JSON.stringify(this.data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `bullet_journal_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                this.showToast('داده‌ها با موفقیت export شدند');
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update date display
+            document.getElementById('dateDisplay').textContent = globalHandlers.getShamsiDate();
+            
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    globalHandlers.addRipple(e.currentTarget, e);
+                    const page = e.currentTarget.dataset.page;
+                    globalHandlers.switchPage(page);
+                });
             });
-        }
-    },
-
-    openSearchResult(type, id) {
-        const item = this.data[type].find(i => i.id === id);
-        if (!item) return;
-        
-        const content = `
-            <div class="form-group">
-                <label>نوع</label>
-                <input type="text" value="${type}" readonly>
-            </div>
-            <div class="form-group">
-                <label>محتوا</label>
-                <textarea rows="4" readonly>${JSON.stringify(item, null, 2)}</textarea>
-            </div>
-            <button class="btn btn-secondary" onclick="globalHandlers.closeModal()">بستن</button>
-        `;
-        this.openModal('جزئیات', content);
-    },
-
-    // Quick Add
-    quickAdd() {
-        const input = document.getElementById('quickInput');
-        const text = input.value.trim();
-        
-        if (!text) {
-            this.showToast('متن را وارد کنید');
-            return;
-        }
-        
-        // غیرفعال کردن دکمه برای جلوگیری از ارسال چندباره
-        const addBtn = document.querySelector('.quick-input .btn-primary');
-        addBtn.disabled = true;
-        addBtn.textContent = 'در حال افزودن...';
-        
-        // Simple logic: if starts with # it's a note, else it's a task
-        if (text.startsWith('#')) {
-            const noteText = text.substring(1);
             
-            // بررسی تکراری نبودن یادداشت
-            const today = new Date().toISOString().split('T')[0];
-            const existingNote = this.data.notes.find(note => 
-                note.text === noteText && note.date === today
-            );
+            // Tabs - Now works in all sections
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    globalHandlers.addRipple(e.currentTarget, e);
+                    const tabName = e.currentTarget.dataset.tab;
+                    
+                    // Update active tab
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    
+                    // Update current tab
+                    globalHandlers.currentTab = tabName;
+                    
+                    // Always switch to today page when a tab is clicked
+                    globalHandlers.switchPage('today');
+                });
+            });
             
-            if (existingNote) {
-                this.showToast('این یادداشت قبلاً اضافه شده است');
-                addBtn.disabled = false;
-                addBtn.textContent = 'افزودن';
-                return;
+            // Mobile menu toggle
+            document.getElementById('menuToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+            
+            // Quick input enter key
+            document.getElementById('quickInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    globalHandlers.quickAdd();
+                }
+            });
+            
+            // Modal close on outside click
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if (e.target.id === 'modal') {
+                    globalHandlers.closeModal();
+                }
+            });
+            
+            // Initialize first page
+            globalHandlers.updatePageContent('today');
+            
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').then(() => {
+                    console.log('Service Worker registered');
+                });
             }
-            
-            const note = {
-                id: Date.now().toString(),
-                text: noteText,
-                date: today,
-                createdAt: new Date().toISOString()
-            };
-            this.data.notes.push(note);
-        } else {
-            // بررسی تکراری نبودن وظیفه
-            const today = new Date().toISOString().split('T')[0];
-            const existingTask = this.data.tasks.find(task => 
-                task.text === text && task.date === today
-            );
-            
-            if (existingTask) {
-                this.showToast('این وظیفه قبلاً اضافه شده است');
-                addBtn.disabled = false;
-                addBtn.textContent = 'افزودن';
-                return;
-            }
-            
-            const task = {
-                id: Date.now().toString(),
-                text,
-                date: today,
-                completed: false,
-                createdAt: new Date().toISOString()
-            };
-            this.data.tasks.push(task);
-        }
-        
-        this.saveData();
-        input.value = '';
-        this.renderToday();
-        this.showToast('با موفقیت افزوده شد');
-        
-        // فعال کردن مجدد دکمه
-        addBtn.disabled = false;
-        addBtn.textContent = 'افزودن';
-    },
-
-    // Export Data
-    exportData() {
-        const dataStr = JSON.stringify(this.data, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `bullet_journal_${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        
-        this.showToast('داده‌ها با موفقیت export شدند');
-    }
-};
-
-// Initialize App
-document.addEventListener('DOMContentLoaded', () => {
-    // Update date display
-    document.getElementById('dateDisplay').textContent = globalHandlers.getShamsiDate();
-    
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            globalHandlers.addRipple(e.currentTarget, e);
-            const page = e.currentTarget.dataset.page;
-            globalHandlers.switchPage(page);
         });
-    });
-    
-    // Tabs - Now works in all sections
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            globalHandlers.addRipple(e.currentTarget, e);
-            const tabName = e.currentTarget.dataset.tab;
-            
-            // Update active tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-            
-            // Update current tab
-            globalHandlers.currentTab = tabName;
-            
-            // Always switch to today page when a tab is clicked
-            globalHandlers.switchPage('today');
-        });
-    });
-    
-    // Mobile menu toggle
-    document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('open');
-    });
-    
-    // Quick input enter key
-    document.getElementById('quickInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            globalHandlers.quickAdd();
-        }
-    });
-    
-    // Modal close on outside click
-    document.getElementById('modal').addEventListener('click', (e) => {
-        if (e.target.id === 'modal') {
-            globalHandlers.closeModal();
-        }
-    });
-    
-    // Initialize first page
-    globalHandlers.updatePageContent('today');
-    
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').then(() => {
-            console.log('Service Worker registered');
-        });
-    }
-});
+    </script>
+</body>
+</html>
